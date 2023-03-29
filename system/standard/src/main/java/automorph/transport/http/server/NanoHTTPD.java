@@ -33,8 +33,12 @@ package automorph.transport.http.server;
  * #L%
  */
 
+// PATCH BEGIN
 import automorph.transport.http.server.NanoHTTPD.Response.IStatus;
 import automorph.transport.http.server.NanoHTTPD.Response.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+// PATCH END
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -86,9 +90,10 @@ import java.util.TimeZone;
 // PATCH BEGIN
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 // PATCH END
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -193,9 +198,10 @@ public abstract class NanoHTTPD {
                 // stacktrace
 // PATCH BEGIN
 //                if (!(e instanceof SocketException && "NanoHttpd Shutdown".equals(e.getMessage())) && !(e instanceof SocketTimeoutException)) {
+//                NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the client broken, or an bug in the handler code", e);
                 if (!(e instanceof SocketException) && !(e instanceof SocketTimeoutException)) {
 // PATCH END
-                    NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the client broken, or an bug in the handler code", e);
+                    NanoHTTPD.LOG.error("Communication with the client broken, or an bug in the handler code", e);
                 }
             } finally {
                 safeClose(outputStream);
@@ -452,7 +458,10 @@ public abstract class NanoHTTPD {
                 try {
                     file.delete();
                 } catch (Exception ignored) {
-                    NanoHTTPD.LOG.log(Level.WARNING, "could not delete file ", ignored);
+// PATCH BEGIN
+//                    NanoHTTPD.LOG.log(Level.WARNING, "could not delete file ", ignored);
+                    NanoHTTPD.LOG.warn("Could not delete file ", ignored);
+// PATCH END
                 }
             }
             this.tempFiles.clear();
@@ -701,7 +710,10 @@ public abstract class NanoHTTPD {
                     protocolVersion = st.nextToken();
                 } else {
                     protocolVersion = "HTTP/1.1";
-                    NanoHTTPD.LOG.log(Level.FINE, "no protocol version specified, strange. Assuming HTTP/1.1.");
+// PATCH BEGIN
+//                    NanoHTTPD.LOG.log(Level.FINE, "no protocol version specified, strange. Assuming HTTP/1.1.");
+                    NanoHTTPD.LOG.debug("No protocol version specified, strange. Assuming HTTP/1.1.");
+// PATCH END
                 }
                 String line = in.readLine();
                 while (line != null && !line.trim().isEmpty()) {
@@ -1649,7 +1661,10 @@ public abstract class NanoHTTPD {
                 outputStream.flush();
                 safeClose(this.data);
             } catch (IOException ioe) {
-                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+// PATCH BEGIN
+//                NanoHTTPD.LOG.log(Level.SEVERE, "Could not send response to the client", ioe);
+                NanoHTTPD.LOG.error("Could not send response to the client", ioe);
+// PATCH END
             }
         }
 
@@ -1665,7 +1680,10 @@ public abstract class NanoHTTPD {
                 try {
                     size = Long.parseLong(contentLengthString);
                 } catch (NumberFormatException ex) {
-                    LOG.severe("content-length was no number " + contentLengthString);
+// PATCH BEGIN
+//                    LOG.severe("content-length was no number " + contentLengthString);
+                    LOG.error("Content-Length was no number " + contentLengthString);
+// PATCH END
                 }
             }
             pw.print("Content-Length: " + size + "\r\n");
@@ -1797,7 +1815,10 @@ public abstract class NanoHTTPD {
                     final InputStream inputStream = finalAccept.getInputStream();
                     NanoHTTPD.this.asyncRunner.exec(createClientHandler(finalAccept, inputStream));
                 } catch (IOException e) {
-                    NanoHTTPD.LOG.log(Level.FINE, "Communication with the client broken", e);
+// PATCH BEGIN
+//                    NanoHTTPD.LOG.log(Level.FINE, "Communication with the client broken", e);
+                    NanoHTTPD.LOG.debug("Communication with the client broken", e);
+// PATCH END
                 }
             } while (!NanoHTTPD.this.myServerSocket.isClosed());
         }
@@ -1878,7 +1899,10 @@ public abstract class NanoHTTPD {
     /**
      * logger to log to.
      */
-    private static final Logger LOG = Logger.getLogger(NanoHTTPD.class.getName());
+// PATCH BEGIN
+//    private static final Logger LOG = Logger.getLogger(NanoHTTPD.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(NanoHTTPD.class);
+// PATCH END
 
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
@@ -1891,7 +1915,10 @@ public abstract class NanoHTTPD {
             loadMimeTypes(MIME_TYPES, "META-INF/nanohttpd/default-mimetypes.properties");
             loadMimeTypes(MIME_TYPES, "META-INF/nanohttpd/mimetypes.properties");
             if (MIME_TYPES.isEmpty()) {
-                LOG.log(Level.WARNING, "no mime types found in the classpath! please provide mimetypes.properties");
+// PATCH BEGIN
+//                LOG.log(Level.WARNING, "no mime types found in the classpath! please provide mimetypes.properties");
+                LOG.warn("No mime types found in the classpath! please provide mimetypes.properties");
+// PATCH END
             }
         }
         return MIME_TYPES;
@@ -1912,14 +1939,20 @@ public abstract class NanoHTTPD {
                     stream = url.openStream();
                     properties.load(stream);
                 } catch (IOException e) {
-                    LOG.log(Level.SEVERE, "could not load mimetypes from " + url, e);
+// PATCH BEGIN
+//                    LOG.log(Level.SEVERE, "could not load mimetypes from " + url, e);
+                    LOG.error("Could not load mimetypes from " + url, e);
+// PATCH END
                 } finally {
                     safeClose(stream);
                 }
                 result.putAll((Map) properties);
             }
         } catch (IOException e) {
-            LOG.log(Level.INFO, "no mime types available at " + resourceName);
+// PATCH BEGIN
+//            LOG.log(Level.INFO, "no mime types available at " + resourceName);
+            LOG.info("No mime types available at " + resourceName);
+// PATCH END
         }
     };
 
@@ -2007,7 +2040,10 @@ public abstract class NanoHTTPD {
                 }
             }
         } catch (IOException e) {
-            NanoHTTPD.LOG.log(Level.SEVERE, "Could not close", e);
+// PATCH BEGIN
+//            NanoHTTPD.LOG.log(Level.SEVERE, "Could not close", e);
+            NanoHTTPD.LOG.error("Could not close", e);
+// PATCH END
         }
     }
 
@@ -2150,7 +2186,10 @@ public abstract class NanoHTTPD {
         try {
             decoded = URLDecoder.decode(str, "UTF8");
         } catch (UnsupportedEncodingException ignored) {
-            NanoHTTPD.LOG.log(Level.WARNING, "Encoding not supported, ignored", ignored);
+// PATCH BEGIN
+//            NanoHTTPD.LOG.log(Level.WARNING, "Encoding not supported, ignored", ignored);
+            NanoHTTPD.LOG.warn("Encoding not supported, ignored", ignored);
+// PATCH END
         }
         return decoded;
     }
@@ -2226,7 +2265,10 @@ public abstract class NanoHTTPD {
                 }
                 bytes = txt.getBytes(contentType.getEncoding());
             } catch (UnsupportedEncodingException e) {
-                NanoHTTPD.LOG.log(Level.SEVERE, "encoding problem, responding nothing", e);
+// PATCH BEGIN
+//                NanoHTTPD.LOG.log(Level.SEVERE, "encoding problem, responding nothing", e);
+                NanoHTTPD.LOG.error("Encoding problem, responding nothing", e);
+// PATCH END
                 bytes = new byte[0];
             }
             return newFixedLengthResponse(status, contentType.getContentTypeHeader(), new ByteArrayInputStream(bytes), bytes.length);
@@ -2406,7 +2448,10 @@ public abstract class NanoHTTPD {
                 this.myThread.join();
             }
         } catch (Exception e) {
-            NanoHTTPD.LOG.log(Level.SEVERE, "Could not stop all connections", e);
+// PATCH BEGIN
+//            NanoHTTPD.LOG.log(Level.SEVERE, "Could not stop all connections", e);
+            NanoHTTPD.LOG.error("Could not stop all connections", e);
+// PATCH END
         }
     }
 

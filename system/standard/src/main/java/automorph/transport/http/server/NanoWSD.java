@@ -36,7 +36,8 @@ package automorph.transport.http.server;
 // PATCH BEGIN
 import automorph.transport.http.server.NanoHTTPD.IHTTPSession;
 import automorph.transport.http.server.NanoHTTPD.Response;
-// PATCH END
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode;
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseFrame;
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.OpCode;
@@ -56,7 +57,10 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+// PATCH BEGIN
+// import java.util.logging.Level;
+// import java.util.logging.Logger;
+// PATCH END
 
 public abstract class NanoWSD extends NanoHTTPD {
 
@@ -154,14 +158,20 @@ public abstract class NanoWSD extends NanoHTTPD {
                 try {
                     this.in.close();
                 } catch (IOException e) {
-                    NanoWSD.LOG.log(Level.FINE, "close failed", e);
+// PATCH BEGIN
+//                    NanoWSD.LOG.log(Level.FINE, "close failed", e);
+                    NanoWSD.LOG.debug("Close failed", e);
+// PATCH END
                 }
             }
             if (this.out != null) {
                 try {
                     this.out.close();
                 } catch (IOException e) {
-                    NanoWSD.LOG.log(Level.FINE, "close failed", e);
+// PATCH BEGIN
+//                    NanoWSD.LOG.log(Level.FINE, "close failed", e);
+                    NanoWSD.LOG.debug("Close failed", e);
+// PATCH END
                 }
             }
             this.state = State.CLOSED;
@@ -743,7 +753,10 @@ public abstract class NanoWSD extends NanoHTTPD {
     /**
      * logger to log to.
      */
-    private static final Logger LOG = Logger.getLogger(NanoWSD.class.getName());
+// PATCH BEGIN
+//    private static final Logger LOG = Logger.getLogger(NanoWSD.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(NanoWSD.class);
+// PATCH END
 
     public static final String HEADER_UPGRADE = "upgrade";
 

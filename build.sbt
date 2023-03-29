@@ -188,7 +188,8 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStand
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http" % "10.5.0",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
-    "com.typesafe.akka" %% "akka-stream" % akkaVersion
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
@@ -218,8 +219,10 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
 
 
 // Test
-val scribeVersion = "3.11.1"
+ThisBuild / Test / fork := true
+ThisBuild / Test / testForkedParallel := true
 ThisBuild / Test / testOptions += Tests.Argument("-oDF")
+val scribeVersion = "3.11.1"
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.15",
