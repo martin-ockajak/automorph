@@ -262,8 +262,13 @@ final case class NanoServer[Effect[_]] (
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(headerXForwardedFor))
-    val address = session.getRemoteHostName
+    val address = if (session.getRemoteHostName.nonEmpty) {
+      session.getRemoteHostName
+    } else {
+      session.getRemoteIpAddress
+    }
     Network.address(forwardedFor, address)
+    session.getRemoteIpAddress
   }
 }
 
