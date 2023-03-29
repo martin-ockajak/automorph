@@ -26,7 +26,7 @@ import scala.util.Using
  * @param effectSystem
  *   effect system plugin
  * @param url
- *   remote API HTTP or WebSocket URL
+ *   remote API HTTP URL
  * @param method
  *   HTTP request method (default: POST)
  * @tparam Effect
@@ -55,8 +55,10 @@ final case class UrlClient[Effect[_]](
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
       effectSystem.evaluate {
-        lazy val responseProperties =
-          ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm)
+        lazy val responseProperties = ListMap(
+          LogProperties.requestId -> requestId,
+          "URL" -> connection.getURL.toExternalForm
+        )
 
         // Process the response
         log.receivingResponse(responseProperties)
@@ -97,8 +99,11 @@ final case class UrlClient[Effect[_]](
       val httpMethod = setConnectionProperties(connection, requestBody, mediaType, requestContext)
 
       // Log the request
-      lazy val requestProperties =
-        ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm, "Method" -> httpMethod)
+      lazy val requestProperties = ListMap(
+        LogProperties.requestId -> requestId,
+        "URL" -> connection.getURL.toExternalForm,
+        "Method" -> httpMethod
+      )
       log.sendingRequest(requestProperties)
 
       // Send the request

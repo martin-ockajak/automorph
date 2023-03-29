@@ -67,7 +67,10 @@ final case class SttpClient[Effect[_]] private (
     val sttpRequest = createRequest(requestBody, mediaType, requestContext)
     transportProtocol(sttpRequest).flatMap { protocol =>
       send(sttpRequest, requestId, protocol).either.flatMap { result =>
-        lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "URL" -> sttpRequest.uri.toString)
+        lazy val responseProperties = ListMap(
+          LogProperties.requestId -> requestId,
+          "URL" -> sttpRequest.uri.toString
+        )
 
         // Process the response
         result.fold(
@@ -112,8 +115,10 @@ final case class SttpClient[Effect[_]] private (
     protocol: Protocol,
   ): Effect[Response[R]] = {
     // Log the request
-    lazy val requestProperties = ListMap(LogProperties.requestId -> requestId, "URL" -> sttpRequest.uri.toString) ++
-      Option.when(protocol == Protocol.Http)("Method" -> sttpRequest.method.toString)
+    lazy val requestProperties = ListMap(
+      LogProperties.requestId -> requestId,
+      "URL" -> sttpRequest.uri.toString
+    ) ++ Option.when(protocol == Protocol.Http)("Method" -> sttpRequest.method.toString)
     log.sendingRequest(requestProperties, protocol.name)
 
     // Send the request

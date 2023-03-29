@@ -122,57 +122,51 @@ final case class HttpClient[Effect[_]](
     requestUrl: URI,
     requestId: String,
     protocol: Protocol,
-  ): Effect[Response] =
-    log(
-      requestId,
-      requestUrl,
-      request.swap.toOption.map(_.method),
-      protocol,
-      request.fold(
-        // Send HTTP request
-        httpRequest =>
-          effectSystem match {
-            case completableSystem: AsyncEffectSystem[?] =>
-              effect(
-                httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
-                completableSystem.asInstanceOf[AsyncEffectSystem[Effect]],
-              ).map(httpResponse)
-            case _ => effectSystem.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
-          },
-        // Send WebSocket request
-        { case (webSocketEffect, resultEffect, requestBody) =>
-          withCompletable(completableSystem =>
-            webSocketEffect.flatMap(webSocket =>
-              effect(webSocket.sendBinary(requestBody.toByteBuffer, true), completableSystem).flatMap(_ => resultEffect)
-            )
-          )
-        },
-      ),
-    )
-
-  private def log(
-    requestId: String,
-    requestUrl: URI,
-    requestMethod: Option[String],
-    protocol: Protocol,
-    response: => Effect[Response],
   ): Effect[Response] = {
-    lazy val requestProperties = ListMap(LogProperties.requestId -> requestId, "URL" -> requestUrl.toString) ++
-      requestMethod.map("Method" -> _)
+    lazy val requestProperties = ListMap(
+      LogProperties.requestId -> requestId,
+      "URL" -> requestUrl.toString
+    ) ++ request.swap.toOption.map(httpRequest => "Method" -> httpRequest.method)
     log.sendingRequest(requestProperties, protocol.name)
-    response.either.flatMap(
-      _.fold(
-        error => {
-          log.failedSendRequest(error, requestProperties, protocol.name)
-          effectSystem.failed(error)
-        },
-        response => {
-          log.sentRequest(requestProperties, protocol.name)
-          effectSystem.successful(response)
-        },
+    request.fold(
+      // Send HTTP request
+      httpRequest => sendHttp(httpRequest),
+      // Send WebSocket request
+      { case (webSocketEffect, resultEffect, requestBody) =>
+        sendWebSocket(webSocketEffect, resultEffect, requestBody)
+      },
+    ).either.flatMap(_.fold(
+      error => {
+        log.failedSendRequest(error, requestProperties, protocol.name)
+        effectSystem.failed(error)
+      },
+      response => {
+        log.sentRequest(requestProperties, protocol.name)
+        effectSystem.successful(response)
+      },
+    ))
+  }
+
+  private def sendHttp(httpRequest: HttpRequest): Effect[Response] =
+    effectSystem match {
+      case completableSystem: AsyncEffectSystem[?] =>
+        effect(
+          httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
+          completableSystem.asInstanceOf[AsyncEffectSystem[Effect]],
+        ).map(httpResponse)
+      case _ => effectSystem.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
+    }
+
+  private def sendWebSocket(
+    webSocketEffect: Effect[WebSocket],
+    resultEffect: Effect[(InputStream, Option[Int], Seq[(String, String)])],
+    requestBody: InputStream,
+  ): Effect[Response] =
+    withCompletable(completableSystem =>
+      webSocketEffect.flatMap(webSocket =>
+        effect(webSocket.sendBinary(requestBody.toByteBuffer, true), completableSystem).flatMap(_ => resultEffect)
       )
     )
-  }
 
   private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) => values.asScala.map(name -> _) }

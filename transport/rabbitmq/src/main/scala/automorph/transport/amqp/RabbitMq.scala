@@ -215,6 +215,8 @@ object RabbitMq extends Logging {
     url: String,
     consumerTag: Option[String],
   ): Map[String, String] =
-    ListMap() ++ requestId.map(LogProperties.requestId -> _) ++
-      ListMap(routingKeyProperty -> routingKey, "URL" -> url) ++ consumerTag.map("Consumer Tag" -> _)
+    ListMap() ++ requestId.map(LogProperties.requestId -> _) ++ ListMap(
+      routingKeyProperty -> routingKey,
+      "URL" -> url
+    ) ++ consumerTag.map("Consumer Tag" -> _)
 }
