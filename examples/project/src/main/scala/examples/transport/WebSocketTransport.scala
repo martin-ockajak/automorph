@@ -29,6 +29,7 @@ private[examples] object WebSocketTransport {
     trait ClientApi {
       def hello(some: String, n: Int): Future[String]
     }
+
     // Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
     val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 

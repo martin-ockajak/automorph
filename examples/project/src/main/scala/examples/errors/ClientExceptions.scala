@@ -41,11 +41,8 @@ private[examples] object ClientExceptions {
       }
     )
 
-    // Create an effect system plugin
-    val effectSystem = Default.effectSystemAsync
-
     // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
-    val clientTransport = Default.clientTransport(effectSystem, new URI("http://localhost:7000/api"))
+    val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
     // Setup custom JSON-RPC HTTP client
     val client = run(

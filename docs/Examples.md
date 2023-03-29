@@ -37,8 +37,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -96,6 +95,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -104,8 +106,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST or PUT requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put))
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put)).bind(api).init()
+)
 ```
 
 **Client**
@@ -116,19 +119,19 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put).init()
+)
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 
 // Call the remote API function dynamically
-println(Await.result(
-  client.call[String]("hello").args("some" -> "world", "n" -> 1),
-  Duration.Inf
+println(run(
+  client.call[String]("hello").args("some" -> "world", "n" -> 1)
 ))
 ```
 
@@ -136,10 +139,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [Optional parameters](../../examples/project/src/main/scala/examples/basic/OptionalParameters.scala)
@@ -173,8 +176,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -184,8 +186,9 @@ val server = serverBuilder(_.bind(api)).init()
 trait ClientApi {
   def hello(some: String): String
 }
+
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
@@ -233,6 +236,9 @@ import scala.concurrent.{Await, Future}
 
 **Data types**
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Introduce custom data types
 sealed abstract class State
 
@@ -269,8 +275,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 ```
 
 **Client**
@@ -282,13 +289,14 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
-// Call the remote API function via proxy
+// Call the remote API function
 lazy val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", Record("test", State.On)),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", Record("test", State.On))
 ))
 ```
 
@@ -296,10 +304,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [Client function names](../../examples/project/src/main/scala/examples/customization/ClientFunctionNames.scala)
@@ -331,8 +339,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -347,7 +354,7 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Customize invoked API to RPC function name mapping
 val mapName = (name: String) => name match {
@@ -420,15 +427,14 @@ val mapName = (name: String) => name match {
 }
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api, mapName)).init()
+val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
 ```
 
 **Client**
 
 ```scala
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
@@ -488,6 +494,9 @@ import scala.util.Try
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -496,8 +505,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 ```
 
 **Client**
@@ -517,15 +527,18 @@ val rpcProtocol = Default.rpcProtocol[Default.ClientContext].mapError((message, 
   }
 )
 
-// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client.protocol(rpcProtocol).transport(clientTransport)
+// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+// Setup custom JSON-RPC HTTP client
+val client = run(
+  Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+)
 
 // Call the remote API function and fail with SQLException
 val remoteApi = client.bind[ClientApi]
-println(Try(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(Try(run(
+  remoteApi.hello("world", 1)
 )).failed.get)
 ```
 
@@ -533,10 +546,10 @@ println(Try(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [Server errors](../../examples/project/src/main/scala/examples/errors/ServerErrors.scala)
@@ -554,7 +567,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcException
-import automorph.{Default, Handler}
+import automorph.{Default, Server}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -566,6 +579,9 @@ import scala.util.Try
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -584,9 +600,13 @@ val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ matc
   case error => Default.rpcProtocol.mapException(error)
 })
 
-// Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(rpcProtocol).system(Default.effectSystemAsync).bind(api)
-val server = Default.server(handler, 7000, "/api").init()
+// Create HTTP server transport listening on port 7000 for requests to '/api'
+val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
+
+// Start JSON-RPC HTTP server
+val server = run(
+  Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
+)
 ```
 
 **Client**
@@ -598,19 +618,19 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote API function and fail with InvalidRequestException
 val remoteApi = client.bind[ClientApi]
-println(Try(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(Try(run(
+  remoteApi.hello("world", 1)
 )).failed.get)
 
 // Call the remote API function and fail with RuntimeException
-println(Try(Await.result(
-  remoteApi.hello("world", -1),
-  Duration.Inf
+println(Try(run(
+  remoteApi.hello("world", -1)
 )).failed.get)
 ```
 
@@ -618,10 +638,10 @@ println(Try(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [HTTP status code](../../examples/project/src/main/scala/examples/errors/HttpStatusCode.scala)
@@ -650,6 +670,9 @@ import scala.util.Try
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -658,13 +681,15 @@ class ServerApi {
 val api = new ServerApi()
 
 // Customize remote API server exception to HTTP status code mapping
-val serverBuilder = Default.serverAsync(7000, "/api", mapException = {
+val mapException = (error: Throwable) => error match {
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
-})
+}
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api", mapException = mapException).bind(api).init()
+)
 ```
 
 **Client**
@@ -674,14 +699,16 @@ val server = serverBuilder(_.bind(api)).init()
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
+
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote API function and fail with InvalidRequestException
 val remoteApi = client.bind[ClientApi]
-println(Try(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(Try(run(
+  remoteApi.hello("world", 1)
 )).failed.get)
 ```
 
@@ -689,10 +716,10 @@ println(Try(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 
@@ -733,8 +760,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -748,7 +774,7 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 val remoteApi = client.bind[ClientApi]
 
 {
@@ -831,8 +857,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -846,7 +871,7 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Create client request context specifying HTTP request metadata
 implicit val httpRequest: ClientContext = client.context
@@ -911,8 +936,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -926,9 +950,9 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
-// Call the remote API function retrieving a result with HTTP response metadata
+// Call the remote API function statically retrieving a result with HTTP response metadata
 val remoteApi = client.bind[ClientApi]
 val static = remoteApi.hello("test")
 println(static.result)
@@ -967,9 +991,8 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.schema.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
-import automorph.transport.http.HttpMethod
+import automorph.schema.{OpenApi, OpenRpc}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -979,6 +1002,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -987,26 +1013,27 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 ```
 
 **Client**
 
 ```scala
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Retrieve the remote API schema in OpenRPC format
-println(Await.result(
-  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
-  Duration.Inf
+println(run(
+  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args()
 ).methods.map(_.name))
 
 // Retrieve the remote API schema in OpenAPI format
-println(Await.result(
+println(run(
   client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
-  Duration.Inf
 ).paths.get.keys.toList)
 ```
 
@@ -1014,10 +1041,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [Dynamic payload](../../examples/project/src/main/scala/examples/special/DynamicPayload.scala)
@@ -1054,8 +1081,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -1067,7 +1093,7 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
@@ -1114,6 +1140,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1122,8 +1151,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 ```
 
 **Client**
@@ -1133,13 +1163,15 @@ val server = serverBuilder(_.bind(api)).init()
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-// Call the remote API function dynamically without waiting for a response
-Await.result(
-  client.tell("hello").args("some" -> "world", "n" -> 1),
-  Duration.Inf
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
+
+// Call the remote API function dynamically without expecting a response
+run(
+  client.tell("hello").args("some" -> "world", "n" -> 1)
 )
 ```
 
@@ -1147,10 +1179,10 @@ Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [Positional arguments](../../examples/project/src/main/scala/examples/special/PositionalArguments.scala)
@@ -1176,6 +1208,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1184,8 +1219,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init(),
+)
 ```
 
 **Client**
@@ -1199,15 +1235,18 @@ trait ClientApi {
 // Configure JSON-RPC to pass arguments by position instead of by name
 val rpcProtocol = Default.rpcProtocol[Default.ClientContext].namedArguments(false)
 
-// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client.protocol(rpcProtocol).transport(clientTransport)
+// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+// Setup  JSON-RPC HTTP client
+val client = run(
+  Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
+println(run(
   remoteApi.hello("world", 1),
-  Duration.Inf
 ))
 ```
 
@@ -1215,10 +1254,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 
@@ -1248,6 +1287,11 @@ import zio.{Task, Unsafe, ZIO}
 **Server**
 
 ```scala
+// Define a helper function to evaluate ZIO tasks
+def run[T](effect: Task[T]): T = Unsafe.unsafe { implicit unsafe =>
+  ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
+}
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Task[String] =
@@ -1256,12 +1300,11 @@ class ServerApi {
 
 val api = new ServerApi()
 
-// Create an effect system plugin
-val effectSystem = ZioSystem[Any]()
+// Create ZIO effect system plugin
+val effectSystem = ZioSystem.default
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilder(effectSystem, 7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+val server = run(Default.server(effectSystem, 7000, "/api").bind(api).init())
 ```
 
 **Client**
@@ -1273,13 +1316,9 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.client(effectSystem, new URI("http://localhost:7000/api"))
-
-// Define a helper function to run ZIO tasks
-def run[T](effect: Task[T]): T =
-  Unsafe.unsafe { implicit unsafe =>
-    ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
-  }
+val client = run(
+  Default.client(effectSystem, new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote APi function via proxy
 val remoteApi = client.bind[ClientApi]
@@ -1291,7 +1330,7 @@ println(run(
 **Cleanup**
 
 ```scala
-  // Close the client
+// Close the client
 run(client.close())
 
 // Stop the server
@@ -1312,8 +1351,8 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.{Client, Default, Handler}
+import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
+import automorph.{Client, Default, Server}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1322,6 +1361,9 @@ import scala.concurrent.{Await, Future}
 
 **Data types**
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Introduce custom data types
 case class Record(values: List[String])
 
@@ -1330,7 +1372,7 @@ val messageCodec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
 
 // Provide custom data type serialization and deserialization logic
 import messageCodec.custom.*
-implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
+implicit def recordRw: messageCodec.custom.ReadWriter[Record] = messageCodec.custom.macroRW
 ```
 
 **Server**
@@ -1345,16 +1387,17 @@ class ServerApi {
 val api = new ServerApi()
 
 // Create a server RPC protocol plugin
-val serverProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
+val serverRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
   messageCodec
 )
 
-// Create an effect system plugin
-val effectSystem = Default.effectSystemAsync
+// Create HTTP server transport listening on port 7000 for requests to '/api'
+val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(effectSystem)
-val server = Default.server(handler.bind(api), 7000, "/api").init()
+// Start JSON-RPC HTTP server
+val server = run(
+  Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+)
 ```
 
 **Client**
@@ -1366,19 +1409,22 @@ trait ClientApi {
 }
 
 // Create a client RPC protocol plugin
-val clientProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](
+val clientRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](
   messageCodec
 )
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client(clientProtocol, clientTransport)
+// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+// Setup JSON-RPC HTTP client
+val client = run(
+  Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 ```
 
@@ -1386,10 +1432,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [RPC protocol](../../examples/project/src/main/scala/examples/integration/RpcProtocol.scala)
@@ -1406,7 +1452,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.protocol.WebRpcProtocol
-import automorph.{Client, Default, Handler}
+import automorph.{Client, Default, Server}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1416,6 +1462,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1424,13 +1473,17 @@ class ServerApi {
 val api = new ServerApi()
 
 // Create a server Web-RPC protocol plugin with '/api' path prefix
-val serverProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
-  Default.messagecodec, "/api"
+val serverRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
+  Default.messageCodec, "/api"
 )
 
-// Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(Default.effectSystemAsync).bind(api)
-val server = Default.server(handler, 7000, "/api").init()
+// Create HTTP server transport listening on port 7000 for requests to '/api'
+val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
+
+// Start Web-RPC HTTP server
+val server = run(
+  Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+)
 ```
 
 **Client**
@@ -1442,19 +1495,22 @@ trait ClientApi {
 }
 
 // Create a client Web-RPC protocol plugin with '/api' path prefix
-val clientProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
+val clientRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
   Default.messageCodec, "/api"
 )
 
-// Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client.protocol(clientProtocol).transport(clientTransport)
+// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+// Setup Web-RPC HTTP client
+val client = run(
+  Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 ```
 
@@ -1462,10 +1518,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 
@@ -1484,7 +1540,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.Default
+import automorph.{Client, Default}
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 ```
@@ -1499,9 +1555,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api)).init()
+// Start JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
 **Client**
@@ -1512,11 +1567,11 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 
-// Create standard library HTTP client message transport sending POST requests to 'http://localhost:7000/api'
+// Create standard JRE HTTP client message transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
 // Setup JSON-RPC HTTP client
-val client = Default.client(clientTransport)
+val client = Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 
 // Call the remote API function via proxy
 val remoteApi = client.bind[ClientApi]
@@ -1548,7 +1603,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.Default
+import automorph.{Default, Server}
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 ```
@@ -1563,9 +1618,11 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Default.handlerSync[NanoServer.Context]
-val server = NanoServer(handler.bind(api), 7000, "/api").init()
+// Create NanoHTTPD HTTP server transport listening on port 7000 for requests to '/api'
+val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")
+
+// Start JSON-RPC HTTP server
+val server = Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
 ```
 
 **Client**
@@ -1609,7 +1666,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.Default
+import automorph.{Default, Endpoint}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import io.undertow.{Handlers, Undertow}
 import java.net.URI
@@ -1621,6 +1678,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1628,14 +1688,16 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Create custom Undertow JSON-RPC endpoint
-val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-val endpoint = UndertowHttpEndpoint(handler.bind(api))
+// Create Undertow JSON-RPC endpoint transport
+val endpointTransport = UndertowHttpEndpoint(Default.effectSystemAsync)
 
-// Start Undertow JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Setup JSON-RPC endpoint
+val endpoint = Endpoint.transport(endpointTransport).rpcProtocol(Default.rpcProtocol).bind(api)
+
+// Start Undertow HTTP server listening on port 7000 for requests to '/api'
 val server = Undertow.builder()
   .addHttpListener(7000, "0.0.0.0")
-  .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
+  .setHandler(Handlers.path().addPrefixPath("/api", endpoint.adapter))
   .build()
 server.start()
 ```
@@ -1647,14 +1709,16 @@ server.start()
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
+
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote API function via proxy
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 ```
 
@@ -1662,7 +1726,7 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
 server.stop()
@@ -1691,6 +1755,9 @@ import scala.concurrent.{Await, Future}
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1699,8 +1766,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 ```
 
 **Client**
@@ -1710,14 +1778,14 @@ val server = serverBuilder(_.bind(api))
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
+
 // Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
 val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 
 // Call the remote API function via proxy
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
+println(run(
   remoteApi.hello("world", 1),
-  Duration.Inf
 ))
 ```
 
@@ -1725,10 +1793,10 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### [AMQP transport](../../examples/project/src/main/scala/examples/transport/AmqpTransport.scala)
@@ -1746,7 +1814,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.Default
+import automorph.{Client, Default, Server}
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
@@ -1763,6 +1831,9 @@ import scala.util.Try
 **Server**
 
 ```scala
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1776,9 +1847,13 @@ val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
 val broker = new EmbeddedRabbitMq(brokerConfig)
 broker.start()
 
-// Start RabbitMQ AMQP server consuming requests from the 'api' queue
-val handler = Default.handlerAsync[RabbitMqServer.Context]
-val server = RabbitMqServer(handler.bind(api), new URI("amqp://localhost"), Seq("api"))
+// Create RabbitMQ AMQP server transport consuming requests from the 'api' queue
+val serverTransport = RabbitMqServer(Default.effectSystemAsync, new URI("amqp://localhost:7000"), Seq("api"))
+
+// Start RabbitMQ AMQP JSON-RPC server
+val server = run(
+  Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
+)
 ```
 
 **Client**
@@ -1790,16 +1865,17 @@ trait ClientApi {
 }
 
 // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
-val clientTransport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.effectSystemAsync)
+val clientTransport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", Default.effectSystemAsync)
 
 // Setup JSON-RPC HTTP client
-val client = Default.client(clientTransport)
+val client = run(
+  Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
+)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 ```
 
@@ -1807,14 +1883,13 @@ println(Await.result(
 
 ```scala
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 
 // Stop embedded RabbitMQ broker
 broker.stop()
 val brokerDirectory = brokerConfig.getExtractionFolder.toPath.resolve(brokerConfig.getVersion.getExtractionFolder)
 Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
-}
 ```

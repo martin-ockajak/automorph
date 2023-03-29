@@ -24,12 +24,14 @@ private[examples] object HttpStatusCode {
     val api = new ServerApi()
 
     // Customize remote API server exception to HTTP status code mapping
+    val mapException = (error: Throwable) => error match {
+      case _: SQLException => 400
+      case e => HttpContext.defaultExceptionToStatusCode(e)
+    }
+
     // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api", mapException = {
-        case _: SQLException => 400
-        case e => HttpContext.defaultExceptionToStatusCode(e)
-      }).bind(api).init()
+      Default.serverAsync(7000, "/api", mapException = mapException).bind(api).init()
     )
 
     // Define client view of the remote API

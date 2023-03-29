@@ -24,6 +24,7 @@ private[examples] object OptionalParameters {
     trait ClientApi {
       def hello(some: String): String
     }
+
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 

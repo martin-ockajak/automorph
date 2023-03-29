@@ -60,7 +60,7 @@ private[examples] object DataSerialization {
       Default.clientAsync(new URI("http://localhost:7000/api")).init()
     )
 
-    // Call the remote API function via proxy
+    // Call the remote API function
     lazy val remoteApi = client.bind[ClientApi]
     println(run(
       remoteApi.hello("world", Record("test", State.On))
