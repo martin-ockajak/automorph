@@ -198,10 +198,10 @@ public abstract class NanoHTTPD {
                 // stacktrace
 // PATCH BEGIN
 //                if (!(e instanceof SocketException && "NanoHttpd Shutdown".equals(e.getMessage())) && !(e instanceof SocketTimeoutException)) {
-//                NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the client broken, or an bug in the handler code", e);
+//                  NanoHTTPD.LOG.log(Level.SEVERE, "Communication with the client broken, or an bug in the handler code", e);
                 if (!(e instanceof SocketException) && !(e instanceof SocketTimeoutException)) {
-// PATCH END
                     NanoHTTPD.LOG.error("Communication with the client broken, or an bug in the handler code", e);
+// PATCH END
                 }
             } finally {
                 safeClose(outputStream);
@@ -1817,7 +1817,9 @@ public abstract class NanoHTTPD {
                 } catch (IOException e) {
 // PATCH BEGIN
 //                    NanoHTTPD.LOG.log(Level.FINE, "Communication with the client broken", e);
-                    NanoHTTPD.LOG.debug("Communication with the client broken", e);
+                    if (!(e instanceof SocketException) && !(e instanceof SocketTimeoutException)) {
+                        NanoHTTPD.LOG.debug("Communication with the client broken", e);
+                    }
 // PATCH END
                 }
             } while (!NanoHTTPD.this.myServerSocket.isClosed());
