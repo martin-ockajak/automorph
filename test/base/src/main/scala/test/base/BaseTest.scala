@@ -7,7 +7,7 @@ import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, Opti
 import org.scalatestplus.scalacheck.Checkers
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
-  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time,
+  FormatterInterpolator, dateFull, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple,
 }
 import scribe.writer.ConsoleWriter
 import scribe.{Level, Logger}
@@ -49,7 +49,7 @@ object BaseTest {
     System.setProperty("org.jboss.logging.provider", "slf4j")
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format =
-      formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
+      formatter"${magenta(dateFull)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
     val path = PathBuilder.static(Paths.get("target/test.log"))
     Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
