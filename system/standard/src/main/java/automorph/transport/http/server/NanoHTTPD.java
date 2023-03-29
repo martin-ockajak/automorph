@@ -368,14 +368,14 @@ public abstract class NanoHTTPD {
 
 // PATCH BEGIN
         private final ExecutorService executorService;
-// PATCH END
 
-        /**
-         * @return a list with currently running clients.
-         */
-        public List<NanoHTTPD.ClientHandler> getRunning() {
-            return running;
-        }
+//        /**
+//         * @return a list with currently running clients.
+//         */
+//        public List<NanoHTTPD.ClientHandler> getRunning() {
+//            return running;
+//        }
+// PATCH END
 
         @Override
         public void closeAll() {
