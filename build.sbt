@@ -210,6 +210,8 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
+  Test / fork := true,
+  Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion,
