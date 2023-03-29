@@ -67,10 +67,6 @@ trait CoreTest extends BaseTest {
               "method" in {
                 consistent(apis)(_.method("value")).should(be(true))
               }
-//              "TEST" in {
-//                val expected = run(simpleApi.method("test"))
-//                executeLogError(fixture.call("function", "argument" -> "test")) == expected
-//              }
             }
           }
         }

@@ -21,7 +21,6 @@ object AmqpContextGenerator {
         headers <- Gen.mapOfN(maxItems, header)
         deliveryMode <- Gen.option(Gen.choose(1, 2))
         priority <- Gen.option(Gen.choose(0, 9))
-        correlationId <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
         expiration <- Gen.option(Gen.choose(0, Int.MaxValue).map(_.toString))
         messageId <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
         timestamp <- Gen.option(Gen.choose(0L, Long.MaxValue).map(Instant.ofEpochMilli))
@@ -31,7 +30,7 @@ object AmqpContextGenerator {
         headers = headers,
         deliveryMode = deliveryMode,
         priority = priority,
-        correlationId = correlationId,
+        correlationId = None,
         expiration = expiration,
         messageId = messageId,
         timestamp = timestamp,

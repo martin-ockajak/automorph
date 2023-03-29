@@ -26,6 +26,7 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
   type Context = RabbitMqServer.Context
 
   private lazy val setupTimeout = 30000
+  private lazy val erlangAvailable = Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)
   private lazy val embeddedBroker = createBroker()
   private lazy val server = LocalServer(system, LocalContext(arbitraryContext.arbitrary.sample.get))
 
@@ -35,9 +36,11 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
-    embeddedBroker.fold {
+    if (erlangAvailable) {
+      AmqpContextGenerator.arbitrary
+    } else {
       Arbitrary(Gen.asciiPrintableStr.map(LocalContext.apply)).asInstanceOf[Arbitrary[Context]]
-    }(_ => AmqpContextGenerator.arbitrary)
+    }
 
   override def clientTransport(id: Int): ClientTransport[Effect, Context] =
     embeddedBroker.map { case (_, config) =>
@@ -70,8 +73,8 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     }
   }
 
-  private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] = {
-    Option.when(Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
+  private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] =
+    Option.when(erlangAvailable) {
       lock()
       val config = new EmbeddedRabbitMqConfig.Builder().randomPort()
         .extractionFolder(Paths.get(SystemUtils.JAVA_IO_TMPDIR, getClass.getSimpleName).toFile)
@@ -80,5 +83,4 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
       broker.start()
       broker -> config
     }
-  }
 }

@@ -2,7 +2,7 @@ package automorph
 
 import automorph.RpcException.InvalidResponseException
 import automorph.client.meta.ClientBind
-import automorph.client.RemoteMessage
+import automorph.client.RemoteTell
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -53,8 +53,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @throws RpcException
    *   on RPC error
    */
-  def tell(function: String): RemoteMessage[Node, Codec, Effect, Context] =
-    RemoteMessage(function, rpcProtocol.messageCodec, sendMessage)
+  def tell(function: String): RemoteTell[Node, Codec, Effect, Context] =
+    RemoteTell(function, rpcProtocol.messageCodec, performTell)
 
   /**
    * Creates a default request context.
@@ -89,46 +89,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       "transport" -> transport,
     ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
     s"${this.getClass.getName}($plugins)"
-  }
-
-  /**
-   * Messages a remote API function using specified arguments.
-   *
-   * Optional request context is used as a last remote function argument.
-   *
-   * @param function
-   *   remote function name
-   * @param arguments
-   *   named arguments
-   * @param requestContext
-   *   request context
-   * @return
-   *   nothing
-   */
-  private def sendMessage(
-    function: String,
-    arguments: Seq[(String, Node)],
-    requestContext: Option[Context],
-  ): Effect[Unit] = {
-    // Create request
-    val requestId = Random.id
-    rpcProtocol.createRequest(
-      function,
-      arguments,
-      responseRequired = false,
-      requestContext.getOrElse(context),
-      requestId,
-    ).pureFold(
-      error => system.failed(error),
-      // Send request
-      rpcRequest =>
-        system.successful(rpcRequest).flatMap { request =>
-          lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
-          lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
-          logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
-          transport.tell(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType)
-        },
-    )
   }
 
   /**
@@ -176,6 +136,46 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
           }
+        },
+    )
+  }
+
+  /**
+   * Send a one-way message to a remote API function using specified arguments.
+   *
+   * Optional request context is used as a last remote function argument.
+   *
+   * @param function
+   *   remote function name
+   * @param arguments
+   *   named arguments
+   * @param requestContext
+   *   request context
+   * @return
+   *   nothing
+   */
+  private def performTell(
+    function: String,
+    arguments: Seq[(String, Node)],
+    requestContext: Option[Context],
+  ): Effect[Unit] = {
+    // Create request
+    val requestId = Random.id
+    rpcProtocol.createRequest(
+      function,
+      arguments,
+      responseRequired = false,
+      requestContext.getOrElse(context),
+      requestId,
+    ).pureFold(
+      error => system.failed(error),
+      // Send request
+      rpcRequest =>
+        system.successful(rpcRequest).flatMap { request =>
+          lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
+          lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
+          logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
+          transport.tell(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType)
         },
     )
   }
