@@ -11,7 +11,7 @@ import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfi
 import java.net.URI
 import java.nio.file.{Files, Paths}
 import scala.jdk.CollectionConverters.IteratorHasAsScala
-import org.scalacheck.Arbitrary
+import org.scalacheck.{Arbitrary, Gen}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
@@ -27,6 +27,7 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
 
   private lazy val setupTimeout = 30000
   private lazy val embeddedBroker = createBroker()
+  private lazy val server = LocalServer(system, LocalContext(arbitraryContext.arbitrary.sample.get))
 
   override lazy val system: FutureSystem = FutureSystem()
 
@@ -34,14 +35,16 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
-    AmqpContextGenerator.arbitrary
+    embeddedBroker.fold {
+      Arbitrary(Gen.asciiPrintableStr.map(LocalContext.apply)).asInstanceOf[Arbitrary[Context]]
+    }(_ => AmqpContextGenerator.arbitrary)
 
   override def clientTransport(id: Int): ClientTransport[Effect, Context] =
     embeddedBroker.map { case (_, config) =>
       val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
       RabbitMqClient[Effect](url, id.toString, system)
     }.getOrElse(
-      LocalClient(system, LocalContext(arbitraryContext.arbitrary.sample.get))
+      LocalClient(system, LocalContext(arbitraryContext.arbitrary.sample.get), server.handler)
         .asInstanceOf[ClientTransport[Effect, Context]]
     )
 
@@ -50,8 +53,7 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
       val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
       RabbitMqServer[Effect](system, url, Seq(id.toString))
     }.getOrElse(
-      LocalServer(system, LocalContext(arbitraryContext.arbitrary.sample.get))
-        .asInstanceOf[ServerTransport[Effect, Context]]
+      server.asInstanceOf[ServerTransport[Effect, Context]]
     )
   }
 
