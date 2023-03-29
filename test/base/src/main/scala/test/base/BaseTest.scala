@@ -44,12 +44,19 @@ trait BaseTest
 object BaseTest {
   setupLogger
 
+  private object Time extends FormatBlock {
+    override def format(record: LogRecord): LogOutput = {
+      val timesStamp = record.timeStamp
+      new TextOutput(s"${timesStamp.t.T}:${timesStamp.t.L}")
+    }
+  }
+
   /** Configure test logging. */
   private lazy val setupLogger: Unit = {
     System.setProperty("org.jboss.logging.provider", "slf4j")
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format =
-      formatter"${magenta(dateFull)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
+      formatter"${magenta(Time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
     val path = PathBuilder.static(Paths.get("target/test.log"))
     Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
