@@ -185,6 +185,8 @@ lazy val jetty = source(project, "transport/jetty", core, http, testStandard % T
 )
 val akkaVersion = "2.8.0"
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
+  Test / fork := true,
+  Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http" % "10.5.0",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
@@ -219,8 +221,8 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
 
 
 // Test
-ThisBuild / Test / fork := true
-ThisBuild / Test / testForkedParallel := true
+ ThisBuild / Test / fork := true
+ ThisBuild / Test / testForkedParallel := true
 ThisBuild / Test / testOptions += Tests.Argument("-oDF")
 val scribeVersion = "3.11.1"
 lazy val testBase = source(project, "test/base", spi).settings(
