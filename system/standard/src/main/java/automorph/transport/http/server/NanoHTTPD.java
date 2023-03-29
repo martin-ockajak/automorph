@@ -397,13 +397,13 @@ public abstract class NanoHTTPD {
         public void exec(NanoHTTPD.ClientHandler clientHandler) {
 // PATCH BEGIN
 //            ++this.requestCount;
-//            Thread t = new Thread(clientHandler);
-//            t.setDaemon(true);
+            Thread t = new Thread(clientHandler);
+            t.setDaemon(true);
 //            t.setName("NanoHttpd Request Processor (#" + this.requestCount + ")");
-//            this.running.add(clientHandler);
-//            t.start();
             this.running.add(clientHandler);
-            executorService.execute(clientHandler);
+            t.start();
+//            this.running.add(clientHandler);
+//            executorService.execute(clientHandler);
 // PATCH END
         }
     }
