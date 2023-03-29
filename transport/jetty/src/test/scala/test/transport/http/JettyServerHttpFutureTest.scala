@@ -1,7 +1,6 @@
 package test.transport.http
 
-import automorph.Types
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer
@@ -17,17 +16,17 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] = {
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyServer(handler, port)
+    JettyServer(system, port(id))
   }
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    JettyHttpEndpoint(system)
 }

@@ -7,10 +7,11 @@ import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, Opti
 import org.scalatestplus.scalacheck.Checkers
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
-  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time,
+  FormatBlock, FormatterInterpolator, cyan, gray, levelColoredPaddedRight, mdcMultiLine, messages, positionSimple
 }
+import scribe.output.{LogOutput, TextOutput}
 import scribe.writer.ConsoleWriter
-import scribe.{Level, Logger}
+import scribe.{Level, LogRecord, Logger}
 
 /**
  * Base structured test.
@@ -44,12 +45,21 @@ trait BaseTest
 object BaseTest {
   setupLogger
 
+  private object Time extends FormatBlock {
+    import perfolation.*
+
+    override def format(record: LogRecord): LogOutput = {
+      val timeStamp = record.timeStamp
+      new TextOutput(s"${timeStamp.t.T}:${timeStamp.t.L}")
+    }
+  }
+
   /** Configure test logging. */
   private lazy val setupLogger: Unit = {
     System.setProperty("org.jboss.logging.provider", "slf4j")
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format =
-      formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
+      formatter"${cyan(Time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
     val path = PathBuilder.static(Paths.get("target/test.log"))
     Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))

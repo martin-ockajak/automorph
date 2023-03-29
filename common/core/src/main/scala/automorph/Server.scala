@@ -1,46 +1,147 @@
 package automorph
 
-import automorph.spi.ServerTransport
+import automorph.handler.ApiRequestHandler
+import automorph.server.meta.ServerBind
+import automorph.spi.protocol.RpcFunction
+import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
+import scala.collection.immutable.ListMap
 
 /**
  * RPC server.
  *
- * The server can be used to serve remote API requests using specific message transport protocol and invoke bound API
+ * Used to serve remote API requests using specific message transport protocol and invoke bound API
  * methods to process them.
  *
- * Remote APIs can be invoked statically using transparent proxy instances automatically derived from specified API
- * traits or dynamically by supplying the required type information on invocation. Undertow HTTP & WebSocket server
- * message transport plugin.
- *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
- *
- * Processes only HTTP requests starting with specified URL path.
+ * Automatically derives remote API bindings for existing API instances.
  *
  * @constructor
- *   Creates an RPC server with specified handler and transport plugin and supporting corresponding message
- *   context type.
- * @param handler
- *   RPC request handler
+ *   Creates a RPC server with specified protocol and transport plugins supporting corresponding message context type.
+ * @param rpcProtocol
+ *   RPC protocol plugin
  * @param transport
  *   server message transport plugin
+ * @param handler
+ *   RPC request handler
+ * @param functions
+ *   bound RPC functions
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
-final case class Server[Effect[_], Context](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   transport: ServerTransport[Effect, Context],
-) {
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  rpcProtocol: RpcProtocol[Node, Codec, Context],
+  handler: RequestHandler[Effect, Context],
+  functions: Seq[RpcFunction] = Seq.empty,
+) extends ServerBind[Node, Codec, Effect, Context] {
+
+  private val configuredTransport = transport.clone(handler)
 
   /**
-   * Starts this server to listen for incoming requests.
+   * Starts this server to process incoming requests.
    *
    * @return
    *   active RPC server
    */
-  def start(): Effect[ActiveServer[Effect, Context]] =
-    genericHandler.effectSystem.evaluate(ActiveServer(handler, transport))
+  def init(): Effect[Server[Node, Codec, Effect, Context]] =
+    configuredTransport.effectSystem.map(configuredTransport.init())(_ => this)
+
+  /**
+   * Stops this server freeing the underlying resources.
+   *
+   * @return
+   *   passive RPC server
+   */
+  def close(): Effect[Server[Node, Codec, Effect, Context]] =
+    configuredTransport.effectSystem.map(configuredTransport.close())(_ => this)
+
+  override def toString: String = {
+    val plugins = Map[String, Any](
+      "rpcProtocol" -> rpcProtocol,
+      "transport" -> configuredTransport,
+    ).map { case (name, plugin) =>
+      s"$name = ${plugin.getClass.getName}"
+    }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
+}
+
+object Server {
+
+  /**
+   * RPC server builder.
+   *
+   * @constructor
+   *   Creates a new RPC server builder.
+   * @param transport
+   *   message transport plugin
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   RPC message context type
+   */
+  case class ServerBuilder[Effect[_], Context](transport: ServerTransport[Effect, Context]) {
+
+    /**
+     * Creates a new RPC server with specified RPC protocol plugin.
+     *
+     * @param rpcProtocol
+     *   RPC protocol plugin
+     * @tparam Node
+     *   message node type
+     * @tparam Codec
+     *   message codec plugin type
+     * @return
+     *   RPC server builder
+     */
+    def rpcProtocol[Node, Codec <: MessageCodec[Node]](
+      rpcProtocol: RpcProtocol[Node, Codec, Context]
+    ): Server[Node, Codec, Effect, Context] =
+      Server(transport, rpcProtocol)
+  }
+
+  /**
+   * Creates a RPC server with specified protocol and transport plugins supporting corresponding message context type.
+   *
+   * @param transport
+   *   server message transport plugin
+   * @param protocol
+   *   RPC protocol plugin
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   RPC message context type
+   * @return RPC server
+   */
+  def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+    transport: ServerTransport[Effect, Context],
+    protocol: RpcProtocol[Node, Codec, Context],
+  ): Server[Node, Codec, Effect, Context] = {
+    val handler = ApiRequestHandler(transport.effectSystem, protocol, ListMap.empty)
+    Server(transport, protocol, handler, handler.functions)
+  }
+
+  /**
+   * Creates an RPC client builder with specified effect transport plugin.
+   *
+   * @param transport
+   *   message transport plugin
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   RPC message context type
+   * @return
+   *   RPC client builder
+   */
+  def transport[Effect[_], Context](transport: ServerTransport[Effect, Context]): ServerBuilder[Effect, Context] =
+    ServerBuilder(transport)
 }

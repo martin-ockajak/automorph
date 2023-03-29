@@ -10,7 +10,7 @@ import java.io.InputStream
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 trait ClientTransport[Effect[_], Context] {
 
@@ -41,7 +41,7 @@ trait ClientTransport[Effect[_], Context] {
   ): Effect[(InputStream, Context)]
 
   /**
-   * Sends a request to a remote endpoint without expecting a response.
+   * Sends a request to a remote endpoint without waiting for a response.
    *
    * An optional request context is used to supply additional information needed to send the request.
    *
@@ -56,7 +56,7 @@ trait ClientTransport[Effect[_], Context] {
    * @return
    *   nothing
    */
-  def message(requestBody: InputStream, requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
+  def tell(requestBody: InputStream, requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
 
   /**
    * Creates default request context based on the configuration of this client transport.
@@ -64,7 +64,15 @@ trait ClientTransport[Effect[_], Context] {
    * @return
    *   request context based on the configuration of this client transport
    */
-  def defaultContext: Context
+  def context: Context
+
+  /**
+   * Initializes this client to invoke remote APIs.
+   *
+   * @return
+   *   active RPC server
+   */
+  def init(): Effect[Unit]
 
   /**
    * Closes this client transport freeing the underlying resources.

@@ -1,8 +1,10 @@
 package test.core
 
-import automorph.RpcException.{FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException, InvalidResponseException}
-import automorph.Types
-import automorph.spi.EffectSystem
+import automorph.RpcException.{
+  FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException, InvalidResponseException
+}
+import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.{Client, Server}
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -18,35 +20,38 @@ trait CoreTest extends BaseTest {
 
   /** Effect type. */
   type Effect[_]
+
   /** Request context type. */
   type Context
   type SimpleApiType = SimpleApi[Effect]
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
+  type GenericServer[E[_], C] = Server[Any, MessageCodec[Any], E, C]
+  type GenericClient[E[_], C] = Client[Any, MessageCodec[Any], E, C]
 
   case class TestFixture(
-    client: Types.ClientAnyCodec[Effect, Context],
-    handler: Types.HandlerAnyCodec[Effect, Context],
+    client: Client[?, ?, Effect, Context],
+    server: Server[?, ?, Effect, Context],
     simpleApi: SimpleApiType,
     complexApi: ComplexApiType,
     invalidApi: InvalidApiType,
     call: (String, (String, String)) => Effect[String],
-    tell: (String, (String, String)) => Effect[Unit]
+    tell: (String, (String, String)) => Effect[Unit],
   ) {
 
-    val genericClient: Types.ClientGenericCodec[Effect, Context] =
-      client.asInstanceOf[Types.ClientGenericCodec[Effect, Context]]
+    val genericClient: GenericClient[Effect, Context] = client.asInstanceOf[GenericClient[Effect, Context]]
+    val genericServer: GenericServer[Effect, Context] = server.asInstanceOf[GenericServer[Effect, Context]]
   }
 
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
   val complexApi: ComplexApiType = ComplexApiImpl(system, arbitraryContext.arbitrary.sample.get)
   val invalidApi: InvalidApiType = InvalidApiImpl(system)
 
-  implicit def arbitraryContext: Arbitrary[Context]
-
   def system: EffectSystem[Effect]
 
-  def execute[T](effect: Effect[T]): T
+  def run[T](effect: Effect[T]): T
+
+  implicit def arbitraryContext: Arbitrary[Context]
 
   def fixtures: Seq[TestFixture]
 
@@ -62,6 +67,10 @@ trait CoreTest extends BaseTest {
               "method" in {
                 consistent(apis)(_.method("value")).should(be(true))
               }
+//              "TEST" in {
+//                val expected = run(simpleApi.method("test"))
+//                executeLogError(fixture.call("function", "argument" -> "test")) == expected
+//              }
             }
           }
         }
@@ -135,8 +144,8 @@ trait CoreTest extends BaseTest {
               "method9" in {
                 check { (a0: String) =>
                   val (testedApi, referenceApi) = apis
-                  val result = Try(execute(testedApi.method9(a0))).toEither
-                  val expected = Try(execute(referenceApi.method9(a0))).toEither
+                  val result = Try(run(testedApi.method9(a0))).toEither
+                  val expected = Try(run(referenceApi.method9(a0))).toEither
                   val expectedErrorMessage = expected.swap.map(error =>
                     s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
                   )
@@ -147,35 +156,35 @@ trait CoreTest extends BaseTest {
             "Invalid API" - {
               val api = fixture.invalidApi
               "Function not found" in {
-                val error = intercept[FunctionNotFoundException](execute(api.nomethod(""))).getMessage.toLowerCase
+                val error = intercept[FunctionNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
                 error.should(include("function not found"))
                 error.should(include("nomethod"))
               }
               "Optional arguments" in {
-                execute(api.method3(0, Some(0)))
+                run(api.method3(0, Some(0)))
               }
               "Malformed argument" in {
                 val error = intercept[InvalidRequestException] {
-                  execute(api.method4(BigDecimal(0), Some(true), None))
+                  run(api.method4(BigDecimal(0), Some(true), None))
                 }.getMessage.toLowerCase
                 error.should(include("malformed argument"))
                 error.should(include("p1"))
               }
               "Missing arguments" in {
                 val error = intercept[InvalidRequestException] {
-                  execute(api.method5(p0 = true, 0))
+                  run(api.method5(p0 = true, 0))
                 }.getMessage.toLowerCase
                 error.should(include("missing argument"))
                 error.should(include("p2"))
               }
               "Redundant arguments" in {
-                val error = intercept[InvalidArgumentsException](execute(api.method1(""))).getMessage.toLowerCase
+                val error = intercept[InvalidArgumentsException](run(api.method1(""))).getMessage.toLowerCase
                 error.should(include("redundant arguments"))
                 error.should(include("0"))
               }
               "Malformed result" in {
                 val error = intercept[InvalidResponseException] {
-                  execute(api.method2(""))
+                  run(api.method2(""))
                 }.getMessage.toLowerCase
                 error.should(include("malformed result"))
               }
@@ -185,7 +194,7 @@ trait CoreTest extends BaseTest {
             "Simple API" - {
               "Call" in {
                 check { (a0: String) =>
-                  val expected = execute(simpleApi.method(a0))
+                  val expected = run(simpleApi.method(a0))
                   executeLogError(fixture.call("method", "argument" -> a0)) == expected
                 }
               }
@@ -195,6 +204,12 @@ trait CoreTest extends BaseTest {
                   true
                 }
               }
+//              "Alias" in {
+//                check { (a0: String) =>
+//                  val expected = run(simpleApi.method(a0))
+//                  executeLogError(fixture.call("function", "argument" -> a0)) == expected
+//                }
+//              }
             }
           }
         }
@@ -208,7 +223,7 @@ trait CoreTest extends BaseTest {
   }
 
   private def executeLogError[T](value: => Effect[T]): T =
-    Try(execute(value)) match {
+    Try(run(value)) match {
       case Success(result) => result
       case Failure(error) =>
         error.printStackTrace(System.out)
@@ -218,8 +233,8 @@ trait CoreTest extends BaseTest {
   private def consistent[Api, Result](apis: (Api, Api))(function: Api => Effect[Result]): Boolean =
     Try {
       val (testedApi, referenceApi) = apis
-      val result = execute(function(testedApi))
-      val expected = execute(function(referenceApi))
+      val result = run(function(testedApi))
+      val expected = run(function(referenceApi))
       expected == result
     } match {
       case Success(result) => result

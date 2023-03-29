@@ -29,6 +29,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -37,11 +40,12 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = run(
+  Default.serverAsync(7000, "/api").bind(api).init()
+)
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+run(server.close())
 ```
 
 ### Static client
@@ -55,23 +59,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Define client view of the remote API
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
+println(run(
+  remoteApi.hello("world", 1)
 ))
 
 // Close the client
-Await.result(client.close(), Duration.Inf)
+run(client.close())
 ```
 
 ### Dynamic client
@@ -85,17 +93,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+// Define a helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+val client = run(
+  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+)
 
 // Call the remote API function dynamically
-println(Await.result(
-  client.call[String]("hello").args("what" -> "world", "n" -> 1),
-  Duration.Inf
+println(run(
+  client.call[String]("hello").args("some" -> "world", "n" -> 1)
 ))
 
 // Close the client
-client.close()
+run(client.close())
 ```
 
 ## [Example Project](https://github.com/martin-ockajak/automorph/examples/project)

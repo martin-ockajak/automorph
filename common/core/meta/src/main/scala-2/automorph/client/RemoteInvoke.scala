@@ -17,7 +17,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  * @tparam Result
  *   result type
  */

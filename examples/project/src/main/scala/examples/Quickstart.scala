@@ -10,17 +10,20 @@ private[examples] object Quickstart {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
     // Create server API instance
     class ServerApi {
 
-      def hello(some: String, n: Int): Future[String] =
-        Future(s"Hello $some $n!")
+      def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
     }
     val api = new ServerApi()
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    val server = serverBuilder(_.bind[ServerApi](api))
+    val server = run(
+      Default.serverAsync(7000, "/api").bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
@@ -28,27 +31,25 @@ private[examples] object Quickstart {
     }
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
 
     // Call the remote API function statically
     val remoteApi = client.bind[ClientApi]
-    println(Await.result(
-      remoteApi.hello("world", 1),
-      Duration.Inf
+    println(run(
+      remoteApi.hello("world", 1)
     ))
 
     // Call the remote API function dynamically
-    val x = implicitly[Default.ClientContext]
-    println(x)
-    println(Await.result(
-      client.call[String]("hello").args("some" -> "world", "n" -> 1),
-      Duration.Inf
+    println(run(
+      client.call[String]("hello").args("some" -> "world", "n" -> 1)
     ))
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

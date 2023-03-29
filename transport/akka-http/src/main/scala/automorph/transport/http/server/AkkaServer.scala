@@ -1,28 +1,29 @@
 package automorph.transport.http.server
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes.{MethodNotAllowed, NotFound}
 import akka.http.scaladsl.server.Directives.{complete, extractRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ServerSettings
-import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import com.typesafe.config.{Config, ConfigFactory}
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.Await
+import scala.util.Try
 
 /**
  * Akka HTTP server transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -32,8 +33,8 @@ import scala.concurrent.Await
  *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
  * @constructor
  *   Creates and starts an Akka HTTP server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -42,79 +43,94 @@ import scala.concurrent.Await
  *   allowed HTTP request methods
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
- * @param requestTimeout
- *   HTTP request processing timeout
+ * @param readTimeout
+ *   request read timeout
+ * @param handler
+ *   RPC request handler
  * @param serverSettings
  *   HTTP server settings
+ * @param config
+ *   actor system configuration
+ * @param guardianProps
+ *   guardian actor properties
  * @tparam Effect
  *   effect type
  */
 final case class AkkaServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
+  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  serverSettings: ServerSettings = ServerSettings(""),
+  config: Config = ConfigFactory.empty(),
+  guardianProps: Props = Props.empty,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.effectSystem
+  private lazy val route = createRoute()
   private val allowedMethods = methods.map(_.name).toSet
-  private val actorSystem = start()
+  private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
+
+  override def clone(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
+    copy(handler = handler)
+
+  override def init(): Effect[Unit] =
+    effectSystem.evaluate(this.synchronized {
+      // Create HTTP endpoint route
+      implicit val actorSystem: ActorSystem[Any] =
+        ActorSystem(Behaviors.empty[Any], getClass.getSimpleName, config, guardianProps)
+
+      // Start HTTP server
+      val serverBinding = Await.result(
+        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(route),
+        Duration.Inf,
+      )
+      logger.info(
+        "Listening for connections",
+        ListMap(
+          "Protocol" -> Protocol.Http,
+          "Port" -> serverBinding.localAddress.getPort.toString
+        ),
+      )
+      server = Some((actorSystem, serverBinding))
+    })
 
   override def close(): Effect[Unit] =
-    system.evaluate {
-      actorSystem.terminate()
-      Await.result(actorSystem.whenTerminated, Duration.Inf)
-      ()
-    }
+    effectSystem.evaluate(this.synchronized {
+      server.fold(
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      ) { case (actorSystem, serverBinding) =>
+        Try(Await.result(serverBinding.unbind(), Duration.Inf)).failed.foreach { error =>
+          logger.error(s"Failed to unbind port: $port", error)
+        }
+        actorSystem.terminate()
+        Await.result(actorSystem.whenTerminated, Duration.Inf)
+        server = None
+      }
+    })
 
-  private def start(): ActorSystem[Nothing] =
-    ActorSystem[Nothing](
-      Behaviors.setup[Nothing] { actorContext =>
-        // Create handler actor
-        implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-        val handlerBehavior = AkkaHttpEndpoint.behavior(handler)
-        val handlerActor = actorContext.spawn(handlerBehavior, AkkaHttpEndpoint.getClass.getSimpleName)
-        actorContext.watch(handlerActor)
-
-        // Create HTTP route
-        val handlerRoute = AkkaHttpEndpoint(handlerActor, requestTimeout)
-        val serverRoute = route(handlerRoute)
-
-        // Start HTTP server
-        val serverBinding = Await.result(
-          Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
-          Duration.Inf
-        )
-        logger.info(
-          "Listening for connections",
-          ListMap("Protocol" -> Protocol.Http, "Port" -> serverBinding.localAddress.getPort.toString),
-        )
-        Behaviors.empty
-      },
-      getClass.getSimpleName,
-    )
-
-  private def route(handlerRoute: Route): Route =
-    // Validate HTTP request method
+  private def createRoute(): Route = {
+    val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
     extractRequest { httpRequest =>
+      // Validate HTTP request method
       if (allowedMethods.contains(httpRequest.method.value.toUpperCase)) {
         // Validate URL path
-        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) { handlerRoute }
-        else { complete(NotFound) }
-      } else { complete(MethodNotAllowed) }
+        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
+          endpointTransport.adapter
+        } else {
+          complete(NotFound)
+        }
+      } else {
+        complete(MethodNotAllowed)
+      }
     }
+  }
 }
 
 object AkkaServer {
 
   /** Request context type. */
   type Context = AkkaHttpEndpoint.Context
-
-  /** Default HTTP server settings. */
-  def defaultServerSettings: ServerSettings =
-    ServerSettings("")
 }

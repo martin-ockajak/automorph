@@ -4,7 +4,6 @@ import automorph.spi.ClientTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
-import java.net.URI
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -19,14 +18,14 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(url: URI): ClientTransport[Effect, Context] =
-    SttpClient(system, HttpClientFutureBackend(), url, HttpMethod.Get)
+  override def clientTransport(id: Int): ClientTransport[Effect, ?] =
+    SttpClient(system, HttpClientFutureBackend(), url(id), HttpMethod.Get)
 
   override def webSocket: Boolean =
     true

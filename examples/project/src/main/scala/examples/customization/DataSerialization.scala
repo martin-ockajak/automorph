@@ -11,6 +11,9 @@ private[examples] object DataSerialization {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
     // Introduce custom data types
     sealed abstract class State
 
@@ -43,8 +46,9 @@ private[examples] object DataSerialization {
     val api = new ServerApi()
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    val server = serverBuilder(_.bind(api))
+    val server = run(
+      Default.serverAsync(7000, "/api").bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
@@ -52,19 +56,20 @@ private[examples] object DataSerialization {
     }
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
 
-    // Call the remote API function via proxy
+    // Call the remote API function
     lazy val remoteApi = client.bind[ClientApi]
-    println(Await.result(
-      remoteApi.hello("world", Record("test", State.On)),
-      Duration.Inf
+    println(run(
+      remoteApi.hello("world", Record("test", State.On))
     ))
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

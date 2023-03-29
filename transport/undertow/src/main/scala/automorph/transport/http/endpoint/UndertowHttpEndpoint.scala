@@ -1,8 +1,7 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
@@ -11,16 +10,16 @@ import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
-import java.io.{ByteArrayInputStream, IOException, InputStream}
+import java.io.{IOException, InputStream}
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
 
 /**
- * Undertow HTTP endpoint message transport plugin.
+ * Undertow HTTP endpoint transport plugin.
  *
- * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -29,22 +28,30 @@ import scala.util.Try
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
- *   Creates an Undertow HTTP handler with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ *   Creates an Undertow HTTP endpoint message transport plugin with specified effect system and request handler.
+ * @param effectSystem
+ *   effect system plugin
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends HttpHandler with Logging with EndpointTransport {
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
+) extends HttpHandler with Logging with EndpointTransport[Effect, Context, HttpHandler] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def adapter: HttpHandler =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): UndertowHttpEndpoint[Effect] =
+    copy(handler = handler)
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     // Log the request
@@ -55,22 +62,26 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
       override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
         log.receivedRequest(requestProperties)
-        val requestBody = message.toInputStream
         val handlerRunnable = new Runnable {
 
           override def run(): Unit =
             // Process the request
-            genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
-              _.fold(
-                error => sendErrorResponse(error, exchange, requestId, requestProperties),
-                result => {
-                  // Send the response
-                  val responseBody = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
-                  val statusCode = result.exception.map(mapException).getOrElse(StatusCodes.OK)
-                  sendResponse(responseBody, statusCode, result.context, exchange, requestId)
-                },
-              )
-            ).runAsync
+            Try {
+              val requestBody = message.toInputStream
+              handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+                _.fold(
+                  error => sendErrorResponse(error, exchange, requestId, requestProperties),
+                  result => {
+                    // Send the response
+                    val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+                    val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
+                    sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
+                  },
+                )
+              ).runAsync
+            }.failed.foreach { error =>
+              sendErrorResponse(error, exchange, requestId, requestProperties)
+            }
         }
         if (exchange.isInIoThread) {
           exchange.dispatch(handlerRunnable)
@@ -113,12 +124,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
     // Send the response
     Try {
-      if (!exchange.isResponseChannelAvailable) { throw new IOException("Response channel not available") }
+      if (!exchange.isResponseChannelAvailable) {
+        throw new IOException("Response channel not available")
+      }
       setResponseContext(exchange, responseContext)
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.rpcProtocol.messageCodec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties)).get
+    }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 
   private def setResponseContext(exchange: HttpServerExchange, responseContext: Option[Context]): Unit = {
@@ -128,18 +141,12 @@ final case class UndertowHttpEndpoint[Effect[_]](
     }
   }
 
-  private def clientAddress(exchange: HttpServerExchange): String = {
-    val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
-    val address = exchange.getSourceAddress.toString
-    Network.address(forwardedFor, address)
-  }
-
   private def getRequestContext(exchange: HttpServerExchange): Context = {
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
     HttpContext(
-      transport = Some(Left(exchange).withRight[WebSocketHttpExchange]),
+      message = Some(Left(exchange).withRight[WebSocketHttpExchange]),
       method = Some(HttpMethod.valueOf(exchange.getRequestMethod.toString)),
       headers = headers,
     ).url(exchange.getRequestURI)
@@ -154,6 +161,12 @@ final case class UndertowHttpEndpoint[Effect[_]](
       "URL" -> url,
       "Method" -> exchange.getRequestMethod.toString,
     )
+  }
+
+  private def clientAddress(exchange: HttpServerExchange): String = {
+    val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
+    val address = exchange.getSourceAddress.toString
+    Network.address(forwardedFor, address)
   }
 }
 

@@ -52,15 +52,18 @@ private[automorph] object Extensions {
 
   implicit class ByteArrayOps(data: Array[Byte]) {
 
+    /** Converts this byte array to input stream. */
     def toInputStream: InputStream =
       ArrayInputStream(data)
 
+    /** Converts this byte array to string. */
     def asString: String =
       new String(data, charset)
   }
 
   implicit class ByteBufferOps(data: ByteBuffer) {
 
+    /** Converts this byte buffer array to byte array. */
     def toArray: Array[Byte] =
       if (data.hasArray) { data.array }
       else {
@@ -69,6 +72,7 @@ private[automorph] object Extensions {
         array
       }
 
+    /** Converts this byte buffer array to input stream. */
     def toInputStream: InputStream =
       if (data.hasArray) { data.array.toInputStream }
       else {
@@ -83,18 +87,22 @@ private[automorph] object Extensions {
     /** Input stream reading buffer size. */
     private val bufferSize = 4096
 
+    /** Converts this input stream array to byte array. */
     def asArray(length: Int): Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
         case _ => toByteArray(Some(length))
       }
 
+    /** Converts this input stream array to byte buffer. */
     def toByteBuffer: ByteBuffer =
       ByteBuffer.wrap(data.toArray)
 
+    /** Converts this input stream array to string. */
     def asString: String =
       data.toArray.asString
 
+    /** Converts this input stream array to byte array. */
     def toArray: Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => arrayInputStream.data
@@ -118,9 +126,11 @@ private[automorph] object Extensions {
 
   implicit class StringOps(data: String) {
 
+    /** Converts this input stream array to byte array. */
     def asArray: Array[Byte] =
       data.getBytes(charset)
 
+    /** Converts this input stream array to input stream. */
     def toInputStream: InputStream =
       ArrayInputStream(data.getBytes(charset))
   }
@@ -128,26 +138,26 @@ private[automorph] object Extensions {
   implicit final class TryOps[T](private val tryValue: Try[T]) {
 
     /**
-     * Creates a new 'Try' by applying ''onFailure'' on `Failure` or returns this on `Success`.
+     * Applies ''onFailure'' on `Failure` or returns this on `Success`.
      *
      * @param onFailure
      *   function to apply if this is a `Failure`
      * @return
      *   a transformed `Try`
      */
-    def onFailure(onFailure: Throwable => Unit): Try[T] =
+    def onError(onFailure: Throwable => Unit): Try[T] =
       tryValue.recoverWith { case error =>
         onFailure(error)
         Failure(error)
       }
 
     /**
-     * Applies ''onException'' on `Failure` or ''onSuccess'' on `Success`.
+     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
      *
      * @param onFailure
-     *   function to apply if this is a `Success`
-     * @param onSuccess
      *   function to apply if this is a `Failure`
+     * @param onSuccess
+     *   function to apply if this is a `Success`
      * @tparam U
      *   result type
      * @return
@@ -157,6 +167,20 @@ private[automorph] object Extensions {
       tryValue match {
         case Failure(error) => onFailure(error)
         case Success(value) => onSuccess(value)
+      }
+
+    /**
+     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
+     *
+     * @param onFailure
+     *   function to apply if this is a `Failure`
+     * @return
+     *   applied function result or success value
+     */
+    def foldError(onFailure: Throwable => T): T =
+      tryValue match {
+        case Failure(error) => onFailure(error)
+        case Success(value) => value
       }
   }
 

@@ -35,16 +35,6 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit =
     log(message, properties, underlying.isErrorEnabled, message => underlying.error(message))
 
-  private def log[T](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    if (enabled) {
-      val iterableProperties = unpackProperties(properties)
-      addDiagnosticContext(iterableProperties)
-      logMessage(message)
-      removeDiagnosticContext(iterableProperties)
-    }
-
   def error(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
     error(message, cause, properties)
 
@@ -52,6 +42,9 @@ final private[automorph] case class Logger private (private val underlying: slf4
     evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
   ): Unit =
     log(message, cause, properties, underlying.isErrorEnabled, (message, cause) => underlying.error(message, cause))
+
+  def isErrorEnabled: Boolean =
+    underlying.isErrorEnabled
 
   def warn(message: => String): Unit =
     underlying.warn(message)
@@ -75,6 +68,9 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit =
     log(message, cause, properties, underlying.isWarnEnabled, (message, cause) => underlying.warn(message, cause))
 
+  def isWarnEnabled: Boolean =
+    underlying.isWarnEnabled
+
   def info(message: => String): Unit =
     underlying.info(message)
 
@@ -96,6 +92,9 @@ final private[automorph] case class Logger private (private val underlying: slf4
     evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
   ): Unit =
     log(message, cause, properties, underlying.isInfoEnabled, (message, cause) => underlying.info(message, cause))
+
+  def isInfoEnabled: Boolean =
+    underlying.isInfoEnabled
 
   def debug(message: => String): Unit =
     underlying.debug(message)
@@ -119,6 +118,9 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit =
     log(message, cause, properties, underlying.isDebugEnabled, (message, cause) => underlying.debug(message, cause))
 
+  def isDebugEnabled: Boolean =
+    underlying.isDebugEnabled
+
   def trace(message: => String): Unit =
     underlying.trace(message)
 
@@ -140,6 +142,19 @@ final private[automorph] case class Logger private (private val underlying: slf4
     evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
   ): Unit =
     log(message, cause, properties, underlying.isTraceEnabled, (message, cause) => underlying.trace(message, cause))
+
+  def isTraceEnabled: Boolean =
+    underlying.isTraceEnabled
+
+  private def log[T](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    if (enabled) {
+      val iterableProperties = unpackProperties(properties)
+      addDiagnosticContext(iterableProperties)
+      logMessage(message)
+      removeDiagnosticContext(iterableProperties)
+    }
 
   private def log[T](
     message: => String,

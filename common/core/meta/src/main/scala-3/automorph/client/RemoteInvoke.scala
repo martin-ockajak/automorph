@@ -15,7 +15,7 @@ import scala.quoted.{Expr, Quotes, Type}
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  * @tparam Result
  *   result type
  */

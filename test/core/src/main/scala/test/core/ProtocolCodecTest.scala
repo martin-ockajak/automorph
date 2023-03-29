@@ -5,9 +5,9 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
-import automorph.spi.ClientTransport
-import automorph.transport.local.client.HandlerTransport
-import automorph.{Client, Handler, Types}
+import automorph.spi.{ClientTransport, EndpointTransport, ServerTransport}
+import automorph.transport.local.endpoint.LocalEndpoint
+import automorph.{Client, Endpoint, Server}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
+import test.base.BaseTest
 import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
@@ -22,46 +23,70 @@ trait ProtocolCodecTest extends CoreTest {
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
-    Seq(
-      circeJsonFixture(),
-      jacksonJsonFixture(),
-      uPickleJsonFixture(),
-      uPickleMessagePackFixture(),
-      argonautJsonFixture(),
-    )
+    if (BaseTest.testBasic) {
+      Seq(circeJsonFixture(0))
+    } else {
+      Seq(
+        circeJsonFixture(0),
+        jacksonJsonFixture(1),
+        uPickleJsonFixture(2),
+        uPickleMessagePackFixture(3),
+        argonautJsonFixture(4),
+      )
+    }
   }
+
+  def clientTransport(id: Int): ClientTransport[Effect, ?]
+
+  def serverTransport(id: Int): ServerTransport[Effect, Context]
+
+  def endpointTransport: EndpointTransport[Effect, Context, ?] =
+    LocalEndpoint(system).asInstanceOf[EndpointTransport[Effect, Context, ?]]
+
+  def typedClientTransport(id: Int): ClientTransport[Effect, Context] =
+    clientTransport(id).asInstanceOf[ClientTransport[Effect, Context]]
 
   override def fixtures: Seq[TestFixture] =
     testFixtures
 
-  def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientTransport[Effect, Context]] = {
-    Seq(handler)
-    None
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    fixtures.map(_.genericServer.init()).map(run)
+    fixtures.map(_.genericServer.close()).map(run)
+    fixtures.map(_.genericServer.init()).map(run)
+    fixtures.map(_.genericClient.init()).map(run)
+    fixtures.map(_.genericClient.close()).map(run)
+    fixtures.map(_.genericClient.init()).map(run)
+    ()
   }
 
-  private def circeJsonFixture()(implicit context: Context): TestFixture = {
+  override def afterAll(): Unit = {
+    fixtures.map(_.genericClient.close()).map(run)
+    fixtures.map(_.genericServer.close()).map(run)
+    super.afterAll()
+  }
+
+  private def circeJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
     implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
     Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
-  private def jacksonJsonFixture()(implicit context: Context): TestFixture = {
+  private def jacksonJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     val enumModule = new SimpleModule().addSerializer(
       classOf[Enum.Enum],
       new StdSerializer[Enum.Enum](classOf[Enum.Enum]) {
@@ -79,21 +104,21 @@ trait ProtocolCodecTest extends CoreTest {
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
-  private def uPickleJsonFixture()(implicit context: Context): TestFixture = {
+  private def uPickleJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     class Custom extends UpickleJsonCustom {
       implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
         .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
@@ -102,21 +127,21 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
-  private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
+  private def uPickleMessagePackFixture(id: Int)(implicit context: Context): TestFixture = {
     class Custom extends UpickleMessagePackCustom {
       implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
         .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
@@ -125,21 +150,21 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
-  private def argonautJsonFixture()(implicit context: Context): TestFixture = {
+  private def argonautJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumCodecJson: CodecJson[Enum.Enum] =
       CodecJson((v: Enum.Enum) => jNumber(Enum.toOrdinal(v)), cursor => cursor.focus.as[Int].map(Enum.fromOrdinal))
     implicit val structureCodecJson: CodecJson[Structure] = Argonaut
@@ -180,17 +205,23 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
+
+  private def mapName(name: String): Seq[String] =
+    name match {
+      case "method" => Seq("method", "function")
+      case value => Seq(value)
+    }
 }

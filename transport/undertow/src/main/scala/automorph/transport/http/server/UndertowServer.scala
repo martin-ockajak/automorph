@@ -1,8 +1,7 @@
 package automorph.transport.http.server
 
-import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
@@ -18,10 +17,9 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * Undertow HTTP & WebSocket server message transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
- *
- * Processes only HTTP requests starting with specified URL path.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
+ *   - Processes only HTTP requests starting with specified URL path.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -32,9 +30,9 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
- *   Creates and starts an Undertow HTTP & WebSocket server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ *   Creates an Undertow HTTP & WebSocket server with specified effect system RPC request handler.
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -47,38 +45,68 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *   maps an exception to a corresponding HTTP status code
  * @param builder
  *   Undertow builder
+ * @param handler
+ *   RPC request andler
  * @tparam Effect
  *   effect type
  */
 final case class UndertowServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   builder: Undertow.Builder = defaultBuilder,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private lazy val undertow = createServer()
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.effectSystem
+  private var active = false
+  private lazy val server = createServer()
   private val allowedMethods = methods.map(_.name).toSet
-  start()
+
+  override def clone(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
+    copy(handler = handler)
+
+  override def init(): Effect[Unit] =
+    effectSystem.evaluate(this.synchronized {
+      server.start()
+      active = true
+      server.getListenerInfo.asScala.foreach { listener =>
+        logger.info(
+          "Listening for connections",
+          ListMap("Protocol" -> listener.getProtcol) ++
+            (listener.getAddress match {
+              case address: InetSocketAddress =>
+                ListMap("Host" -> address.getHostString, "Port" -> address.getPort.toString)
+              case _ => ListMap()
+            }),
+        )
+      }
+    })
 
   override def close(): Effect[Unit] =
-    system.evaluate(undertow.stop())
+    effectSystem.evaluate(this.synchronized {
+      if (active) {
+        server.stop()
+        active = false
+      } else {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      }
+    })
 
   private def createServer(): Undertow = {
     // Validate HTTP request method
-    val httpHandler = methodHandler(UndertowHttpEndpoint(handler, mapException))
+    val endpointTransport = UndertowHttpEndpoint(effectSystem, mapException, handler)
+    val httpHandler = methodHandler(endpointTransport.adapter)
 
     // Validate URL path
     val rootHandler = Handlers.predicate(
-      // HTTP
       Predicates.prefix(pathPrefix),
-      // WebSocket
-      Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
+      // WebSocket support
+      Option.when(webSocket)(
+        UndertowWebSocketEndpoint(effectSystem, handler).handshakeHandler(httpHandler)
+      ).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404,
     )
     builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
@@ -90,21 +118,6 @@ final case class UndertowServer[Effect[_]](
       handler,
       ResponseCodeHandler.HANDLE_405,
     )
-
-  private def start(): Unit = {
-    undertow.start()
-    undertow.getListenerInfo.asScala.foreach { listener =>
-      logger.info(
-        "Listening for connections",
-        ListMap("Protocol" -> listener.getProtcol) ++
-          (listener.getAddress match {
-            case address: InetSocketAddress =>
-              ListMap("Host" -> address.getHostString, "Port" -> address.getPort.toString)
-            case _ => ListMap()
-          }),
-      )
-    }
-  }
 }
 
 object UndertowServer {

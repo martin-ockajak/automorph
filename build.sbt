@@ -118,23 +118,25 @@ lazy val webrpc = source(project, "protocol/webrpc", webrpcMeta, openapi, util)
 // Effect system
 lazy val standard = source(project, "system/standard", core, http, testCore % Test, testHttp % Test)
 lazy val zio = source(project, "system/zio", spi, testStandard % Test)
-  .settings(libraryDependencies += "dev.zio" %% "zio" % "2.0.9")
+  .settings(libraryDependencies += "dev.zio" %% "zio" % "2.0.10")
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
   .settings(libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1")
 lazy val catsEffect = source(project, "system/cats-effect", spi, testStandard % Test)
-  .settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.6")
+  .settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8")
 lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandard % Test)
   .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13")
 
 // Message codec
-val circeVersion = "0.14.4"
+val circeVersion = "0.14.5"
 lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies ++= Seq("io.circe" %% "circe-parser" % circeVersion, "io.circe" %% "circe-generic" % circeVersion)
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-parser" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion
+  )
 )
 val jacksonVersion = "2.14.2"
 lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion)
-    .cross(CrossVersion.for3Use2_13)
+  libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
 lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin % Test)
   .settings(libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0")
@@ -144,7 +146,7 @@ lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugi
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.8.11"
+val sttpVersion = "3.8.13"
 val sttpHttpClientVersion = "3.5.2"
 lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
@@ -156,12 +158,12 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
 val embeddedRabbitMqVersion = "1.5.0"
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
   .settings(libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.16.0",
+    "com.rabbitmq" % "amqp-client" % "5.17.0",
     "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion % Test
   ))
 
 // Server
-val tapirVersion = "1.2.8"
+val tapirVersion = "1.2.11"
 lazy val tapir = source(project, "transport/tapir", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
@@ -169,27 +171,35 @@ lazy val tapir = source(project, "transport/tapir", core, http, testStandard % T
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final"
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.4.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
-  .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.3.8")
-val jettyVersion = "11.0.13"
+  .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.4.0")
+val jettyVersion = "11.0.14"
 lazy val jetty = source(project, "transport/jetty", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "websocket-jetty-server" % jettyVersion
   )
 )
+val akkaVersion = "2.8.0"
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
-    ("com.typesafe.akka" %% "akka-http" % "10.4.0").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-actor-typed" % "2.7.0").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-stream" % "2.7.0").cross(CrossVersion.for3Use2_13)
+    "com.typesafe.akka" %% "akka-http" % "10.5.0",
+    "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
-  libraryDependencies += ("com.twitter" % "finagle-http" % "22.12.0")
-    .exclude("org.scala-lang.modules", "scala-collection-compat_2.13").cross(CrossVersion.for3Use2_13)
+  libraryDependencies ++= Seq(
+    ("com.twitter" % "finagle-http" % "22.12.0")
+      .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
+      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13")
+      .cross(CrossVersion.for3Use2_13),
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  )
 )
 
 // Miscellaneous
@@ -209,8 +219,10 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
 
 
 // Test
-val scribeVersion = "3.11.0"
-ThisBuild / Test / testOptions += Tests.Argument("-oD")
+ThisBuild / Test / fork := true
+ThisBuild / Test / testForkedParallel := true
+ThisBuild / Test / testOptions += Tests.Argument("-oDF")
+val scribeVersion = "3.11.1"
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.15",
@@ -234,8 +246,20 @@ ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 val commonScalacOptions =
-  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "11", "-encoding", "utf8")
-val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
+  Seq(
+    "-language:higherKinds",
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-release", "11",
+    "-encoding",
+    "utf8"
+  )
+val docScalacOptions = commonScalacOptions ++ Seq(
+  "-language:adhocExtensions",
+  "-pagewidth",
+  "120"
+)
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => docScalacOptions ++ Seq(
@@ -291,7 +315,10 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
-  Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+  Compile / doc / scalacOptions := docScalacOptions ++ Seq(
+    "-skip-by-id:automorph.handler",
+    s"-source-links:src=github://$repositoryPath/master"
+  ),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=

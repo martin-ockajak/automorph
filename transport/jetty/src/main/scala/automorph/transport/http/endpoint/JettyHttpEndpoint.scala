@@ -1,8 +1,7 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
@@ -18,8 +17,8 @@ import scala.util.Try
 /**
  * Jetty HTTP endpoint message transport plugin.
  *
- * The servlet interprets HTTP request body as an RPC request and processes it with the specified RPC handler. The
- * response returned by the RPC handler is used as HTTP response body.
+ * Interprets HTTP request body as an RPC request and processes it with the specified RPC handler.
+ *   - The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -28,22 +27,30 @@ import scala.util.Try
  * @see
  *   [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
  * @constructor
- *   Creates a Jetty HTTP servlet with the specified RPC request handler.
- * @param handler
- *   RPC request handler
+ *   Creates an Jetty HTTP endpoint message transport plugin with specified effect system and request handler.
+ * @param effectSystem
+ *   effect system plugin
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class JettyHttpEndpoint[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends HttpServlet with Logging with EndpointTransport {
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
+) extends HttpServlet with Logging with EndpointTransport[Effect, Context, HttpServlet] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def adapter: HttpServlet =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): JettyHttpEndpoint[Effect] =
+    copy(handler = handler)
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Log the request
@@ -55,17 +62,19 @@ final case class JettyHttpEndpoint[Effect[_]](
       val requestBody = request.getInputStream
 
       // Process the request
-      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+      Try(handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
         _.fold(
           error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-            val status = result.exception.map(mapException).getOrElse(HttpStatus.OK_200)
-            sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val status = result.flatMap(_.exception).map(mapException).getOrElse(HttpStatus.OK_200)
+            sendResponse(responseBody, status, result.flatMap(_.context), response, asyncContext, request, requestId)
           },
         )
-      ).runAsync
+      ).runAsync).failed.foreach { error =>
+        sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties)
+      }
     }
   }
 
@@ -104,30 +113,24 @@ final case class JettyHttpEndpoint[Effect[_]](
     // Send the response
     Try {
       setResponseContext(response, responseContext)
-      response.setContentType(genericHandler.rpcProtocol.messageCodec.mediaType)
+      response.setContentType(handler.mediaType)
       response.setStatus(responseStatus)
       val outputStream = response.getOutputStream
       responseBody.transferTo(outputStream)
       outputStream.flush()
       asyncContext.complete()
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties)).get
+    }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 
   private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit =
     responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.setHeader(name, value) }
 
-  private def clientAddress(request: HttpServletRequest): String = {
-    val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
-    val address = request.getRemoteAddr
-    Network.address(forwardedFor, address)
-  }
-
   private def getRequestContext(request: HttpServletRequest): Context = {
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
-    HttpContext(transport = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
+    HttpContext(message = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
       .url(request.getRequestURI)
   }
 
@@ -140,6 +143,12 @@ final case class JettyHttpEndpoint[Effect[_]](
       "URL" -> url,
       "Method" -> request.getMethod,
     )
+  }
+
+  private def clientAddress(request: HttpServletRequest): String = {
+    val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
+    val address = request.getRemoteAddr
+    Network.address(forwardedFor, address)
   }
 }
 

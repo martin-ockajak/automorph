@@ -9,6 +9,11 @@ private[examples] object EffectSystem {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate ZIO tasks
+    def run[T](effect: Task[T]): T = Unsafe.unsafe { implicit unsafe =>
+      ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
+    }
+
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Task[String] =
@@ -20,8 +25,7 @@ private[examples] object EffectSystem {
     val effectSystem = ZioSystem.default
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val serverBuilder = Default.serverBuilder(effectSystem, 7000, "/api")
-    val server = serverBuilder(_.bind(api))
+    val server = run(Default.server(effectSystem, 7000, "/api").bind(api).init())
 
     // Define client view of the remote API
     trait ClientApi {
@@ -29,13 +33,9 @@ private[examples] object EffectSystem {
     }
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.client(effectSystem, new URI("http://localhost:7000/api"))
-
-    // Define a helper function to run ZIO tasks
-    def run[T](effect: Task[T]): T =
-      Unsafe.unsafe { implicit unsafe =>
-        ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
-      }
+    val client = run(
+      Default.client(effectSystem, new URI("http://localhost:7000/api")).init()
+    )
 
     // Call the remote APi function via proxy
     val remoteApi = client.bind[ClientApi]

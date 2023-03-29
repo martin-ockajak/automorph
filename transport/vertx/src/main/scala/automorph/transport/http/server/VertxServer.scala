@@ -1,10 +1,9 @@
 package automorph.transport.http.server
 
-import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint
-import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
+import automorph.transport.http.server.VertxServer.{Context, defaultVertxOptions}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
@@ -14,10 +13,9 @@ import scala.collection.immutable.ListMap
 /**
  * Vert.x HTTP & WebSocket server message transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
- *
- * Processes only HTTP requests starting with specified URL path.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
+ *   - Processes only HTTP requests starting with specified URL path.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -29,8 +27,8 @@ import scala.collection.immutable.ListMap
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
  *   Creates an Vert.x HTTP & WebSocket server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -45,18 +43,21 @@ import scala.collection.immutable.ListMap
  *   VertX options
  * @param httpServerOptions
  *   HTTP server options
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class VertxServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
-  httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
+  httpServerOptions: HttpServerOptions = new HttpServerOptions,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val httpServer = createServer()
@@ -65,27 +66,38 @@ final case class VertxServer[Effect[_]](
   private val statusMethodNotAllowed = 405
   private val messageNotFound = "Not Found"
   private val messageMethodNotAllowed = "Method Not Allowed"
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
-  start()
+
+  override def clone(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
+    copy(handler = handler)
+
+  override def init(): Effect[Unit] =
+    effectSystem.evaluate(this.synchronized {
+      val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
+      (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
+        logger.info("Listening for connections", ListMap(
+          "Protocol" -> protocol,
+          "Port" -> server.actualPort.toString
+        ))
+      }
+    })
 
   override def close(): Effect[Unit] =
-    system.evaluate {
-      val closedServer = httpServer.close()
-      Option(closedServer.result).getOrElse(throw closedServer.cause)
+    effectSystem.evaluate(this.synchronized {
+      httpServer.close().toCompletionStage.toCompletableFuture.get
       ()
-    }
+    })
 
   private def createServer(): HttpServer = {
     // HTTP
-    val httpHandler = VertxHttpEndpoint(handler, mapException)
+    val endpoint = VertxHttpEndpoint(effectSystem, mapException, handler)
     val server = Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions.setPort(port)).requestHandler { request =>
       // Validate URL path
       if (request.path.startsWith(pathPrefix)) {
         // Validate HTTP request method
-        if (allowedMethods.contains(request.method.name.toUpperCase)) { httpHandler.handle(request) }
-        else {
+        if (allowedMethods.contains(request.method.name.toUpperCase)) {
+          endpoint.adapter.handle(request)
+        } else {
           request.response.setStatusCode(statusMethodNotAllowed).end(messageMethodNotAllowed)
           ()
         }
@@ -97,23 +109,17 @@ final case class VertxServer[Effect[_]](
 
     // WebSocket
     Option.when(webSocket) {
-      val webSocketHandler = VertxWebSocketEndpoint(handler)
+      val webSocketHandler = VertxWebSocketEndpoint(effectSystem, handler)
       server.webSocketHandler { request =>
         // Validate URL path
-        if (request.path.startsWith(pathPrefix)) { webSocketHandler.handle(request) }
-        else {
+        if (request.path.startsWith(pathPrefix)) {
+          webSocketHandler.handle(request)
+        } else {
           request.close((statusWebSocketApplication + statusNotFound).toShort, messageNotFound)
           ()
         }
       }
     }.getOrElse(server)
-  }
-
-  private def start(): Unit = {
-    val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
-    (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> server.actualPort.toString))
-    }
   }
 }
 
@@ -124,14 +130,10 @@ object VertxServer {
 
   /**
    * Default Vert.x server options providing the following settings.
-   *   - Event loop threads: 2 * number of CPU cores
-   *   - Worker threads: number of CPU cores
+   * - Event loop threads: 2 * number of CPU cores
+   * - Worker threads: number of CPU cores
    */
   def defaultVertxOptions: VertxOptions =
     new VertxOptions().setEventLoopPoolSize(Runtime.getRuntime.availableProcessors * 2)
       .setWorkerPoolSize(Runtime.getRuntime.availableProcessors)
-
-  /** Default HTTP server options. */
-  def defaultHttpServerOptions: HttpServerOptions =
-    new HttpServerOptions()
 }

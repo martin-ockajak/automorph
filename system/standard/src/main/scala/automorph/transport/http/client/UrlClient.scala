@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
-import automorph.transport.http.client.UrlClient.{Context, Session}
+import automorph.transport.http.client.UrlClient.{Context, Message}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
 import java.io.InputStream
@@ -15,7 +15,7 @@ import scala.util.Using
 /**
  * Standard JRE HttpURLConnection HTTP client message transport plugin.
  *
- * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
+ * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]
@@ -26,21 +26,24 @@ import scala.util.Using
  * @param effectSystem
  *   effect system plugin
  * @param url
- *   remote API HTTP or WebSocket URL
+ *   remote API HTTP URL
  * @param method
  *   HTTP request method (default: POST)
  * @tparam Effect
  *   effect type
  */
-final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: URI, method: HttpMethod = HttpMethod.Post)
-  extends ClientTransport[Effect, Context] with Logging {
+final case class UrlClient[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  url: URI,
+  method: HttpMethod = HttpMethod.Post,
+) extends ClientTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(
@@ -52,8 +55,10 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
       effectSystem.evaluate {
-        lazy val responseProperties =
-          ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm)
+        lazy val responseProperties = ListMap(
+          LogProperties.requestId -> requestId,
+          "URL" -> connection.getURL.toExternalForm
+        )
 
         // Process the response
         log.receivingResponse(responseProperties)
@@ -64,13 +69,16 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
       }
     }
 
-  override def defaultContext: Context =
-    Session.defaultContext.url(url).method(method)
+  override def context: Context =
+    Message.defaultContext.url(url).method(method)
+
+  override def init(): Effect[Unit] =
+    effectSystem.successful(())
 
   override def close(): Effect[Unit] =
     effectSystem.successful(())
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -91,8 +99,11 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
       val httpMethod = setConnectionProperties(connection, requestBody, mediaType, requestContext)
 
       // Log the request
-      lazy val requestProperties =
-        ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm, "Method" -> httpMethod)
+      lazy val requestProperties = ListMap(
+        LogProperties.requestId -> requestId,
+        "URL" -> connection.getURL.toExternalForm,
+        "Method" -> httpMethod
+      )
       log.sendingRequest(requestProperties)
 
       // Send the request
@@ -102,13 +113,13 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
         stream.write(requestBody)
         stream.flush()
       }
-      write.onFailure(error => log.failedSendRequest(error, requestProperties)).get
+      write.onError(error => log.failedSendRequest(error, requestProperties)).get
       log.sentRequest(requestProperties)
       connection
     }
 
   private def createConnection(requestContext: Context): HttpURLConnection = {
-    val requestUrl = requestContext.overrideUrl(requestContext.transport.map(_.connection.getURL.toURI).getOrElse(url))
+    val requestUrl = requestContext.overrideUrl(requestContext.message.map(_.connection.getURL.toURI).getOrElse(url))
     requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
@@ -119,9 +130,9 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
     requestContext: Context,
   ): String = {
     // Method
-    val transportConnection = requestContext.transport.map(_.connection).getOrElse(connection)
+    val transportConnection = requestContext.message.map(_.connection).getOrElse(connection)
     val requestMethod =
-      requestContext.method.map(_.name).orElse(requestContext.transport.map(_.connection.getRequestMethod))
+      requestContext.method.map(_.name).orElse(requestContext.message.map(_.connection.getRequestMethod))
         .getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
@@ -154,21 +165,22 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
   }
 
   private def getResponseContext(connection: HttpURLConnection): Context =
-    defaultContext.statusCode(connection.getResponseCode).headers(connection.getHeaderFields.asScala.toSeq.flatMap {
+    context.statusCode(connection.getResponseCode).headers(connection.getHeaderFields.asScala.toSeq.flatMap {
       case (name, values) => values.asScala.map(name -> _)
     }*)
 }
 
 object UrlClient {
 
-  /** Request context type. */
-  type Context = HttpContext[Session]
+  /** Message context type. */
+  type Context = HttpContext[Message]
 
-  final case class Session(connection: HttpURLConnection)
+  /** Message properties. */
+  final case class Message(connection: HttpURLConnection)
 
-  object Session {
+  object Message {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Message] = HttpContext()
   }
 }

@@ -21,7 +21,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Codec
  *   message codec plugin type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]] {
   this: WebRpcProtocol[Node, Codec, Context] =>
@@ -224,7 +224,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * Creates a copy of this protocol with specified message contex type.
    *
    * @tparam NewContext
-   *   message context type
+   *   RPC message context type
    * @return
    *   JSON-RPC protocol
    */

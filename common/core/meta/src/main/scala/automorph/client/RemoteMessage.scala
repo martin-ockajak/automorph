@@ -18,7 +18,7 @@ import automorph.spi.MessageCodec
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final private[automorph] case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Context] private (
   functionName: String,
@@ -48,7 +48,7 @@ private[automorph] object RemoteMessage {
    * @tparam Effect
    *   effect type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    */
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: String,

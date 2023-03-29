@@ -1,6 +1,6 @@
 package examples.transport
 
-import automorph.Default
+import automorph.{Default, Endpoint}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import io.undertow.{Handlers, Undertow}
 import java.net.URI
@@ -12,6 +12,9 @@ private[examples] object EndpointTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Future[String] =
@@ -19,14 +22,16 @@ private[examples] object EndpointTransport {
     }
     val api = new ServerApi()
 
-    // Create custom Undertow JSON-RPC endpoint
-    val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-    val endpoint = UndertowHttpEndpoint(handler.bind(api))
+    // Create Undertow JSON-RPC endpoint transport
+    val endpointTransport = UndertowHttpEndpoint(Default.effectSystemAsync)
 
-    // Start Undertow JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Setup JSON-RPC endpoint
+    val endpoint = Endpoint.transport(endpointTransport).rpcProtocol(Default.rpcProtocol).bind(api)
+
+    // Start Undertow HTTP server listening on port 7000 for requests to '/api'
     val server = Undertow.builder()
       .addHttpListener(7000, "0.0.0.0")
-      .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
+      .setHandler(Handlers.path().addPrefixPath("/api", endpoint.adapter))
       .build()
     server.start()
 
@@ -34,18 +39,20 @@ private[examples] object EndpointTransport {
     trait ClientApi {
       def hello(some: String, n: Int): Future[String]
     }
+
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
 
     // Call the remote API function via proxy
     val remoteApi = client.bind[ClientApi]
-    println(Await.result(
-      remoteApi.hello("world", 1),
-      Duration.Inf
+    println(run(
+      remoteApi.hello("world", 1)
     ))
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
     server.stop()

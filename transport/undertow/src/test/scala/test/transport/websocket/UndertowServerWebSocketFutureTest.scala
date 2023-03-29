@@ -1,9 +1,9 @@
 package test.transport.websocket
 
-import automorph.Types
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.server.UndertowServer
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,17 +17,17 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] =
-    UndertowServer(handler, port)
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    UndertowServer[Effect](system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    UndertowWebSocketEndpoint(system)
 
   override def webSocket: Boolean =
     true

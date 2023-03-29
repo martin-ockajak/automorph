@@ -8,12 +8,33 @@ package automorph.spi
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 trait ServerTransport[Effect[_], Context] {
 
+  /** Effect system plugin. */
+  def effectSystem: EffectSystem[Effect]
+
   /**
-   * Closes this server transport freeing the underlying resources.
+   * Create a copy of this server transport with specified RPC request handler.
+   *
+   * @param handler
+   *   RPC request handler
+   * @return
+   *   server transport
+   */
+  def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
+
+  /**
+   * Starts this server to process incoming requests.
+   *
+   * @return
+   *   active RPC server
+   */
+  def init(): Effect[Unit]
+
+  /**
+   * Stops this server transport freeing the underlying resources.
    *
    * @return
    *   nothing

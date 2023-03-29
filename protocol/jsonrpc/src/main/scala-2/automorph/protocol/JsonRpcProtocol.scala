@@ -44,7 +44,7 @@ import scala.reflect.macros.blackbox
  * @tparam Codec
  *   message codec plugin type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   messageCodec: Codec,
@@ -138,7 +138,7 @@ object JsonRpcProtocol extends ErrorMapping {
    * @tparam Codec
    *   message codec plugin type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   JSON-RPC protocol plugin
    */
@@ -168,7 +168,7 @@ object JsonRpcProtocol extends ErrorMapping {
    * @tparam Codec
    *   message codec plugin type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   JSON-RPC protocol plugin
    */

@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
-import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
+import automorph.transport.http.client.JettyClient.{Context, Message, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
 import java.io.InputStream
@@ -59,9 +59,7 @@ final case class JettyClient[Effect[_]](
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
-  if (!httpClient.isStarted) { httpClient.start() }
-  webSocketClient.start()
+  implicit private val system: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,
@@ -90,7 +88,7 @@ final case class JettyClient[Effect[_]](
       }
     }
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -101,14 +99,22 @@ final case class JettyClient[Effect[_]](
       send(request, requestUrl, requestId, protocol).map(_ => ())
     }
 
-  override def defaultContext: Context =
-    Session.defaultContext.url(url).method(method)
+  override def context: Context =
+    Message.defaultContext.url(url).method(method)
+
+  override def init(): Effect[Unit] =
+    effectSystem.evaluate(this.synchronized {
+      if (!httpClient.isStarted) {
+        httpClient.start()
+      }
+      webSocketClient.start()
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate {
+    effectSystem.evaluate(this.synchronized {
       webSocketClient.stop()
       httpClient.stop()
-    }
+    })
 
   private def send(
     request: Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)],
@@ -137,7 +143,8 @@ final case class JettyClient[Effect[_]](
                   httpRequest.send(responseListener)
                   completableResponse.effect
               }
-            case _ => effectSystem.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
+            case _ =>
+              effectSystem.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
           },
         // Send WebSocket request
         {
@@ -207,7 +214,7 @@ final case class JettyClient[Effect[_]](
     requestContext: Context,
   ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)], URI)] = {
     val requestUrl = requestContext
-      .overrideUrl(requestContext.transport.map(transport => transport.request.getURI).getOrElse(url))
+      .overrideUrl(requestContext.message.map(transport => transport.request.getURI).getOrElse(url))
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
@@ -237,9 +244,9 @@ final case class JettyClient[Effect[_]](
   ): Request = {
     // URL, method & body
     val requestMethod = http.HttpMethod.valueOf(httpContext.method.orElse {
-      httpContext.transport.map(_.request.getMethod).map(HttpMethod.valueOf)
+      httpContext.message.map(_.request.getMethod).map(HttpMethod.valueOf)
     }.getOrElse(method).name)
-    val transportRequest = httpContext.transport.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
+    val transportRequest = httpContext.message.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
     val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody.toArray))
 
     // Headers
@@ -303,7 +310,7 @@ final case class JettyClient[Effect[_]](
 
   private def createWebSocketRequest(httpContext: Context, requestUrl: URI): ClientUpgradeRequest = {
     // Headers
-    val transportRequest = httpContext.transport.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
+    val transportRequest = httpContext.message.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
     val headers = transportRequest.getHeaders.asScala.map(field => field.getName -> field.getValue) ++
       httpContext.headers
     val request = new ClientUpgradeRequest
@@ -319,24 +326,25 @@ final case class JettyClient[Effect[_]](
 
   private def responseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
-    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
+    statusCode.map(context.statusCode).getOrElse(context).headers(headers*)
   }
 }
 
 object JettyClient {
 
   /** Request context type. */
-  type Context = HttpContext[Session]
+  type Context = HttpContext[Message]
 
   /** Default Jetty HTTP client. */
   def defaultClient: HttpClient =
     new HttpClient()
 
-  final case class Session(request: Request)
+  /** Message properties. */
+  final case class Message(request: Request)
 
-  object Session {
+  object Message {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Message] = HttpContext()
   }
 }

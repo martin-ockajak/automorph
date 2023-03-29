@@ -1,8 +1,7 @@
 package automorph.transport.websocket.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -13,12 +12,13 @@ import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
+import scala.util.Try
 
 /**
  * Vert.x WebSocket endpoint message transport plugin.
  *
- * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
- * handler. The response returned by the RPC request handler is used as WebSocket response message.
+ * Interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
+ * - The response returned by the RPC request handler is used as WebSocket response message.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
@@ -27,64 +27,79 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
- *   Creates an Vert.x WebSocket handler with specified RPC request handler.
+ *   Creates a Vert.x Websocket endpoint message transport plugin with specified effect system and request handler.
+ * @param effectSystem
+ *   effect system plugin
  * @param handler
  *   RPC request handler
  * @tparam Effect
  *   effect type
  */
-final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCodec[Effect, Context])
-  extends Handler[ServerWebSocket] with Logging with EndpointTransport {
+final case class VertxWebSocketEndpoint[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
+) extends Handler[ServerWebSocket] with Logging with EndpointTransport[Effect, Context, Handler[ServerWebSocket]] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.WebSocket.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
 
-  override def handle(request: ServerWebSocket): Unit = {
+  override def adapter: Handler[ServerWebSocket] =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): VertxWebSocketEndpoint[Effect] =
+    copy(handler = handler)
+
+  override def handle(session: ServerWebSocket): Unit = {
     // Log the request
     val requestId = Random.id
-    lazy val requestProperties = getRequestProperties(request, requestId)
+    lazy val requestProperties = getRequestProperties(session, requestId)
     log.receivingRequest(requestProperties)
-    request.binaryMessageHandler { buffer =>
-      val requestBody = buffer.getBytes.toInputStream
-      log.receivedRequest(requestProperties)
+    session.binaryMessageHandler { buffer =>
+      Try {
+        val requestBody = buffer.getBytes.toInputStream
+        log.receivedRequest(requestProperties)
 
-      // Process the request
-      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-        _.fold(
-          error => sendErrorResponse(error, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-            sendResponse(responseBody, request, requestId)
-          },
-        )
-      ).runAsync
+        // Process the request
+        handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+          _.fold(
+            error => sendErrorResponse(error, session, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              sendResponse(responseBody, session, requestId)
+            },
+          )
+        ).runAsync
+      }.failed.foreach { error =>
+        sendErrorResponse(error, session, requestId, requestProperties)
+      }
     }
     ()
   }
 
   private def sendErrorResponse(
     error: Throwable,
-    request: ServerWebSocket,
+    session: ServerWebSocket,
     requestId: String,
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
     val responseBody = error.description.toInputStream
-    sendResponse(responseBody, request, requestId)
+    sendResponse(responseBody, session, requestId)
   }
 
-  private def sendResponse(responseBody: InputStream, request: ServerWebSocket, requestId: String): Unit = {
+  private def sendResponse(responseBody: InputStream, session: ServerWebSocket, requestId: String): Unit = {
     // Log the response
-    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(request))
+    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(session))
     log.sendingResponse(responseProperties)
 
     // Send the response
-    request.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
+    session.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties))
+    }.onFailure { error =>
+      log.failedSendResponse(error, responseProperties)
+    }
     ()
   }
 
@@ -96,7 +111,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCode
 
   private def getRequestContext(request: ServerWebSocket): Context = {
     val headers = request.headers.entries.asScala.map(entry => entry.getKey -> entry.getValue).toSeq
-    HttpContext(transport = Some(Right(request).withLeft[HttpServerRequest]), headers = headers).url(request.uri)
+    HttpContext(message = Some(Right(request).withLeft[HttpServerRequest]), headers = headers).url(request.uri)
   }
 
   private def getRequestProperties(request: ServerWebSocket, requestId: String): Map[String, String] =
