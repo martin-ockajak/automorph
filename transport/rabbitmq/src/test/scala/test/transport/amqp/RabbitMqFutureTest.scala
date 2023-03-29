@@ -67,6 +67,7 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
         broker.stop()
         val brokerDirectory = config.getExtractionFolder.toPath.resolve(config.getVersion.getExtractionFolder)
         Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
+        Try(Files.delete(brokerDirectory))
       }
     } finally {
       unlock()
