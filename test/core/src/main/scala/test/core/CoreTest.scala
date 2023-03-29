@@ -12,7 +12,7 @@ import test.base.BaseTest
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl}
 
 /**
- * Main client -> server RPC API function invocation test.
+ * Main client -> server remote API function invocation test.
  *
  * Checks the results of remote RPC function invocations against identical local invocations.
  */
