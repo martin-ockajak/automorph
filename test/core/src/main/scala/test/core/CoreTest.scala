@@ -194,7 +194,7 @@ trait CoreTest extends BaseTest {
                   executeLogError(fixture.call("method", "argument" -> a0)) == expected
                 }
               }
-              "Message" in {
+              "Tell" in {
                 check { (a0: String) =>
                   executeLogError(fixture.tell("method", "argument" -> a0))
                   true
