@@ -47,6 +47,8 @@ import scala.util.Try
  *   maps an exception to a corresponding HTTP status code
  * @param readTimeout
  *   request read timeout
+ * @param threads
+ *   number of request processing threads
  * @tparam Effect
  *   effect type
  */
@@ -58,7 +60,8 @@ final case class NanoServer[Effect[_]] (
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-) extends NanoWSD(port) with Logging with ServerTransport[Effect, Context] {
+  threads: Int = Runtime.getRuntime.availableProcessors * 2,
+) extends NanoWSD(port, threads) with Logging with ServerTransport[Effect, Context] {
 
   private var handler: RequestHandler[Effect, Context] = RequestHandler.dummy
   private val headerXForwardedFor = "X-Forwarded-For"

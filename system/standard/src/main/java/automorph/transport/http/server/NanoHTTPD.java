@@ -90,6 +90,8 @@ import java.util.TimeZone;
 // PATCH BEGIN
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 // PATCH END
@@ -355,9 +357,18 @@ public abstract class NanoHTTPD {
      */
     public static class DefaultAsyncRunner implements AsyncRunner {
 
-        private long requestCount;
+// PATCH BEGIN
+        public DefaultAsyncRunner(int threads) {
+            executorService = Executors.newFixedThreadPool(threads);
+        }
+//        private long requestCount;
+// PATCH END
 
         private final List<NanoHTTPD.ClientHandler> running = Collections.synchronizedList(new ArrayList<NanoHTTPD.ClientHandler>());
+
+// PATCH BEGIN
+        private final ExecutorService executorService;
+// PATCH END
 
         /**
          * @return a list with currently running clients.
@@ -372,6 +383,9 @@ public abstract class NanoHTTPD {
             for (NanoHTTPD.ClientHandler clientHandler : new ArrayList<NanoHTTPD.ClientHandler>(this.running)) {
                 clientHandler.close();
             }
+// PATCH BEGIN
+//            executorService.shutdown();
+// PATCH END
         }
 
         @Override
@@ -381,12 +395,16 @@ public abstract class NanoHTTPD {
 
         @Override
         public void exec(NanoHTTPD.ClientHandler clientHandler) {
-            ++this.requestCount;
-            Thread t = new Thread(clientHandler);
-            t.setDaemon(true);
-            t.setName("NanoHttpd Request Processor (#" + this.requestCount + ")");
+// PATCH BEGIN
+//            ++this.requestCount;
+//            Thread t = new Thread(clientHandler);
+//            t.setDaemon(true);
+//            t.setName("NanoHttpd Request Processor (#" + this.requestCount + ")");
+//            this.running.add(clientHandler);
+//            t.start();
             this.running.add(clientHandler);
-            t.start();
+            executorService.execute(clientHandler);
+// PATCH END
         }
     }
 
@@ -2072,9 +2090,13 @@ public abstract class NanoHTTPD {
     /**
      * Constructs an HTTP server on given port.
      */
-    public NanoHTTPD(int port) {
-        this(null, port);
+// PATCH BEGIN
+//    public NanoHTTPD(int port) {
+//        this(null, port);
+    public NanoHTTPD(int port, int threads) {
+        this(null, port, threads);
     }
+// PATCH END
 
     // -------------------------------------------------------------------------------
     // //
@@ -2087,12 +2109,16 @@ public abstract class NanoHTTPD {
     /**
      * Constructs an HTTP server on given hostname and port.
      */
-    public NanoHTTPD(String hostname, int port) {
+// PATCH BEGIN
+//    public NanoHTTPD(String hostname, int port) {
+    public NanoHTTPD(String hostname, int port, int threads) {
         this.hostname = hostname;
         this.myPort = port;
         setTempFileManagerFactory(new DefaultTempFileManagerFactory());
-        setAsyncRunner(new DefaultAsyncRunner());
+//        setAsyncRunner(new DefaultAsyncRunner());
+        setAsyncRunner(new DefaultAsyncRunner(threads));
     }
+// PATCH END
 
     /**
      * Forcibly closes all connections that are open.

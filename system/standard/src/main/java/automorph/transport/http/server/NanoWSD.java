@@ -825,13 +825,19 @@ public abstract class NanoWSD extends NanoHTTPD {
         return encodeBase64(sha1hash);
     }
 
-    public NanoWSD(int port) {
-        super(port);
+// PATCH BEGIN
+//    public NanoWSD(int port) {
+//        super(port);
+    public NanoWSD(int port, int threads) {
+        super(port, threads);
     }
 
-    public NanoWSD(String hostname, int port) {
-        super(hostname, port);
+//    public NanoWSD(String hostname, int port) {
+//        super(hostname, port);
+    public NanoWSD(String hostname, int port, int threads) {
+        super(hostname, port, threads);
     }
+// PATCH END
 
     private boolean isWebSocketConnectionHeader(Map<String, String> headers) {
         String connection = headers.get(NanoWSD.HEADER_CONNECTION);
