@@ -221,8 +221,6 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
 
 
 // Test
-// ThisBuild / Test / fork := true
-// ThisBuild / Test / testForkedParallel := true
 ThisBuild / Test / testOptions += Tests.Argument("-oDF")
 val scribeVersion = "3.11.1"
 lazy val testBase = source(project, "test/base", spi).settings(
