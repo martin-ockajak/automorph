@@ -34,10 +34,10 @@ private[examples] object ServerErrors {
       case error => Default.rpcProtocol.mapException(error)
     })
 
-    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    // Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
     val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-    // Start JSON-RPC HTTP server
+    // Start JSON-RPC HTTP & WebSocket server
     val server = run(
       Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
     )
@@ -47,7 +47,7 @@ private[examples] object ServerErrors {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
     val client = run(
       Default.clientAsync(new URI("http://localhost:7000/api")).init()
     )

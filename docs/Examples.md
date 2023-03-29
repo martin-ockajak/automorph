@@ -36,7 +36,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -47,7 +47,7 @@ val server = Default.serverSync(7000, "/api").bind(api).init()
 trait ClientApi {
   def hello(some: String, n: Int): String
 }
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
@@ -105,7 +105,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for POST or PUT requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST or PUT requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put)).bind(api).init()
 )
@@ -118,7 +118,7 @@ val server = run(
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
-// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending PUT requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put).init()
 )
@@ -175,7 +175,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -187,7 +187,7 @@ trait ClientApi {
   def hello(some: String): String
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
@@ -274,7 +274,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api").bind(api).init()
 )
@@ -288,7 +288,7 @@ trait ClientApi {
   def hello(some: String, record: Record): Future[Record]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -338,7 +338,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -353,7 +353,7 @@ trait ClientApi {
   def hi(some: String, n: Int): String
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Customize invoked API to RPC function name mapping
@@ -426,14 +426,14 @@ val mapName = (name: String) => name match {
   case other => Seq(s"test.$other")
 }
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
 ```
 
 **Client**
 
 ```scala
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
@@ -504,7 +504,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api").bind(api).init()
 )
@@ -527,10 +527,10 @@ val rpcProtocol = Default.rpcProtocol[Default.ClientContext].mapError((message, 
   }
 )
 
-// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+// Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-// Setup custom JSON-RPC HTTP client
+// Setup custom JSON-RPC HTTP & WebSocket client
 val client = run(
   Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
 )
@@ -600,10 +600,10 @@ val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ matc
   case error => Default.rpcProtocol.mapException(error)
 })
 
-// Create HTTP server transport listening on port 7000 for requests to '/api'
+// Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
 val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-// Start JSON-RPC HTTP server
+// Start JSON-RPC HTTP & WebSocket server
 val server = run(
   Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
 )
@@ -617,7 +617,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -686,7 +686,7 @@ val mapException = (error: Throwable) => error match {
   case e => HttpContext.defaultExceptionToStatusCode(e)
 }
 
-// Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start custom JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api", mapException = mapException).bind(api).init()
 )
@@ -700,7 +700,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -759,7 +759,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -773,7 +773,7 @@ trait ClientApi {
   def hello(message: String)(implicit http: ClientContext): String
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 val remoteApi = client.bind[ClientApi]
 
@@ -856,7 +856,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -870,7 +870,7 @@ trait ClientApi {
   def hello(message: String)(implicit http: ClientContext): String
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Create client request context specifying HTTP request metadata
@@ -935,7 +935,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -949,7 +949,7 @@ trait ClientApi {
   def hello(message: String): Contextual[String, ClientContext]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically retrieving a result with HTTP response metadata
@@ -1012,7 +1012,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api").bind(api).init()
 )
@@ -1021,7 +1021,7 @@ val server = run(
 **Client**
 
 ```scala
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -1080,7 +1080,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for PUT requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -1092,7 +1092,7 @@ trait ClientApi {
   def hello(some: String, n: Json): Json
 }
 
-// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending PUT requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
@@ -1150,7 +1150,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api").bind(api).init()
 )
@@ -1164,7 +1164,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -1218,7 +1218,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = run(
   Default.serverAsync(7000, "/api").bind(api).init(),
 )
@@ -1235,10 +1235,10 @@ trait ClientApi {
 // Configure JSON-RPC to pass arguments by position instead of by name
 val rpcProtocol = Default.rpcProtocol[Default.ClientContext].namedArguments(false)
 
-// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+// Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-// Setup  JSON-RPC HTTP client
+// Setup  JSON-RPC HTTP & WebSocket client
 val client = run(
   Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
 )
@@ -1303,7 +1303,7 @@ val api = new ServerApi()
 // Create ZIO effect system plugin
 val effectSystem = ZioSystem.default
 
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(Default.server(effectSystem, 7000, "/api").bind(api).init())
 ```
 
@@ -1315,7 +1315,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Task[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.client(effectSystem, new URI("http://localhost:7000/api")).init()
 )
@@ -1391,10 +1391,10 @@ val serverRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messag
   messageCodec
 )
 
-// Create HTTP server transport listening on port 7000 for requests to '/api'
+// Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
 val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-// Start JSON-RPC HTTP server
+// Start JSON-RPC HTTP & WebSocket server
 val server = run(
   Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
 )
@@ -1413,10 +1413,10 @@ val clientRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messag
   messageCodec
 )
 
-// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+// Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-// Setup JSON-RPC HTTP client
+// Setup JSON-RPC HTTP & WebSocket client
 val client = run(
   Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
 )
@@ -1477,10 +1477,10 @@ val serverRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.Serv
   Default.messageCodec, "/api"
 )
 
-// Create HTTP server transport listening on port 7000 for requests to '/api'
+// Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
 val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-// Start Web-RPC HTTP server
+// Start Web-RPC HTTP & WebSocket server
 val server = run(
   Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
 )
@@ -1499,10 +1499,10 @@ val clientRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.Clie
   Default.messageCodec, "/api"
 )
 
-// Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+// Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-// Setup Web-RPC HTTP client
+// Setup Web-RPC HTTP & WebSocket client
 val client = run(
   Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
 )
@@ -1555,7 +1555,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server listening on port 80 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
 ```
 
@@ -1567,10 +1567,10 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 
-// Create standard JRE HTTP client message transport sending POST requests to 'http://localhost:7000/api'
+// Create standard JRE HTTP & WebSocket client message transport sending POST requests to 'http://localhost:7000/api'
 val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
-// Setup JSON-RPC HTTP client
+// Setup JSON-RPC HTTP & WebSocket client
 val client = Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 
 // Call the remote API function via proxy
@@ -1618,10 +1618,10 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Create NanoHTTPD HTTP server transport listening on port 7000 for requests to '/api'
+// Create NanoHTTPD HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
 val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")
 
-// Start JSON-RPC HTTP server
+// Start JSON-RPC HTTP & WebSocket server
 val server = Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
 ```
 
@@ -1633,7 +1633,7 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
@@ -1694,7 +1694,7 @@ val endpointTransport = UndertowHttpEndpoint(Default.effectSystemAsync)
 // Setup JSON-RPC endpoint
 val endpoint = Endpoint.transport(endpointTransport).rpcProtocol(Default.rpcProtocol).bind(api)
 
-// Start Undertow HTTP server listening on port 7000 for requests to '/api'
+// Start Undertow HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Undertow.builder()
   .addHttpListener(7000, "0.0.0.0")
   .setHandler(Handlers.path().addPrefixPath("/api", endpoint.adapter))
@@ -1710,7 +1710,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.clientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -1779,7 +1779,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
+// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'ws://localhost:7000/api'
 val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 
 // Call the remote API function via proxy
@@ -1867,7 +1867,7 @@ trait ClientApi {
 // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
 val clientTransport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", Default.effectSystemAsync)
 
-// Setup JSON-RPC HTTP client
+// Setup JSON-RPC HTTP & WebSocket client
 val client = run(
   Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 )

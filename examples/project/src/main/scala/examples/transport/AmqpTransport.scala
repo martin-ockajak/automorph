@@ -37,7 +37,7 @@ private[examples] object AmqpTransport {
       // Create RabbitMQ AMQP server transport consuming requests from the 'api' queue
       val serverTransport = RabbitMqServer(Default.effectSystemAsync, new URI("amqp://localhost:7000"), Seq("api"))
 
-      // Start RabbitMQ AMQP JSON-RPC server
+      // Start JSON-RPC AMQP server
       val server = run(
         Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
       )
@@ -50,7 +50,7 @@ private[examples] object AmqpTransport {
       // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
       val clientTransport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", Default.effectSystemAsync)
 
-      // Setup JSON-RPC HTTP client
+      // Setup JSON-RPC AMQP client
       val client = run(
         Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
       )

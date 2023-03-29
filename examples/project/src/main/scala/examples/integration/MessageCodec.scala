@@ -38,10 +38,10 @@ private[examples] object MessageCodec {
       messageCodec
     )
 
-    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    // Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
     val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-    // Start JSON-RPC HTTP server
+    // Start JSON-RPC HTTP & WebSocket server
     val server = run(
       Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
     )
@@ -56,10 +56,10 @@ private[examples] object MessageCodec {
       messageCodec
     )
 
-    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup JSON-RPC HTTP client
+    // Setup JSON-RPC HTTP & WebSocket client
     val client = run(
       Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
     )

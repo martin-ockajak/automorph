@@ -22,7 +22,7 @@ private[examples] object ClientExceptions {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(
       Default.serverAsync(7000, "/api").bind(api).init()
     )
@@ -41,10 +41,10 @@ private[examples] object ClientExceptions {
       }
     )
 
-    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup custom JSON-RPC HTTP client
+    // Setup custom JSON-RPC HTTP & WebSocket client
     val client = run(
       Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
     )

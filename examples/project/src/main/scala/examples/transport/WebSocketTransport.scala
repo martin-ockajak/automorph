@@ -30,7 +30,7 @@ private[examples] object WebSocketTransport {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
+    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'ws://localhost:7000/api'
     val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 
     // Call the remote API function via proxy

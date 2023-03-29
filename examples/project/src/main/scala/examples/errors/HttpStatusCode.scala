@@ -29,7 +29,7 @@ private[examples] object HttpStatusCode {
       case e => HttpContext.defaultExceptionToStatusCode(e)
     }
 
-    // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Start custom JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(
       Default.serverAsync(7000, "/api", mapException = mapException).bind(api).init()
     )
@@ -39,7 +39,7 @@ private[examples] object HttpStatusCode {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
     val client = run(
       Default.clientAsync(new URI("http://localhost:7000/api")).init()
     )

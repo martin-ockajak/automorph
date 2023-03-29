@@ -20,7 +20,7 @@ private[examples] object PositionalArguments {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
     val server = run(
       Default.serverAsync(7000, "/api").bind(api).init(),
     )
@@ -33,10 +33,10 @@ private[examples] object PositionalArguments {
     // Configure JSON-RPC to pass arguments by position instead of by name
     val rpcProtocol = Default.rpcProtocol[Default.ClientContext].namedArguments(false)
 
-    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup  JSON-RPC HTTP client
+    // Setup JSON-RPC HTTP & WebSocket client
     val client = run(
       Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
     )

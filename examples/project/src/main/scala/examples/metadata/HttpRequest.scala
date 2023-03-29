@@ -21,7 +21,7 @@ private[examples] object HttpRequest {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = Default.serverSync(7000, "/api").bind(api).init()
 
     // Define client view of the remote API
@@ -31,7 +31,7 @@ private[examples] object HttpRequest {
       def hello(message: String)(implicit http: ClientContext): String
     }
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
     // Create client request context specifying HTTP request metadata

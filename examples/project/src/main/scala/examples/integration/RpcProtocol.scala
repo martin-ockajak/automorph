@@ -27,10 +27,10 @@ private[examples] object RpcProtocol {
       Default.messageCodec, "/api"
     )
 
-    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    // Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
     val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-    // Start Web-RPC HTTP server
+    // Start Web-RPC HTTP & WebSocket server
     val server = run(
       Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
     )
@@ -45,10 +45,10 @@ private[examples] object RpcProtocol {
       Default.messageCodec, "/api"
     )
 
-    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup Web-RPC HTTP client
+    // Setup Web-RPC HTTP & WebSocket client
     val client = run(
       Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
     )

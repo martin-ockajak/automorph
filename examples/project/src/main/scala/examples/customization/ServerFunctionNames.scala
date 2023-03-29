@@ -31,7 +31,7 @@ private[examples] object ServerFunctionNames {
       case other => Seq(s"test.$other")
     }
 
-    // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
 
     // Define client view of the remote API
@@ -41,7 +41,7 @@ private[examples] object ServerFunctionNames {
       def hi(some: String, n: Int): String
     }
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
     // Call the remote API function statically
