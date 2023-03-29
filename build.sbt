@@ -219,7 +219,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
 
 // Test
 val scribeVersion = "3.11.1"
-ThisBuild / Test / testOptions += Tests.Argument("-oD")
+ThisBuild / Test / testOptions += Tests.Argument("-oDF")
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.15",
