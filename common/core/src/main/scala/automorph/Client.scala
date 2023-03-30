@@ -5,7 +5,7 @@ import automorph.client.meta.ClientBind
 import automorph.client.RemoteTell
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.Extensions.EffectOps
 import automorph.util.Random
 import java.io.InputStream
 import scala.collection.immutable.ListMap
@@ -123,7 +123,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       responseRequired = true,
       requestContext.getOrElse(context),
       requestId,
-    ).pureFold(
+    ).fold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -167,7 +167,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       responseRequired = false,
       requestContext.getOrElse(context),
       requestId,
-    ).pureFold(
+    ).fold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -209,12 +209,12 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} response", allProperties)
-        rpcResponse.result.pureFold(
+        rpcResponse.result.fold(
           // Raise error
           error => raiseError(error, requestProperties),
           // Decode result
           result =>
-            Try(decodeResult(result, responseContext)).pureFold(
+            Try(decodeResult(result, responseContext)).fold(
               error => raiseError(InvalidResponseException("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${rpcProtocol.name} request", requestProperties)

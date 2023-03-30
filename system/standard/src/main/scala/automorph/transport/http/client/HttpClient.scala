@@ -5,7 +5,7 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.HttpClient.{Context, Message, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps}
 import java.io.{ByteArrayOutputStream, InputStream}
 import java.net.URI
 import java.net.http.HttpClient.Builder
@@ -188,7 +188,7 @@ final case class HttpClient[Effect[_]](
     completableSystem: AsyncEffectSystem[Effect],
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
-      Try(completableFuture).pureFold(
+      Try(completableFuture).fold(
         exception => completable.fail(exception).runAsync,
         value => {
           value.handle { case (result, error) =>

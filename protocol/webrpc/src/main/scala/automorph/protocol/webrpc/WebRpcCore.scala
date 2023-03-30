@@ -8,7 +8,7 @@ import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.{HttpContext, HttpMethod}
-import automorph.util.Extensions.{ThrowableOps, TryOps}
+import automorph.util.Extensions.ThrowableOps
 import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -117,7 +117,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       } else { Right(requestContext.parameters.map { case (name, value) => name -> encodeString(value) }.toMap) }
     }.getOrElse {
       // Other HTTP methods - deserialize request
-      Try(decodeRequest(messageCodec.deserialize(requestBody))).pureFold(
+      Try(decodeRequest(messageCodec.deserialize(requestBody))).fold(
         error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
         request => Right(request),
       )
@@ -126,7 +126,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   @nowarn("msg=used")
   override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
     // Create response
-    val responseMessage = result.pureFold(
+    val responseMessage = result.fold(
       error => {
         val responseError = error match {
           case WebRpcException(message, code, _) => ResponseError(message, code)
@@ -158,13 +158,13 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     responseContext: Context,
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
-    Try(decodeResponse(messageCodec.deserialize(responseBody))).pureFold(
+    Try(decodeResponse(messageCodec.deserialize(responseBody))).fold(
       error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), responseBody))),
       responseMessage => {
         // Validate response
         val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
         val message = RpcMessage((), responseBody, responseMessage.properties, messageText)
-        Try(Response(responseMessage)).pureFold(
+        Try(Response(responseMessage)).fold(
           error => Left(RpcError(InvalidResponseException("Malformed response", error), message)),
           response =>
             // Check for error

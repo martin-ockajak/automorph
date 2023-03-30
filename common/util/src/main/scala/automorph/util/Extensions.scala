@@ -156,24 +156,6 @@ private[automorph] object Extensions {
      *
      * @param onFailure
      *   function to apply if this is a `Failure`
-     * @param onSuccess
-     *   function to apply if this is a `Success`
-     * @tparam U
-     *   result type
-     * @return
-     *   applied function result
-     */
-    def pureFold[U](onFailure: Throwable => U, onSuccess: T => U): U =
-      tryValue match {
-        case Failure(error) => onFailure(error)
-        case Success(value) => onSuccess(value)
-      }
-
-    /**
-     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
-     *
-     * @param onFailure
-     *   function to apply if this is a `Failure`
      * @return
      *   applied function result or success value
      */

@@ -4,7 +4,7 @@ import automorph.RpcException.{FunctionNotFoundException, InvalidRequestExceptio
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol, RpcResult}
-import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
@@ -101,7 +101,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
       }.map { arguments =>
         // Call bound API method
         binding.call(arguments, context)
-      }.pureFold(
+      }.fold(
         error => errorResponse(error, rpcRequest.message, responseRequired, requestProperties),
         result => {
           // Encode bound API method result
@@ -278,7 +278,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     message: RpcMessage[rpcProtocol.Metadata],
     requestProperties: => Map[String, String],
   ): Effect[Option[RpcResult[Context]]] =
-    rpcProtocol.createResponse(result.map(_._1), message.metadata).pureFold(
+    rpcProtocol.createResponse(result.map(_._1), message.metadata).fold(
       error => effectSystem.failed(error),
       rpcResponse => {
         val responseBody = rpcResponse.message.body

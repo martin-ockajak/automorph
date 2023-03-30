@@ -67,7 +67,7 @@ case class AkkaHttpEndpoint[Effect[_]](
         extractMaterializer { implicit materializer =>
           extractExecutionContext { implicit executionContext =>
             onComplete(handle(httpRequest, remoteAddress))(
-              _.pureFold(
+              _.fold(
                 error => {
                   log.failedProcessRequest(error, Map())
                   complete(InternalServerError, error.description)

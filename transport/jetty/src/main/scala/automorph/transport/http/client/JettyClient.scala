@@ -5,7 +5,7 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.JettyClient.{Context, Message, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
 import java.io.InputStream
 import java.net.URI
 import java.util
@@ -293,7 +293,7 @@ final case class JettyClient[Effect[_]](
     completableSystem: AsyncEffectSystem[Effect],
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
-      Try(completableFuture).pureFold(
+      Try(completableFuture).fold(
         exception => completable.fail(exception).runAsync,
         value => {
           value.handle { case (result, error) =>
