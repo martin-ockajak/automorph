@@ -35,7 +35,7 @@
 
 ### Documentation only
 
-* [NodeJS](https://nodejs.org/) 17+
+* [NodeJS](https://nodejs.org/) 19+
 * [Yarn](https://yarnpkg.com/) 1.22+
 
 ## Commands
