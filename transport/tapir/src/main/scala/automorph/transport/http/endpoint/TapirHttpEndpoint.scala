@@ -39,7 +39,7 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
  */
 final case class TapirHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
-  method: Method,
+  method: Method = Method.POST,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with EndpointTransport[
