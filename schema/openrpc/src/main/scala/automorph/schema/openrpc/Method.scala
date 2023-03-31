@@ -7,7 +7,7 @@ case class Method(
   description: Option[String] = None,
   externalDocs: Option[ExternalDocumentation] = None,
   params: List[ContentDescriptor],
-  result: ContentDescriptor,
+  result: Option[ContentDescriptor],
   deprecated: Option[Boolean] = None,
   servers: Option[List[Server]] = None,
   errors: Option[List[Error]] = None,

@@ -186,14 +186,14 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     ))
 
   /**
-   * Generates OpenAPI speficication for given RPC functions.
+   * Generates OpenAPI schema for given RPC functions.
    *
    * @see
    *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
    * @param functions
    *   RPC functions
    * @return
-   *   OpenAPI specification
+   *   OpenAPI schema
    */
   def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>

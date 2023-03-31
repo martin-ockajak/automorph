@@ -171,27 +171,27 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     )
 
   /**
-   * Generates OpenRPC specification for given RPC functions.
+   * Generates OpenRPC schema for given RPC functions.
    *
    * @see
    *   [[https://spec.open-rpc.org OpenRPC specification]]
    * @param functions
    *   RPC functions
    * @return
-   *   OpenRPC specification
+   *   OpenRPC schema
    */
   def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
     mapOpenRpc(OpenRpc(functions))
 
   /**
-   * Generates OpenAPI specification for given RPC functions.
+   * Generates OpenAPI schema for given RPC functions.
    *
    * @see
    *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
    * @param functions
    *   RPC functions
    * @return
-   *   OpenAPI specification
+   *   OpenAPI schema
    */
   def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>

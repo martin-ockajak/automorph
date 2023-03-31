@@ -59,7 +59,7 @@ object OpenRpc {
       val method = Method(
         name = function.name,
         params = params,
-        result = result,
+        result = Some(result),
         summary = summary,
         description = function.documentation,
         paramStructure = Some("either"),

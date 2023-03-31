@@ -40,11 +40,11 @@ class OpenRpcTest extends BaseTest {
           schema = Schema(`type` = Some(value = "Option[Map[String, Boolean]"), title = Some(value = "alt")),
         ),
       ),
-      result = ContentDescriptor(
+      result = Some(ContentDescriptor(
         name = "result",
         required = Some(value = true),
         schema = Schema(`type` = Some(value = "Seq[String]"), title = Some(value = "result")),
-      ),
+      )),
       paramStructure = Some(value = "either"),
     )),
   )
