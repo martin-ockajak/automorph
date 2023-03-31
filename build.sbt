@@ -13,7 +13,7 @@ ThisBuild / organizationHomepage := Some(url(siteUrl))
 ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
-  email = "automorph.release@gmail.com",
+  email = "automorph.org@proton.me",
   url = url(s"https://github.com/martin-ockajak")
 ))
 Global / onChangedBuildSource := ReloadOnSourceChanges
