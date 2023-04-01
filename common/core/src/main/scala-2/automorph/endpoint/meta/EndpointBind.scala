@@ -1,7 +1,7 @@
 package automorph.endpoint.meta
 
 import automorph.spi.{EndpointTransport, MessageCodec, RequestHandler, RpcProtocol}
-import automorph.Endpoint
+import automorph.RpcEndpoint
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -52,8 +52,8 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
    * @throws java.lang.IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api): Endpoint[Node, Codec, Effect, Context, Adapter] =
-    macro EndpointMeta.bindMacro[Node, Codec, Effect, Context, Adapter, Api]
+  def bind[Api <: AnyRef](api: Api): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
+    macro EndpointBind.bindMacro[Node, Codec, Effect, Context, Adapter, Api]
 
   /**
    * Creates a copy of this endpoint with added RPC bindings for all public methods of the specified API instance.
@@ -86,11 +86,11 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
    */
   def bind[Api <: AnyRef](
     api: Api, mapName: String => Iterable[String]
-  ): Endpoint[Node, Codec, Effect, Context, Adapter] =
-    macro EndpointMeta.bindMapNameMacro[Node, Codec, Effect, Context, Adapter, Api]
+  ): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
+    macro EndpointBind.bindMapNameMacro[Node, Codec, Effect, Context, Adapter, Api]
 }
 
-object EndpointMeta {
+object EndpointBind {
 
   def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter, Api <: AnyRef](c: blackbox.Context)(
     api: c.Expr[Api]
@@ -101,7 +101,7 @@ object EndpointMeta {
     contextType: c.WeakTypeTag[Context],
     adapterType: c.WeakTypeTag[Adapter],
     apiType: c.WeakTypeTag[Api],
-  ): c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]] = {
+  ): c.Expr[RpcEndpoint[Node, Codec, Effect, Context, Adapter]] = {
     import c.universe.Quasiquote
     Seq(nodeType, codecType, effectType, contextType, adapterType, apiType)
 
@@ -122,12 +122,12 @@ object EndpointMeta {
     contextType: c.WeakTypeTag[Context],
     adapterType: c.WeakTypeTag[Adapter],
     apiType: c.WeakTypeTag[Api],
-  ): c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]] = {
+  ): c.Expr[RpcEndpoint[Node, Codec, Effect, Context, Adapter]] = {
     import c.universe.Quasiquote
     Seq(adapterType)
 
     // This endpoint needs to be assigned to a stable identifier due to macro expansion limitations
-    c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
+    c.Expr[RpcEndpoint[Node, Codec, Effect, Context, Adapter]](q"""
       import automorph.handler.{ApiRequestHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
       import scala.collection.immutable.ListMap
@@ -148,7 +148,7 @@ object EndpointMeta {
         endpoint.rpcProtocol,
         apiBindings ++ newApiBindings,
       )
-      automorph.Endpoint(endpoint.transport, endpoint.rpcProtocol, handler, handler.functions)
+      automorph.RpcEndpoint(endpoint.transport, endpoint.rpcProtocol, handler, handler.functions)
     """)
   }
 }

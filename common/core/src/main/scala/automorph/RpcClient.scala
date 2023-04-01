@@ -34,7 +34,7 @@ import scala.util.Try
  * @tparam Context
  *   RPC message context type
  */
-final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   transport: ClientTransport[Effect, Context],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
 ) extends ClientBind[Node, Codec, Effect, Context] with Logging {
@@ -71,7 +71,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return
    *   active RPC server
    */
-  def init(): Effect[Client[Node, Codec, Effect, Context]] =
+  def init(): Effect[RpcClient[Node, Codec, Effect, Context]] =
     system.map(transport.init())(_ => this)
 
   /**
@@ -80,7 +80,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return
    *   nothing
    */
-  def close(): Effect[Client[Node, Codec, Effect, Context]] =
+  def close(): Effect[RpcClient[Node, Codec, Effect, Context]] =
     system.map(transport.close())(_ => this)
 
   override def toString: String = {
@@ -243,7 +243,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 }
 
-object Client {
+object RpcClient {
 
   /**
    * RPC client builder.
@@ -273,8 +273,8 @@ object Client {
      */
     def rpcProtocol[Node, Codec <: MessageCodec[Node]](
       rpcProtocol: RpcProtocol[Node, Codec, Context]
-    ): Client[Node, Codec, Effect, Context] =
-      Client(transport, rpcProtocol)
+    ): RpcClient[Node, Codec, Effect, Context] =
+      RpcClient(transport, rpcProtocol)
   }
 
   /**

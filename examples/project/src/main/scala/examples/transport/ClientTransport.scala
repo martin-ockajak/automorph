@@ -1,6 +1,6 @@
 package examples.transport
 
-import automorph.{Client, Default}
+import automorph.{RpcClient, Default}
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 
@@ -27,7 +27,7 @@ private[examples] object ClientTransport {
     val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
     // Setup JSON-RPC HTTP client
-    val client = Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
+    val client = RpcClient.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 
     // Call the remote API function via proxy
     val remoteApi = client.bind[ClientApi]

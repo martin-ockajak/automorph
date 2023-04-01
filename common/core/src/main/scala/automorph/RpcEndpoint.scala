@@ -34,7 +34,7 @@ import scala.collection.immutable.ListMap
  * @tparam Adapter
  *   transport layer adapter type
  */
-final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter] (
+final case class RpcEndpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter] (
   transport: EndpointTransport[Effect, Context, Adapter],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   handler: RequestHandler[Effect, Context],
@@ -58,7 +58,7 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
   }
 }
 
-object Endpoint {
+object RpcEndpoint {
 
   /**
    * RPC endpoint builder.
@@ -90,8 +90,8 @@ object Endpoint {
      */
     def rpcProtocol[Node, Codec <: MessageCodec[Node]](
       rpcProtocol: RpcProtocol[Node, Codec, Context]
-    ): Endpoint[Node, Codec, Effect, Context, Adapter] =
-      Endpoint(transport, rpcProtocol)
+    ): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
+      RpcEndpoint(transport, rpcProtocol)
   }
 
   /**
@@ -116,9 +116,9 @@ object Endpoint {
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter](
     transport: EndpointTransport[Effect, Context, Adapter],
     rpcProtocol: RpcProtocol[Node, Codec, Context],
-  ): Endpoint[Node, Codec, Effect, Context, Adapter] = {
+  ): RpcEndpoint[Node, Codec, Effect, Context, Adapter] = {
     val handler = ApiRequestHandler(transport.effectSystem, rpcProtocol, ListMap.empty)
-    Endpoint(transport, rpcProtocol, handler, handler.functions)
+    RpcEndpoint(transport, rpcProtocol, handler, handler.functions)
   }
 
   /**

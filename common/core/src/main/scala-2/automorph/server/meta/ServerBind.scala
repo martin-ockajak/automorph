@@ -1,7 +1,7 @@
 package automorph.server.meta
 
 import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
-import automorph.Server
+import automorph.RpcServer
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -50,8 +50,8 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws java.lang.IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api): Server[Node, Codec, Effect, Context] =
-    macro ServerMeta.bindMacro[Node, Codec, Effect, Context, Api]
+  def bind[Api <: AnyRef](api: Api): RpcServer[Node, Codec, Effect, Context] =
+    macro ServerBind.bindMacro[Node, Codec, Effect, Context, Api]
 
   /**
    * Creates a copy of this server with added RPC bindings for all public methods of the specified API instance.
@@ -82,11 +82,11 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws java.lang.IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Server[Node, Codec, Effect, Context] =
-    macro ServerMeta.bindMapNameMacro[Node, Codec, Effect, Context, Api]
+  def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): RpcServer[Node, Codec, Effect, Context] =
+    macro ServerBind.bindMapNameMacro[Node, Codec, Effect, Context, Api]
 }
 
-object ServerMeta {
+object ServerBind {
 
   def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
     api: c.Expr[Api]
@@ -96,7 +96,7 @@ object ServerMeta {
     effectType: c.WeakTypeTag[Effect[?]],
     contextType: c.WeakTypeTag[Context],
     apiType: c.WeakTypeTag[Api],
-  ): c.Expr[Server[Node, Codec, Effect, Context]] = {
+  ): c.Expr[RpcServer[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
     Seq(nodeType, codecType, effectType, contextType, apiType)
 
@@ -114,11 +114,11 @@ object ServerMeta {
     effectType: c.WeakTypeTag[Effect[?]],
     contextType: c.WeakTypeTag[Context],
     apiType: c.WeakTypeTag[Api],
-  ): c.Expr[Server[Node, Codec, Effect, Context]] = {
+  ): c.Expr[RpcServer[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
 
     // This server needs to be assigned to a stable identifier due to macro expansion limitations
-    c.Expr[Server[Node, Codec, Effect, Context]](q"""
+    c.Expr[RpcServer[Node, Codec, Effect, Context]](q"""
       import automorph.handler.{ApiRequestHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
       import scala.collection.immutable.ListMap
@@ -139,7 +139,7 @@ object ServerMeta {
         server.rpcProtocol,
         apiBindings ++ newApiBindings,
       )
-      automorph.Server(server.transport, server.rpcProtocol, handler, handler.functions)
+      automorph.RpcServer(server.transport, server.rpcProtocol, handler, handler.functions)
     """)
   }
 }

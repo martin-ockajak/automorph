@@ -1,6 +1,6 @@
 package automorph.endpoint.meta
 
-import automorph.Endpoint
+import automorph.RpcEndpoint
 import automorph.handler.ApiRequestHandler
 import automorph.handler.meta.HandlerBindings
 import automorph.spi.{EndpointTransport, MessageCodec, RequestHandler, RpcProtocol}
@@ -53,7 +53,7 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
    * @throws IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): Endpoint[Node, Codec, Effect, Context, Adapter] =
+  inline def bind[Api <: AnyRef](api: Api): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
     bind(api, Seq(_))
 
   /**
@@ -87,7 +87,7 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
    */
   inline def bind[Api <: AnyRef](
     api: Api, mapName: String => Iterable[String]
-  ): Endpoint[Node, Codec, Effect, Context, Adapter] =
+  ): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
     val apiBindings = handler match
       case apiHandler: ApiRequestHandler[?, ?, ?, ?] =>
         apiHandler.asInstanceOf[ApiRequestHandler[Node, Codec, Effect, Context]].apiBindings
@@ -102,4 +102,4 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
       rpcProtocol,
       apiBindings ++ newApiBindings,
     )
-    Endpoint(transport, rpcProtocol, apiHandler, apiHandler.functions)
+    RpcEndpoint(transport, rpcProtocol, apiHandler, apiHandler.functions)

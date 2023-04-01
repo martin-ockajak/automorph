@@ -482,7 +482,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.{Client, Default}
+import automorph.{Default, RpcClient}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -532,7 +532,7 @@ val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI
 
 // Setup custom JSON-RPC HTTP & WebSocket client
 val client = run(
-  Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+  RpcClient.transport(clientTransport).rpcProtocol(rpcProtocol).init()
 )
 
 // Call the remote API function and fail with SQLException
@@ -567,7 +567,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcException
-import automorph.{Default, Server}
+import automorph.{Default, RpcServer}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -605,7 +605,7 @@ val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "
 
 // Start JSON-RPC HTTP & WebSocket server
 val server = run(
-  Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
+  RpcServer.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
 )
 ```
 
@@ -1198,7 +1198,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.{Client, Default}
+import automorph.{Default, RpcClient}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1240,7 +1240,7 @@ val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI
 
 // Setup  JSON-RPC HTTP & WebSocket client
 val client = run(
-  Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+  RpcClient.transport(clientTransport).rpcProtocol(rpcProtocol).init()
 )
 
 // Call the remote API function
@@ -1352,7 +1352,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
-import automorph.{Client, Default, Server}
+import automorph.{Default, RpcClient, RpcServer}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1396,7 +1396,7 @@ val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "
 
 // Start JSON-RPC HTTP & WebSocket server
 val server = run(
-  Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+  RpcServer.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
 )
 ```
 
@@ -1418,7 +1418,7 @@ val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI
 
 // Setup JSON-RPC HTTP & WebSocket client
 val client = run(
-  Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+  RpcClient.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
 )
 
 // Call the remote API function
@@ -1452,7 +1452,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.protocol.WebRpcProtocol
-import automorph.{Client, Default, Server}
+import automorph.{Default, RpcClient, RpcServer}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1482,7 +1482,7 @@ val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "
 
 // Start Web-RPC HTTP & WebSocket server
 val server = run(
-  Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+  RpcServer.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
 )
 ```
 
@@ -1504,7 +1504,7 @@ val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI
 
 // Setup Web-RPC HTTP & WebSocket client
 val client = run(
-  Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+  RpcClient.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
 )
 
 // Call the remote API function
@@ -1540,7 +1540,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.{Client, Default}
+import automorph.{Default, RpcClient}
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 ```
@@ -1571,7 +1571,7 @@ trait ClientApi {
 val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
 // Setup JSON-RPC HTTP & WebSocket client
-val client = Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
+val client = RpcClient.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 
 // Call the remote API function via proxy
 val remoteApi = client.bind[ClientApi]
@@ -1603,7 +1603,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.{Default, Server}
+import automorph.{Default, RpcServer}
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 ```
@@ -1622,7 +1622,7 @@ val api = new ServerApi()
 val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")
 
 // Start JSON-RPC HTTP & WebSocket server
-val server = Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
+val server = RpcServer.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
 ```
 
 **Client**
@@ -1814,7 +1814,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.{Client, Default, Server}
+import automorph.{Default, RpcClient, RpcServer}
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
@@ -1852,7 +1852,7 @@ val serverTransport = RabbitMqServer(Default.effectSystemAsync, new URI("amqp://
 
 // Start RabbitMQ AMQP JSON-RPC server
 val server = run(
-  Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
+  RpcServer.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
 )
 ```
 
@@ -1869,7 +1869,7 @@ val clientTransport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", De
 
 // Setup JSON-RPC HTTP & WebSocket client
 val client = run(
-  Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
+  RpcClient.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
 )
 
 // Call the remote API function

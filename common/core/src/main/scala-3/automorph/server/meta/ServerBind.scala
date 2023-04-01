@@ -1,6 +1,6 @@
 package automorph.server.meta
 
-import automorph.Server
+import automorph.RpcServer
 import automorph.handler.ApiRequestHandler
 import automorph.handler.meta.HandlerBindings
 import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
@@ -51,7 +51,7 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): Server[Node, Codec, Effect, Context] =
+  inline def bind[Api <: AnyRef](api: Api): RpcServer[Node, Codec, Effect, Context] =
     bind(api, Seq(_))
 
   /**
@@ -83,7 +83,7 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Server[Node, Codec, Effect, Context] =
+  inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): RpcServer[Node, Codec, Effect, Context] =
     val apiBindings = handler match
       case apiHandler: ApiRequestHandler[?, ?, ?, ?] =>
         apiHandler.asInstanceOf[ApiRequestHandler[Node, Codec, Effect, Context]].apiBindings
@@ -98,4 +98,4 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
       rpcProtocol,
       apiBindings ++ newApiBindings,
     )
-    Server(transport, rpcProtocol, apiHandler, apiHandler.functions)
+    RpcServer(transport, rpcProtocol, apiHandler, apiHandler.functions)

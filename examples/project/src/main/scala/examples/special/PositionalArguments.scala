@@ -1,6 +1,6 @@
 package examples.special
 
-import automorph.{Client, Default}
+import automorph.{RpcClient, Default}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -38,7 +38,7 @@ private[examples] object PositionalArguments {
 
     // Setup JSON-RPC HTTP & WebSocket client
     val client = run(
-      Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+      RpcClient.transport(clientTransport).rpcProtocol(rpcProtocol).init()
     )
 
     // Call the remote API function

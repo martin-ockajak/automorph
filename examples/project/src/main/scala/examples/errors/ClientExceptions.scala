@@ -1,6 +1,6 @@
 package examples.errors
 
-import automorph.{Client, Default}
+import automorph.{RpcClient, Default}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,7 +46,7 @@ private[examples] object ClientExceptions {
 
     // Setup custom JSON-RPC HTTP & WebSocket client
     val client = run(
-      Client.transport(clientTransport).rpcProtocol(rpcProtocol).init()
+      RpcClient.transport(clientTransport).rpcProtocol(rpcProtocol).init()
     )
 
     // Call the remote API function and fail with SQLException

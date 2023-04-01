@@ -32,7 +32,7 @@ import scala.collection.immutable.ListMap
  * @tparam Context
  *   RPC message context type
  */
-final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
+final case class RpcServer[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   transport: ServerTransport[Effect, Context],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   handler: RequestHandler[Effect, Context],
@@ -47,7 +47,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    * @return
    *   active RPC server
    */
-  def init(): Effect[Server[Node, Codec, Effect, Context]] =
+  def init(): Effect[RpcServer[Node, Codec, Effect, Context]] =
     configuredTransport.effectSystem.map(configuredTransport.init())(_ => this)
 
   /**
@@ -56,7 +56,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    * @return
    *   passive RPC server
    */
-  def close(): Effect[Server[Node, Codec, Effect, Context]] =
+  def close(): Effect[RpcServer[Node, Codec, Effect, Context]] =
     configuredTransport.effectSystem.map(configuredTransport.close())(_ => this)
 
   override def toString: String = {
@@ -70,7 +70,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   }
 }
 
-object Server {
+object RpcServer {
 
   /**
    * RPC server builder.
@@ -100,8 +100,8 @@ object Server {
      */
     def rpcProtocol[Node, Codec <: MessageCodec[Node]](
       rpcProtocol: RpcProtocol[Node, Codec, Context]
-    ): Server[Node, Codec, Effect, Context] =
-      Server(transport, rpcProtocol)
+    ): RpcServer[Node, Codec, Effect, Context] =
+      RpcServer(transport, rpcProtocol)
   }
 
   /**
@@ -124,9 +124,9 @@ object Server {
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     transport: ServerTransport[Effect, Context],
     protocol: RpcProtocol[Node, Codec, Context],
-  ): Server[Node, Codec, Effect, Context] = {
+  ): RpcServer[Node, Codec, Effect, Context] = {
     val handler = ApiRequestHandler(transport.effectSystem, protocol, ListMap.empty)
-    Server(transport, protocol, handler, handler.functions)
+    RpcServer(transport, protocol, handler, handler.functions)
   }
 
   /**

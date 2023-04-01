@@ -56,8 +56,8 @@ object Default extends DefaultMessageCodec {
     effectSystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
-  ): Client[Node, Codec, Effect, ClientContext] =
-    Client(clientTransport(effectSystem, url, method), rpcProtocol)
+  ): RpcClient[Node, Codec, Effect, ClientContext] =
+    RpcClient(clientTransport(effectSystem, url, method), rpcProtocol)
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client using default RPC protocol with
@@ -84,8 +84,8 @@ object Default extends DefaultMessageCodec {
    */
   def clientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
-  ): Client[Node, Codec, AsyncEffect, ClientContext] =
-    Client(clientTransport(effectSystemAsync, url, method), rpcProtocol)
+  ): RpcClient[Node, Codec, AsyncEffect, ClientContext] =
+    RpcClient(clientTransport(effectSystemAsync, url, method), rpcProtocol)
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client using default RPC protocol with
@@ -108,8 +108,8 @@ object Default extends DefaultMessageCodec {
    * @return
    *   synchronous RPC client
    */
-  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): Client[Node, Codec, SyncEffect, ClientContext] =
-    Client(clientTransport(effectSystemSync, url, method), rpcProtocol)
+  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): RpcClient[Node, Codec, SyncEffect, ClientContext] =
+    RpcClient(clientTransport(effectSystemSync, url, method), rpcProtocol)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin with
@@ -182,8 +182,8 @@ object Default extends DefaultMessageCodec {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): Server[Node, Codec, Effect, ServerContext] =
-    Server(serverTransport(effectSystem, port, path, methods, webSocket, mapException, builder), rpcProtocol)
+  ): RpcServer[Node, Codec, Effect, ServerContext] =
+    RpcServer(serverTransport(effectSystem, port, path, methods, webSocket, mapException, builder), rpcProtocol)
 
   /**
    * Creates an Undertow JSON-RPC server over HTTP & WebSocket using default RPC protocol with
@@ -221,8 +221,8 @@ object Default extends DefaultMessageCodec {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  )(implicit executionContext: ExecutionContext): Server[Node, Codec, AsyncEffect, ServerContext] =
-    Server(serverTransport(effectSystemAsync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
+  )(implicit executionContext: ExecutionContext): RpcServer[Node, Codec, AsyncEffect, ServerContext] =
+    RpcServer(serverTransport(effectSystemAsync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
 
   /**
    * Creates an Undertow JSON-RPC server over HTTP & WebSocket using default RPC protocol with
@@ -258,8 +258,8 @@ object Default extends DefaultMessageCodec {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): Server[Node, Codec, SyncEffect, ServerContext] =
-    Server(serverTransport(effectSystemSync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
+  ): RpcServer[Node, Codec, SyncEffect, ServerContext] =
+    RpcServer(serverTransport(effectSystemSync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server message transport plugin with

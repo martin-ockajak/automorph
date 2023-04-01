@@ -1,7 +1,7 @@
 package examples.integration
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
-import automorph.{Client, Default, Server}
+import automorph.{RpcClient, Default, RpcServer}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -43,7 +43,7 @@ private[examples] object MessageCodec {
 
     // Start JSON-RPC HTTP & WebSocket server
     val server = run(
-      Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+      RpcServer.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
     )
 
     // Define client view of the remote API
@@ -61,7 +61,7 @@ private[examples] object MessageCodec {
 
     // Setup JSON-RPC HTTP & WebSocket client
     val client = run(
-      Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+      RpcClient.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
     )
 
     // Call the remote API function

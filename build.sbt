@@ -157,10 +157,14 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
 )
 val embeddedRabbitMqVersion = "1.5.0"
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
-  .settings(libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.17.0",
-    "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion % Test
-  ))
+  .settings(
+    Test / fork := true,
+    Test / testForkedParallel := true,
+    libraryDependencies ++= Seq(
+      "com.rabbitmq" % "amqp-client" % "5.17.0",
+      "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion % Test
+    )
+  )
 
 // Server
 val tapirVersion = "1.2.11"

@@ -2,7 +2,7 @@ package examples.errors
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcException
-import automorph.{Default, Server}
+import automorph.{Default, RpcServer}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +39,7 @@ private[examples] object ServerErrors {
 
     // Start JSON-RPC HTTP & WebSocket server
     val server = run(
-      Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
+      RpcServer.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
     )
 
     // Define client view of the remote API
