@@ -19,7 +19,13 @@ sidebar_position: 3
 
 ## Diagram
 
-![architecture](images/architecture.jpg)
+### Client & Server
+
+![architecture](images/architecture-server.jpg)
+
+### Client & Endpoint
+
+![architecture](images/architecture-endpoint.jpg)
 
 
 ## Client
