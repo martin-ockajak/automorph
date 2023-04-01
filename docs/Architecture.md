@@ -16,9 +16,11 @@ sidebar_position: 3
 * [Message transport](/api/automorph/spi/MessageTransport.html)
 * [Message codec](/api/automorph/spi/MessageCodec.html)
 
+
 ## Diagram
 
 ![architecture](images/architecture.jpg)
+
 
 ## Client
 
@@ -35,7 +37,8 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 
 * Applications
 
-## Handler
+
+## Server
 
 The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
 
@@ -52,6 +55,26 @@ processing of incoming RPC requests into API invocations resulting in correspond
 * [Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html)
 * [Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
 * Applications
+
+
+## Endpoint
+
+The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
+
+It provides automatic derivation of remote API RPC bindings for existing API implementations and
+processing of incoming RPC requests into API invocations resulting in corresponding RPC responses.
+
+**Depends on**
+
+* [RPC protocol](/api/automorph/spi/RpcProtocol.html)
+* [Effect system](/api/automorph/spi/EffectSystem.html)
+
+**Used by**
+
+* [Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html)
+* [Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
+* Applications
+
 
 ## Plugins
 
@@ -138,3 +161,4 @@ Passively parses requests to be processed by the RPC handler and creates respons
 **Used by**
 
 * Applications
+
