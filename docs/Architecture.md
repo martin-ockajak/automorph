@@ -8,8 +8,9 @@ sidebar_position: 3
 
 **Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate with existing systems by freely combining various plugins:
 
-* [Client](/api/automorph/Client.html)
-* [Handler](/api/automorph/Handler.html)
+* [Client](/api/automorph/RpcClient.html)
+* [Server](/api/automorph/RpcServer.html)
+* [Endpoint](/api/automorph/RpcEndpoint.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 * [Effect system](/api/automorph/spi/EffectSystem.html)
 * [Message transport](/api/automorph/spi/MessageTransport.html)
