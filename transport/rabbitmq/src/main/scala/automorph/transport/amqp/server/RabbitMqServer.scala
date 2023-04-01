@@ -8,6 +8,7 @@ import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, Strin
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
+import scala.Array.emptyByteArray
 import scala.util.{Try, Using}
 import scala.jdk.CollectionConverters.MapHasAsJava
 
@@ -108,7 +109,7 @@ final case class RabbitMqServer[Effect[_]](
                 error => sendErrorResponse(error, replyTo, requestProperties, actualRequestId),
                 result => {
                   // Send the response
-                  val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
+                  val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
                   sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
                 }
               )).runAsync

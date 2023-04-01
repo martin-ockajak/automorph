@@ -10,6 +10,7 @@ import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, Strin
 import automorph.util.Random
 import scala.collection.immutable.ListMap
 import scala.util.Try
+import scala.Array.emptyByteArray
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
@@ -77,7 +78,7 @@ final case class TapirHttpEndpoint[Effect[_]](
                 ).withLeft[Unit],
                 result => {
                   // Create the response
-                  val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
+                  val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
                   val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
                     .getOrElse(StatusCode.Ok)
                   Right[Unit, LogicResult](

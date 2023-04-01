@@ -8,6 +8,7 @@ import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint.{Context, E
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.Random
 import scala.collection.immutable.ListMap
+import scala.Array.emptyByteArray
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
@@ -72,7 +73,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
               error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
               result => {
                 // Create the response
-                val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
+                val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
                 createResponse(responseBody, clientIp, requestId, log)
               },
             )
