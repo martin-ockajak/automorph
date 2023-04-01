@@ -12,26 +12,26 @@ sealed abstract class RpcException(message: String, cause: Throwable = None.orNu
 object RpcException {
 
   /** Invalid RPC request error. */
-  case class InvalidRequestException(message: String, cause: Throwable = None.orNull)
+  final case class InvalidRequest(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 
   /** Invalid RPC response error. */
-  case class InvalidResponseException(message: String, cause: Throwable = None.orNull)
+  final case class InvalidResponse(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 
   /** Remote function not found error. */
-  case class FunctionNotFoundException(message: String, cause: Throwable = None.orNull)
+  final case class FunctionNotFound(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 
   /** Invalid remote function arguments error. */
-  case class InvalidArgumentsException(message: String, cause: Throwable = None.orNull)
+  final case class InvalidArguments(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 
   /** Remote server error. */
-  case class ServerErrorException(message: String, cause: Throwable = None.orNull)
+  final case class ServerError(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 
   /** Remote API application error. */
-  case class ApplicationErrorException(message: String, cause: Throwable = None.orNull)
+  final case class ApplicationError(message: String, cause: Throwable = None.orNull)
     extends RpcException(message, cause)
 }

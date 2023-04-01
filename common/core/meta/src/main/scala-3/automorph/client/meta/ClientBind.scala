@@ -1,6 +1,6 @@
 package automorph.client.meta
 
-import automorph.RpcException.InvalidRequestException
+import automorph.RpcException.InvalidRequest
 import automorph.client.{RemoteCall, RemoteTell}
 import automorph.spi.{MessageCodec, RpcProtocol}
 
@@ -104,7 +104,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
               throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}"),
             )
             parameter.name -> Try(encodeArgument(argument)).recoverWith { case error =>
-              Failure(InvalidRequestException(s"Malformed argument: ${parameter.name}", error))
+              Failure(InvalidRequest(s"Malformed argument: ${parameter.name}", error))
             }.get
           }
 

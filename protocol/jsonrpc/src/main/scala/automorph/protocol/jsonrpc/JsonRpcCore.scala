@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
 import automorph.RpcFunction
-import automorph.RpcException.InvalidResponseException
+import automorph.RpcException.InvalidResponse
 import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.schema.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
@@ -152,7 +152,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
             response.error.fold(
               // Check for result
               response.result match {
-                case None => Left(ParseError(InvalidResponseException("Invalid result", None.orNull), message))
+                case None => Left(ParseError(InvalidResponse("Invalid result", None.orNull), message))
                 case Some(result) => Right(protocol.Response(Success(result), message))
               }
             )(error => Right(protocol.Response(Failure(mapError(error.message, error.code)), message))),

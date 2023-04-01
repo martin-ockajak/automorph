@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.RpcFunction
-import automorph.RpcException.{FunctionNotFoundException, InvalidRequestException}
+import automorph.RpcException.{FunctionNotFound, InvalidRequest}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RequestHandler.Result
 import automorph.spi.protocol.{Message, Request}
@@ -116,7 +116,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
         },
       )
     }.getOrElse {
-      val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
+      val error = FunctionNotFound(s"Function not found: ${rpcRequest.function}", None.orNull)
       errorResponse(error, rpcRequest.message, responseRequired, requestProperties)
     }
   }
@@ -187,7 +187,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
       )
       Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
         val message = s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}"
-        Failure(InvalidRequestException(message, error))
+        Failure(InvalidRequest(message, error))
       }.get
     }
 

@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.RpcException.InvalidResponseException
+import automorph.RpcException.InvalidResponse
 import automorph.protocol.jsonrpc.Message.{Id, version}
 
 /**
@@ -35,7 +35,7 @@ private[automorph] object Response {
   def apply[Node](message: Message[Node]): Response[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "version")
     if (jsonrpc != version) {
-      throw InvalidResponseException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
+      throw InvalidResponse(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
     val id = mandatory(message.id, "id")
     message.result.map(result => Response(id, Some(result), None)).getOrElse {
@@ -55,9 +55,9 @@ private[automorph] object Response {
    *   property type
    * @return
    *   property value
-   * @throws InvalidResponseException
+   * @throws InvalidResponse
    *   if the property value is missing
    */
   def mandatory[T](value: Option[T], name: String): T =
-    value.getOrElse(throw InvalidResponseException(s"Missing message property: $name", None.orNull))
+    value.getOrElse(throw InvalidResponse(s"Missing message property: $name", None.orNull))
 }

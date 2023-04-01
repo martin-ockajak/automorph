@@ -1,8 +1,8 @@
 package automorph.protocol.jsonrpc
 
 import automorph.RpcException.{
-  ApplicationErrorException, FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException,
-  ServerErrorException,
+  ApplicationError, FunctionNotFound, InvalidArguments, InvalidRequest,
+  ServerError,
 }
 
 /** JSON-RPC protocol errors. */
@@ -20,14 +20,14 @@ private[automorph] trait ErrorMapping {
    */
   def defaultMapError(message: String, code: Int): Throwable =
     code match {
-      case ErrorType.ParseError.code => InvalidRequestException(message)
-      case ErrorType.InvalidRequest.code => InvalidRequestException(message)
-      case ErrorType.MethodNotFound.code => FunctionNotFoundException(message)
-      case ErrorType.InvalidParams.code => InvalidArgumentsException(message)
-      case ErrorType.InternalError.code => ServerErrorException(message)
+      case ErrorType.ParseError.code => InvalidRequest(message)
+      case ErrorType.InvalidRequest.code => InvalidRequest(message)
+      case ErrorType.MethodNotFound.code => FunctionNotFound(message)
+      case ErrorType.InvalidParams.code => InvalidArguments(message)
+      case ErrorType.InternalError.code => ServerError(message)
       case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) =>
-        ServerErrorException(message)
-      case _ => ApplicationErrorException(message)
+        ServerError(message)
+      case _ => ApplicationError(message)
     }
 
   /**
@@ -40,10 +40,10 @@ private[automorph] trait ErrorMapping {
    */
   def defaultMapException(exception: Throwable): ErrorType =
     exception match {
-      case _: InvalidRequestException => ErrorType.InvalidRequest
-      case _: FunctionNotFoundException => ErrorType.MethodNotFound
+      case _: InvalidRequest => ErrorType.InvalidRequest
+      case _: FunctionNotFound => ErrorType.MethodNotFound
       case _: IllegalArgumentException => ErrorType.InvalidParams
-      case _: ServerErrorException => ErrorType.ServerError
+      case _: ServerError => ErrorType.ServerError
       case _ => ErrorType.ApplicationError
     }
 }

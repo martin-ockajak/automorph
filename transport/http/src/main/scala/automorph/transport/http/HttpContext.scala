@@ -1,6 +1,6 @@
 package automorph.transport.http
 
-import automorph.RpcException.{FunctionNotFoundException, InvalidRequestException, ServerErrorException}
+import automorph.RpcException.{FunctionNotFound, InvalidRequest, ServerError}
 import automorph.util.Extensions.{ByteArrayOps, StringOps}
 import java.io.IOException
 import java.net.URI
@@ -596,10 +596,10 @@ final case class HttpContext[Message](
 object HttpContext {
 
   private val exceptionToStatusCode: Map[Class[?], Int] = Map[Class[?], Int](
-    classOf[InvalidRequestException] -> 400,
+    classOf[InvalidRequest] -> 400,
     classOf[IllegalArgumentException] -> 400,
-    classOf[FunctionNotFoundException] -> 501,
-    classOf[ServerErrorException] -> 500,
+    classOf[FunctionNotFound] -> 501,
+    classOf[ServerError] -> 500,
     classOf[IOException] -> 500,
   ).withDefaultValue(500)
 

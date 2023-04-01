@@ -160,7 +160,7 @@ object ClientBind {
                 throw new IllegalStateException("Missing method parameter encoder: " + parameter.name)
               )
               parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
-                scala.util.Failure(automorph.RpcException.InvalidRequestException(
+                scala.util.Failure(automorph.RpcException.InvalidRequest(
                   "Malformed argument: " + parameter.name,
                   error
                 ))

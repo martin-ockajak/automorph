@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.RpcException.InvalidResponseException
+import automorph.RpcException.InvalidResponse
 import automorph.client.meta.ClientBind
 import automorph.client.RemoteTell
 import automorph.log.{LogProperties, Logging}
@@ -215,7 +215,7 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
           // Decode result
           result =>
             Try(decodeResult(result, responseContext)).fold(
-              error => raiseError(InvalidResponseException("Malformed result", error), requestProperties),
+              error => raiseError(InvalidResponse("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${rpcProtocol.name} request", requestProperties)
                 system.successful(result)

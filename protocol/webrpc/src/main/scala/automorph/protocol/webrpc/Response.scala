@@ -1,6 +1,6 @@
 package automorph.protocol.webrpc
 
-import automorph.RpcException.InvalidResponseException
+import automorph.RpcException.InvalidResponse
 
 /**
  * Web-RPC call response.
@@ -37,9 +37,9 @@ private[automorph] object Response {
    *   property type
    * @return
    *   property value
-   * @throws InvalidResponseException
+   * @throws InvalidResponse
    *   if the property value is missing
    */
   def mandatory[T](value: Option[T], name: String): T =
-    value.getOrElse(throw InvalidResponseException(s"Missing message property: $name", None.orNull))
+    value.getOrElse(throw InvalidResponse(s"Missing message property: $name", None.orNull))
 }

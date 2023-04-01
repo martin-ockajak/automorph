@@ -1,7 +1,7 @@
 package automorph.protocol.webrpc
 
 import automorph.RpcFunction
-import automorph.RpcException.{InvalidRequestException, InvalidResponseException}
+import automorph.RpcException.{InvalidRequest, InvalidResponse}
 import automorph.protocol.WebRpcProtocol
 import automorph.protocol.webrpc.Message.Request
 import automorph.schema.OpenApi
@@ -68,7 +68,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     // Serialize request
     val messageText = () => Some(messageCodec.text(encodeRequest(request)))
     Try(messageCodec.serialize(encodeRequest(request))).recoverWith { case error =>
-      Failure(InvalidRequestException("Malformed request", error))
+      Failure(InvalidRequest("Malformed request", error))
     }.map { messageBody =>
       val message = protocol.Message((), messageBody, requestProperties, messageText)
       val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
@@ -97,11 +97,11 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
           )
         } else {
           val message = protocol.Message((), requestBody, requestProperties, messageText)
-          Left(ParseError(InvalidRequestException(s"Invalid URL path: $path"), message))
+          Left(ParseError(InvalidRequest(s"Invalid URL path: $path"), message))
         }
       }.getOrElse {
         val message = protocol.Message((), requestBody, requestProperties, messageText)
-        Left(ParseError(InvalidRequestException("Missing URL path"), message))
+        Left(ParseError(InvalidRequest("Missing URL path"), message))
       }
     }
 
@@ -115,7 +115,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       val duplicateParameters = parameterNames.diff(parameterNames.distinct)
       if (duplicateParameters.nonEmpty) {
         Left(ParseError(
-          InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
+          InvalidRequest(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
           protocol.Message((), requestBody),
         ))
       } else { Right(requestContext.parameters.map { case (name, value) => name -> encodeString(value) }.toMap) }
@@ -123,7 +123,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       // Other HTTP methods - deserialize request
       Try(decodeRequest(messageCodec.deserialize(requestBody))).fold(
         error => Left(
-          ParseError(InvalidRequestException("Malformed request", error), protocol.Message((), requestBody))
+          ParseError(InvalidRequest("Malformed request", error), protocol.Message((), requestBody))
         ),
         request => Right(request),
       )
@@ -151,7 +151,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     // Serialize response
     val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
     Try(messageCodec.serialize(encodeResponse(responseMessage))).recoverWith { case error =>
-      Failure(InvalidResponseException("Malformed response", error))
+      Failure(InvalidResponse("Malformed response", error))
     }.map { messageBody =>
       val message = protocol.Message((), messageBody, responseMessage.properties, messageText)
       protocol.Response(result, message)
@@ -166,20 +166,20 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     // Deserialize response
     Try(decodeResponse(messageCodec.deserialize(responseBody))).fold(
       error => Left(
-        ParseError(InvalidResponseException("Malformed response", error), protocol.Message((), responseBody))
+        ParseError(InvalidResponse("Malformed response", error), protocol.Message((), responseBody))
       ),
       responseMessage => {
         // Validate response
         val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
         val message = protocol.Message((), responseBody, responseMessage.properties, messageText)
         Try(Response(responseMessage)).fold(
-          error => Left(ParseError(InvalidResponseException("Malformed response", error), message)),
+          error => Left(ParseError(InvalidResponse("Malformed response", error), message)),
           response =>
             // Check for error
             response.error.fold(
               // Check for result
               response.result match {
-                case None => Left(ParseError(InvalidResponseException("Invalid result", None.orNull), message))
+                case None => Left(ParseError(InvalidResponse("Invalid result", None.orNull), message))
                 case Some(result) => Right(protocol.Response(Success(result), message))
               }
             )(error => Right(protocol.Response(Failure(mapError(error.message, error.code)), message))),

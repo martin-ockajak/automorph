@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.RpcException.InvalidRequestException
+import automorph.RpcException.InvalidRequest
 import automorph.protocol.jsonrpc.Message.{version, Id, Params}
 
 /**
@@ -35,7 +35,7 @@ private[automorph] object Request {
   def apply[Node](message: Message[Node]): Request[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "version")
     if (jsonrpc != version) {
-      throw InvalidRequestException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
+      throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
     val id = message.id
     val method = mandatory(message.method, "method")
@@ -54,9 +54,9 @@ private[automorph] object Request {
    *   property type
    * @return
    *   property value
-   * @throws InvalidRequestException
+   * @throws InvalidRequest
    *   if the property value is missing
    */
   def mandatory[T](value: Option[T], name: String): T =
-    value.getOrElse(throw InvalidRequestException(s"Missing message property: $name", None.orNull))
+    value.getOrElse(throw InvalidRequest(s"Missing message property: $name", None.orNull))
 }

@@ -1,6 +1,6 @@
 package automorph.transport.local.client
 
-import automorph.RpcException.InvalidResponseException
+import automorph.RpcException.InvalidResponse
 import automorph.spi.{ClientTransport, EffectSystem, RequestHandler}
 import automorph.transport.local.LocalContext
 import automorph.transport.local.client.LocalClient.Context
@@ -39,7 +39,7 @@ final case class LocalClient[Effect[_]](
   ): Effect[(InputStream, Context)] =
     handler.processRequest(requestBody, requestContext, requestId).flatMap(_.map { result =>
       effectSystem.successful(result.responseBody -> result.context.getOrElse(context))
-    }.getOrElse(effectSystem.failed(InvalidResponseException("Missing call response", None.orNull))))
+    }.getOrElse(effectSystem.failed(InvalidResponse("Missing call response", None.orNull))))
 
   override def tell(
     requestBody: InputStream,
