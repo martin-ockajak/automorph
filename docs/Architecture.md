@@ -24,14 +24,15 @@ sidebar_position: 3
 
 ## Client
 
-The client can be used to transparently perform type-safe remote API calls or send one-way messages.
+Used to perform type-safe remote API calls or send one-way messages.
 
-Remote APIs can be invoked statically using transparent proxy instances automatically derived from specified API traits or dynamically by supplying the required type information on invocation.
+Remote APIs can be invoked statically using transparent proxy instances automatically derived from specified API
+ traits or dynamically by supplying the required type information on invocation.
 
 **Depends on**
 
-* [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 * [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
+* [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 **Used by**
 
@@ -40,39 +41,35 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 
 ## Server
 
-The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
+Used to serve remote API requests using specific message transport protocol and invoke bound API
+methods to process them.
 
-It provides automatic derivation of remote API RPC bindings for existing API implementations and
-processing of incoming RPC requests into API invocations resulting in corresponding RPC responses.
+Automatically derives remote API bindings for existing API instances.
 
 **Depends on**
 
+* [Server message transport](/api/automorph/spi/ServerMessageTransport.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
-* [Effect system](/api/automorph/spi/EffectSystem.html)
 
 **Used by**
 
-* [Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html)
-* [Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
 * Applications
 
 
 ## Endpoint
 
-The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
+Integrates with an existing message transport layer to receive remote API requests using
+specific message transport protocol and invoke bound API methods to process them.
 
-It provides automatic derivation of remote API RPC bindings for existing API implementations and
-processing of incoming RPC requests into API invocations resulting in corresponding RPC responses.
+Automatically derives remote API bindings for existing API instances.
 
 **Depends on**
 
+* [Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
-* [Effect system](/api/automorph/spi/EffectSystem.html)
 
 **Used by**
 
-* [Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html)
-* [Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
 * Applications
 
 
@@ -90,8 +87,9 @@ The underlying RPC protocol must support remote function invocation.
 
 **Used by**
 
-* [Client](/api/automorph/Client.html)
-* [Handler](/api/automorph/Handler.html)
+* [Client](/api/automorph/RpcClient.html)
+* [Server](/api/automorph/RpcServer.html)
+* [Endpoint](/api/automorph/RpcEndpoint.html)
 
 ### Effect system
 
@@ -102,7 +100,8 @@ The underlying runtime must support monadic composition of effectful values.
 **Used by**
 
 * [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
-* [Handler](/api/automorph/Handler.html)
+* [Server message transport](/api/automorph/spi/ServerMessageTransport.html)
+* [Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html)
 
 ### Message codec
 
@@ -132,7 +131,7 @@ Passively sends requests and receives responses to and from a remote endpoint us
 
 **Used by**
 
-* [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
+* [Client](/api/automorph/RpcClientMessageTransport.html)
 
 #### Server transport
 
@@ -142,7 +141,7 @@ Actively receives requests to be processed by the RPC handler and sends response
 
 **Depends on**
 
-* [Handler](/api/automorph/Handler.html)
+* [Effect system](/api/automorph/spi/EffectSystem.html)
 
 **Used by**
 
@@ -156,7 +155,7 @@ Passively parses requests to be processed by the RPC handler and creates respons
 
 **Depends on**
 
-* [Handler](/api/automorph/Handler.html)
+* [Effect system](/api/automorph/spi/EffectSystem.html)
 
 **Used by**
 
