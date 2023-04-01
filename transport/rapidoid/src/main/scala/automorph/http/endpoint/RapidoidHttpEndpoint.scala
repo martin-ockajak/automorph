@@ -50,7 +50,7 @@ final case class RapidoidHttpEndpoint[Effect[_]](
         error => sendErrorResponse(error, request, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+          val responseBody = result.responseBody.getOrElse(nullInputStream())
           val statusCode = result.exception.map(mapException).getOrElse(statusOk)
           sendResponse(responseBody, statusCode, result.context, request, requestId)
         },

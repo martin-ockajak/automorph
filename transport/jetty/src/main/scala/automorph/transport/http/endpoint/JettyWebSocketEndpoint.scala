@@ -8,6 +8,7 @@ import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import java.io.{ByteArrayInputStream, InputStream}
+import java.io.InputStream.nullInputStream
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.websocket.api.{Session, UpgradeRequest, WebSocketAdapter, WriteCallback}
 import org.eclipse.jetty.websocket.server.{JettyServerUpgradeRequest, JettyServerUpgradeResponse, JettyWebSocketCreator}
@@ -82,7 +83,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
         error => sendErrorResponse(error, session, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+          val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
           sendResponse(responseBody, session, requestId)
         },
       )

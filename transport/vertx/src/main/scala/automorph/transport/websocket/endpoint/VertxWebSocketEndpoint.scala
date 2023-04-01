@@ -10,6 +10,7 @@ import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
@@ -66,7 +67,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
             error => sendErrorResponse(error, session, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
               sendResponse(responseBody, session, requestId)
             },
           )

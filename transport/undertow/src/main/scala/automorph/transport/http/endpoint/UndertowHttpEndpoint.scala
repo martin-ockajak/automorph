@@ -11,6 +11,7 @@ import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.{IOException, InputStream}
+import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
@@ -73,7 +74,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
                   error => sendErrorResponse(error, exchange, requestId, requestProperties),
                   result => {
                     // Send the response
-                    val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+                    val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
                     val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
                     sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
                   },

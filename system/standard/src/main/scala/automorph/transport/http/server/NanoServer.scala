@@ -11,6 +11,7 @@ import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
+import java.io.InputStream.nullInputStream
 import java.net.URI
 import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
 import scala.collection.immutable.ListMap
@@ -183,7 +184,7 @@ final case class NanoServer[Effect[_]] (
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
             val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
             createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
           },

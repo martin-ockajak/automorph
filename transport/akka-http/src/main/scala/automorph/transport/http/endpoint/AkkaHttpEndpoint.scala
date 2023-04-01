@@ -17,6 +17,7 @@ import automorph.util.Extensions.{
 }
 import automorph.util.{Network, Random}
 import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -107,7 +108,7 @@ case class AkkaHttpEndpoint[Effect[_]](
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
-              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
               val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
                 .getOrElse(StatusCodes.OK)
               createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)

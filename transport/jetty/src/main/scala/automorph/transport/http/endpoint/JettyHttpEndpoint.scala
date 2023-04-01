@@ -9,6 +9,7 @@ import automorph.util.{Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
@@ -67,7 +68,7 @@ final case class JettyHttpEndpoint[Effect[_]](
           error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
             val status = result.flatMap(_.exception).map(mapException).getOrElse(HttpStatus.OK_200)
             sendResponse(responseBody, status, result.flatMap(_.context), response, asyncContext, request, requestId)
           },

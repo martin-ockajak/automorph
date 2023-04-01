@@ -14,6 +14,7 @@ import io.undertow.websockets.core.{
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Try
@@ -115,7 +116,7 @@ object UndertowWebSocketEndpoint {
             error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
               sendResponse(responseBody, exchange, channel, requestId)
               discardMessage()
             },
