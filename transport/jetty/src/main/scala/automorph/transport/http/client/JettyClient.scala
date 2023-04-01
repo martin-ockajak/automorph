@@ -59,7 +59,7 @@ final case class JettyClient[Effect[_]](
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,

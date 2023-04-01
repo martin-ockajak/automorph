@@ -44,7 +44,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
 ) extends RequestHandler[Effect, Context] with Logging {
 
   private val bindings = apiSchemaBindings ++ apiBindings
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   /** Bound RPC functions. */
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>

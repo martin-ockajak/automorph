@@ -43,7 +43,7 @@ final case class UrlClient[Effect[_]](
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(

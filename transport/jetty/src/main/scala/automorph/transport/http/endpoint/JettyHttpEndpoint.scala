@@ -45,7 +45,7 @@ final case class JettyHttpEndpoint[Effect[_]](
 ) extends HttpServlet with Logging with EndpointTransport[Effect, Context, HttpServlet] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def adapter: HttpServlet =
     this

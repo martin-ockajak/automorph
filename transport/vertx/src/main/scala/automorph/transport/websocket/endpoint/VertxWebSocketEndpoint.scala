@@ -43,7 +43,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
 
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.WebSocket.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def adapter: Handler[ServerWebSocket] =
     this

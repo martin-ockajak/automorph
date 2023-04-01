@@ -55,7 +55,7 @@ final case class RabbitMqClient[Effect[_]](
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Completable[Effect, Response]]()
   private val log = MessageLog(logger, RabbitMq.protocol)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,

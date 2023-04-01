@@ -55,7 +55,7 @@ final case class TapirHttpEndpoint[Effect[_]](
     throw new IllegalArgumentException(s"Invalid content type: ${handler.mediaType}")
   })
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 

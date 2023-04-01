@@ -60,7 +60,7 @@ case class AkkaHttpEndpoint[Effect[_]](
     new IllegalStateException(s"Invalid message content type: ${errors.map(_.toString).mkString("\n")}")
   }.swap.toTry.get
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: Route =
     extractRequest { httpRequest =>

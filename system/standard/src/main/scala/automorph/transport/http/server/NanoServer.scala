@@ -68,7 +68,7 @@ final case class NanoServer[Effect[_]] (
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
   private val allowedMethods = methods.map(_.name).toSet
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def clone(handler: RequestHandler[Effect, Context]): NanoServer[Effect] = {
     this.handler = handler

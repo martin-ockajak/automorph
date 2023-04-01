@@ -87,7 +87,7 @@ object UndertowWebSocketEndpoint {
     exchange: WebSocketHttpExchange,
   ) extends AbstractReceiveListener {
 
-    implicit private val system: EffectSystem[Effect] = effectSystem
+    private implicit val system: EffectSystem[Effect] = effectSystem
 
     override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit =
       handle(exchange, message.getData.toInputStream, channel, () => ())

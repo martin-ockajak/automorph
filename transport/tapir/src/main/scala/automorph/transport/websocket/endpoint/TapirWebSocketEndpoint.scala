@@ -46,7 +46,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
 ] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[
     Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect

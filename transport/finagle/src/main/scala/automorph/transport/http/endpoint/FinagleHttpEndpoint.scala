@@ -43,7 +43,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 ) extends Service[Request, Response] with Logging with EndpointTransport[Effect, Context, Service[Request, Response]] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def adapter: Service[Request, Response] =
     this

@@ -55,7 +55,7 @@ final case class RabbitMqServer[Effect[_]](
   private val serverId = RabbitMq.applicationId(getClass.getName)
   private val urlText = url.toString
   private val log = MessageLog(logger, RabbitMq.protocol)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def clone(handler: RequestHandler[Effect, Context]): RabbitMqServer[Effect] =
     copy(handler = handler)

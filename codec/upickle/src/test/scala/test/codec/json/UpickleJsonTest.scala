@@ -26,7 +26,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
   ))
 
   private lazy val custom = codec.custom
-  implicit private lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
+  private implicit lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
 
   "" - {
     "Encode & Decode" in {

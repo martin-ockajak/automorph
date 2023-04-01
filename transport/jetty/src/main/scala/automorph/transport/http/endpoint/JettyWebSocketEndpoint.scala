@@ -49,7 +49,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
   with EndpointTransport[Effect, Context, WebSocketAdapter] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   /** Jetty WebSocket creator. */
   def creator: JettyWebSocketCreator =

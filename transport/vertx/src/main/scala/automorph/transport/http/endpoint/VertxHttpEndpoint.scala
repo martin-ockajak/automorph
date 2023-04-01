@@ -48,7 +48,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private val statusInternalServerError = 500
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def adapter: Handler[HttpServerRequest] =
     this

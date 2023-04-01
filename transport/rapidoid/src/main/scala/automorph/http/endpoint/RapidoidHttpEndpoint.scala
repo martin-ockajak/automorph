@@ -34,7 +34,7 @@ final case class RapidoidHttpEndpoint[Effect[_]](
   private val statusInternalServerError = 500
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  private implicit val system: EffectSystem[Effect] = genericHandler.system
 
   override def execute(request: Req): AnyRef = {
     // Log the request
