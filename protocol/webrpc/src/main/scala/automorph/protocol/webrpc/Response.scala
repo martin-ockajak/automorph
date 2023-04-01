@@ -12,7 +12,7 @@ import automorph.RpcException.InvalidResponse
  * @tparam Node
  *   message node type
  */
-final private[automorph] case class Response[Node](result: Option[Node], error: Option[ResponseError]) {
+private[automorph] final case class Response[Node](result: Option[Node], error: Option[ResponseError]) {
 
   def message: Message[Node] =
     Message[Node](result = result, error = error.map(_.formed))

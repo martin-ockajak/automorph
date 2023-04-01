@@ -17,7 +17,7 @@ import automorph.protocol.jsonrpc.Message.{Id, version}
  * @tparam Node
  *   message node type
  */
-final private[automorph] case class Response[Node](id: Id, result: Option[Node], error: Option[ResponseError[Node]]) {
+private[automorph] final case class Response[Node](id: Id, result: Option[Node], error: Option[ResponseError[Node]]) {
 
   def message: Message[Node] =
     Message[Node](
