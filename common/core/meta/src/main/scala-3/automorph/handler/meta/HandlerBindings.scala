@@ -1,6 +1,6 @@
 package automorph.handler.meta
 
-import automorph.Contextual
+import automorph.RpcResult
 import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.reflection.MethodReflection.functionToExpr
@@ -151,11 +151,11 @@ private[automorph] object HandlerBindings:
     //     codec.encode[ResultType](result.asInstanceOf[ResultType]) -> Option.empty[Context]
     //       OR
     //   (result: Any) =>
-    //     codec.encode[ContextualResultType](result.asInstanceOf[ResultType].result) -> Some(
+    //     codec.encode[RpcResultResultType](result.asInstanceOf[ResultType].result) -> Some(
     //       result.asInstanceOf[ResultType].context
     //     )
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
-    MethodReflection.contextualResult[Context, Contextual](ref.q)(resultType).map { contextualResultType =>
+    MethodReflection.contextualResult[Context, RpcResult](ref.q)(resultType).map { contextualResultType =>
       contextualResultType.asType match
         case '[resultValueType] => '{
           (result: Any) => ${
@@ -164,9 +164,9 @@ private[automorph] object HandlerBindings:
               codec.asTerm,
               MessageCodec.encodeMethod,
               List(contextualResultType),
-              List(List('{ result.asInstanceOf[Contextual[resultValueType, Context]].result }.asTerm))
+              List(List('{ result.asInstanceOf[RpcResult[resultValueType, Context]].result }.asTerm))
             ).asExprOf[Node]
-          } -> Some(result.asInstanceOf[Contextual[resultValueType, Context]].context)
+          } -> Some(result.asInstanceOf[RpcResult[resultValueType, Context]].context)
         }
     }.getOrElse {
       resultType.asType match

@@ -1,8 +1,8 @@
 package automorph.schema
 
-import automorph.schema.OpenApi
+import automorph.RpcFunction
 import automorph.schema.openapi.{Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Schema}
-import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import RpcFunction.Parameter
 import test.base.BaseTest
 
 class OpenApiTest extends BaseTest {
@@ -10,9 +10,9 @@ class OpenApiTest extends BaseTest {
   private val function = RpcFunction(
     "test",
     Seq(
-      RpcParameter("foo", "String"),
-      RpcParameter("bar", "Integer"),
-      RpcParameter("alt", "Option[Map[String, Boolean]"),
+      Parameter("foo", "String"),
+      Parameter("bar", "Integer"),
+      Parameter("alt", "Option[Map[String, Boolean]"),
     ),
     "Seq[String]",
     Some("Test function"),

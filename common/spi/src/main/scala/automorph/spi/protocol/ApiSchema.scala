@@ -1,5 +1,7 @@
 package automorph.spi.protocol
 
+import automorph.RpcFunction
+
 /**
  * RPC API description operation.
  *
@@ -12,7 +14,7 @@ package automorph.spi.protocol
  * @tparam Node
  *   message node type
  */
-final case class RpcApiSchema[Node](
+final case class ApiSchema[Node](
   function: RpcFunction,
   describe: Iterable[RpcFunction] => Node,
 )

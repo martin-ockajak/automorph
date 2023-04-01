@@ -1,9 +1,11 @@
 package automorph.handler
 
+import automorph.RpcFunction
 import automorph.RpcException.{FunctionNotFoundException, InvalidRequestException}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
-import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol, RpcResult}
+import automorph.spi.RequestHandler.Result
+import automorph.spi.protocol.{Message, Request}
+import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol}
 import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 import scala.collection.immutable.ListMap
@@ -49,7 +51,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     binding.function.copy(name = name)
   }.toSeq
 
-  override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[RpcResult[Context]]] =
+  override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[Result[Context]]] =
     // Parse request
     rpcProtocol.parseRequest(body, context, id).fold(
       error =>
@@ -86,10 +88,10 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    *   bound RPC function call response
    */
   private def callFunction(
-    rpcRequest: RpcRequest[Node, rpcProtocol.Metadata, Context],
+    rpcRequest: Request[Node, rpcProtocol.Metadata, Context],
     context: Context,
     requestProperties: => Map[String, String],
-  ): Effect[Option[RpcResult[Context]]] = {
+  ): Effect[Option[Result[Context]]] = {
     // Lookup bindings for the specified remote function
     val responseRequired = rpcRequest.responseRequired
     logger.debug(s"Processing ${rpcProtocol.name} request", requestProperties)
@@ -132,7 +134,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    *   bound function arguments
    */
   private def extractArguments(
-    rpcRequest: RpcRequest[Node, ?, Context],
+    rpcRequest: Request[Node, ?, Context],
     binding: HandlerBinding[Node, Effect, Context],
   ): Try[Seq[Option[Node]]] = {
     // Adjust expected function parameters if it uses context as its last parameter
@@ -218,9 +220,9 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    */
   private def resultResponse(
     callResult: Effect[(Node, Option[Context])],
-    rpcRequest: RpcRequest[Node, rpcProtocol.Metadata, Context],
+    rpcRequest: Request[Node, rpcProtocol.Metadata, Context],
     requestProperties: => Map[String, String],
-  ): Effect[Option[RpcResult[Context]]] =
+  ): Effect[Option[Result[Context]]] =
     callResult.either.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${rpcProtocol.name} request", error, requestProperties),
@@ -251,10 +253,10 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    */
   private def errorResponse(
     error: Throwable,
-    message: RpcMessage[rpcProtocol.Metadata],
+    message: Message[rpcProtocol.Metadata],
     responseRequired: Boolean,
     requestProperties: => Map[String, String],
-  ): Effect[Option[RpcResult[Context]]] = {
+  ): Effect[Option[Result[Context]]] = {
     logger.error(s"Failed to process ${rpcProtocol.name} request", error, requestProperties)
     Option.when(responseRequired) {
       response(Failure(error), message, requestProperties)
@@ -275,9 +277,9 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    */
   private def response(
     result: Try[(Node, Option[Context])],
-    message: RpcMessage[rpcProtocol.Metadata],
+    message: Message[rpcProtocol.Metadata],
     requestProperties: => Map[String, String],
-  ): Effect[Option[RpcResult[Context]]] =
+  ): Effect[Option[Result[Context]]] =
     rpcProtocol.createResponse(result.map(_._1), message.metadata).fold(
       error => effectSystem.failed(error),
       rpcResponse => {
@@ -286,7 +288,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${rpcProtocol.name} response", allProperties)
         effectSystem.successful(
-          Some(RpcResult(responseBody, result.failed.toOption, result.toOption.flatMap(_._2)))
+          Some(Result(responseBody, result.failed.toOption, result.toOption.flatMap(_._2)))
         )
       },
     )

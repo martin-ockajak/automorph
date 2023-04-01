@@ -1,6 +1,6 @@
 package test
 
-import automorph.Contextual
+import automorph.RpcResult
 import automorph.spi.EffectSystem
 
 trait SimpleApi[Effect[_]] {
@@ -33,7 +33,7 @@ trait ComplexApi[Effect[_], Context] {
 
   def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Record]
 
-  def method8(p0: Record, p1: String, p2: Option[Double]): Effect[Contextual[String, Context]]
+  def method8(p0: Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]]
 
   def method9(p0: String): Effect[String]
 
@@ -71,10 +71,10 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
       enumeration = Enum.fromOrdinal(1),
     ))
 
-  override def method8(p0: Record, p1: String, p2: Option[Double]): Effect[Contextual[String, Context]] =
+  override def method8(p0: Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]] =
     backend.successful(p0.int match {
-      case Some(int) => Contextual(s"${int.toString} - $p1", defaultContext)
-      case _ => Contextual(s"${p2.getOrElse(0)}", defaultContext)
+      case Some(int) => RpcResult(s"${int.toString} - $p1", defaultContext)
+      case _ => RpcResult(s"${p2.getOrElse(0)}", defaultContext)
     })
 
   override def method9(p0: String): Effect[String] =

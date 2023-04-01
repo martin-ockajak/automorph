@@ -1,12 +1,14 @@
 package automorph.protocol.webrpc
 
+import automorph.RpcFunction
 import automorph.RpcException.{InvalidRequestException, InvalidResponseException}
 import automorph.protocol.WebRpcProtocol
 import automorph.protocol.webrpc.Message.Request
 import automorph.schema.OpenApi
 import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.spi.MessageCodec
-import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol
+import automorph.spi.protocol.{ApiSchema, ParseError}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.ThrowableOps
 import java.io.InputStream
@@ -57,7 +59,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     responseRequired: Boolean,
     requestContext: Context,
     requestId: String,
-  ): Try[RpcRequest[Node, Metadata, Context]] = {
+  ): Try[protocol.Request[Node, Metadata, Context]] = {
     // Create request
     val request = arguments.toMap
     val requestProperties =
@@ -68,11 +70,11 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     Try(messageCodec.serialize(encodeRequest(request))).recoverWith { case error =>
       Failure(InvalidRequestException("Malformed request", error))
     }.map { messageBody =>
-      val message = RpcMessage((), messageBody, requestProperties, messageText)
+      val message = protocol.Message((), messageBody, requestProperties, messageText)
       val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
       val requestPath = s"${requestContext.path.getOrElse("")}/$function"
       val functionRequestContext = requestContext.path(requestPath).asInstanceOf[Context]
-      RpcRequest(message, function, requestArguments, responseRequired, requestId, functionRequestContext)
+      protocol.Request(message, function, requestArguments, responseRequired, requestId, functionRequestContext)
     }
   }
 
@@ -80,7 +82,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]] =
+  ): Either[ParseError[Metadata], protocol.Request[Node, Metadata, Context]] =
     retrieveRequest(requestBody, requestContext).flatMap { request =>
       // Validate request
       val messageText = () => Some(messageCodec.text(encodeRequest(request)))
@@ -88,43 +90,47 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       requestContext.path.map { path =>
         if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
           val function = functionSeparator.replaceFirstIn(path.substring(pathPrefix.length, path.length), "")
-          val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
+          val message = protocol.Message((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
           val requestArguments = request.map(Right.apply[Node, (String, Node)]).toSeq
-          Right(RpcRequest(message, function, requestArguments, responseRequired = true, requestId, requestContext))
+          Right(
+            protocol.Request(message, function, requestArguments, responseRequired = true, requestId, requestContext)
+          )
         } else {
-          val message = RpcMessage((), requestBody, requestProperties, messageText)
-          Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
+          val message = protocol.Message((), requestBody, requestProperties, messageText)
+          Left(ParseError(InvalidRequestException(s"Invalid URL path: $path"), message))
         }
       }.getOrElse {
-        val message = RpcMessage((), requestBody, requestProperties, messageText)
-        Left(RpcError(InvalidRequestException("Missing URL path"), message))
+        val message = protocol.Message((), requestBody, requestProperties, messageText)
+        Left(ParseError(InvalidRequestException("Missing URL path"), message))
       }
     }
 
   private def retrieveRequest(
     requestBody: InputStream,
     requestContext: Context,
-  ): Either[RpcError[Metadata], Request[Node]] =
+  ): Either[ParseError[Metadata], Request[Node]] =
     requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
       // HTTP GET method - assemble request from URL query parameters
       val parameterNames = requestContext.parameters.map(_._1)
       val duplicateParameters = parameterNames.diff(parameterNames.distinct)
       if (duplicateParameters.nonEmpty) {
-        Left(RpcError(
+        Left(ParseError(
           InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
-          RpcMessage((), requestBody),
+          protocol.Message((), requestBody),
         ))
       } else { Right(requestContext.parameters.map { case (name, value) => name -> encodeString(value) }.toMap) }
     }.getOrElse {
       // Other HTTP methods - deserialize request
       Try(decodeRequest(messageCodec.deserialize(requestBody))).fold(
-        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
+        error => Left(
+          ParseError(InvalidRequestException("Malformed request", error), protocol.Message((), requestBody))
+        ),
         request => Right(request),
       )
     }
 
   @nowarn("msg=used")
-  override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
+  override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[protocol.Response[Node, Metadata]] = {
     // Create response
     val responseMessage = result.fold(
       error => {
@@ -147,8 +153,8 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     Try(messageCodec.serialize(encodeResponse(responseMessage))).recoverWith { case error =>
       Failure(InvalidResponseException("Malformed response", error))
     }.map { messageBody =>
-      val message = RpcMessage((), messageBody, responseMessage.properties, messageText)
-      RpcResponse(result, message)
+      val message = protocol.Message((), messageBody, responseMessage.properties, messageText)
+      protocol.Response(result, message)
     }
   }
 
@@ -156,31 +162,33 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   override def parseResponse(
     responseBody: InputStream,
     responseContext: Context,
-  ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
+  ): Either[ParseError[Metadata], protocol.Response[Node, Metadata]] =
     // Deserialize response
     Try(decodeResponse(messageCodec.deserialize(responseBody))).fold(
-      error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), responseBody))),
+      error => Left(
+        ParseError(InvalidResponseException("Malformed response", error), protocol.Message((), responseBody))
+      ),
       responseMessage => {
         // Validate response
         val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
-        val message = RpcMessage((), responseBody, responseMessage.properties, messageText)
+        val message = protocol.Message((), responseBody, responseMessage.properties, messageText)
         Try(Response(responseMessage)).fold(
-          error => Left(RpcError(InvalidResponseException("Malformed response", error), message)),
+          error => Left(ParseError(InvalidResponseException("Malformed response", error), message)),
           response =>
             // Check for error
             response.error.fold(
               // Check for result
               response.result match {
-                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
-                case Some(result) => Right(RpcResponse(Success(result), message))
+                case None => Left(ParseError(InvalidResponseException("Invalid result", None.orNull), message))
+                case Some(result) => Right(protocol.Response(Success(result), message))
               }
-            )(error => Right(RpcResponse(Failure(mapError(error.message, error.code)), message))),
+            )(error => Right(protocol.Response(Failure(mapError(error.message, error.code)), message))),
         )
       },
     )
 
-  override def apiSchemas: Seq[RpcApiSchema[Node]] =
-    Seq(RpcApiSchema(
+  override def apiSchemas: Seq[ApiSchema[Node]] =
+    Seq(ApiSchema(
       RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
       functions => encodeOpenApi(openApi(functions)),
     ))

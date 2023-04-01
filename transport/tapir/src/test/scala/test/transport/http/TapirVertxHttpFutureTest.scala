@@ -13,6 +13,7 @@
 //import sttp.tapir.server.vertx.VertxFutureServerInterpreter
 //import sttp.tapir.server.vertx.VertxFutureServerInterpreter.VertxFutureToScalaFuture
 //import test.standard.StandardHttpServerTest
+//import test.transport.http.TapirVertxHttpFutureTest.TapirServer
 //
 //class TapirVertxHttpFutureTest extends StandardHttpServerTest {
 //
@@ -30,7 +31,14 @@
 //  def serverTransport(id: Int): ServerTransport[Effect, Context] =
 //    TapirServer(system, port(id))
 //
-//  private final case class TapirServer(
+//}
+//
+//object TapirVertxHttpFutureTest {
+//
+//  type Effect[T] = Future[T]
+//  type Context = TapirHttpEndpoint.Context
+//
+//  final case class TapirServer(
 //    effectSystem: EffectSystem[Effect],
 //    port: Int
 //  ) extends ServerTransport[Effect, Context] {

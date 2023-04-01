@@ -1,6 +1,6 @@
 package automorph.reflection
 
-import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import automorph.RpcFunction
 import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
@@ -23,8 +23,8 @@ private[automorph] object MethodReflection {
       import ref.c.universe.{Liftable, Quasiquote, Tree}
 
       @nowarn("msg=used")
-      implicit val parameterLiftable: Liftable[RpcParameter] = (v: RpcParameter) => q"""
-        automorph.spi.protocol.RpcParameter(
+      implicit val parameterLiftable: Liftable[RpcFunction.Parameter] = (v: RpcFunction.Parameter) => q"""
+        automorph.RpcFunction.Parameter(
           ${v.name},
           ${v.`type`}
         )
@@ -32,7 +32,7 @@ private[automorph] object MethodReflection {
 
       override def apply(v: RpcFunction): Tree =
         q"""
-        automorph.spi.protocol.RpcFunction(
+        automorph.RpcFunction(
           ${v.name},
           Seq(..${v.parameters}),
           ${v.resultType},
@@ -175,13 +175,13 @@ private[automorph] object MethodReflection {
    *   macro context type
    * @tparam Context
    *   RPC message context type
-   * @tparam Contextual
+   * @tparam RpcResult
    *   contextual result type
    * @return
    *   contextual result type if applicable
    */
   @nowarn("msg=check")
-  def contextualResult[C <: blackbox.Context, Context: c.WeakTypeTag, Contextual: c.WeakTypeTag](
+  def contextualResult[C <: blackbox.Context, Context: c.WeakTypeTag, RpcResult: c.WeakTypeTag](
     c: C
   )(someType: c.Type): Option[c.Type] = {
     import c.universe.TypeRef
@@ -190,9 +190,9 @@ private[automorph] object MethodReflection {
     someType.dealias match {
       case typeRef: TypeRef
         // FIXME - fix generic parameter type detection
-        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size == 2
+        if typeRef.typeConstructor <:< c.weakTypeOf[RpcResult].typeConstructor && typeRef.typeArgs.size == 2
          => Some(typeRef.typeArgs(0))
-//        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size == 2 &&
+//        if typeRef.typeConstructor <:< c.weakTypeOf[RpcResult].typeConstructor && typeRef.typeArgs.size == 2 &&
 //        typeRef.typeArgs(1) =:= c.weakTypeOf[Context] => Some(typeRef.typeArgs(0))
       case _ => None
     }

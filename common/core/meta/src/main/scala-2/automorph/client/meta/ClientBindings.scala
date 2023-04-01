@@ -1,11 +1,10 @@
 package automorph.client.meta
 
-import automorph.Contextual
+import automorph.{RpcResult, RpcFunction}
 import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.reflection.{MethodReflection, ClassReflection}
 import automorph.spi.MessageCodec
-import automorph.spi.protocol.RpcFunction
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -151,14 +150,14 @@ object ClientBindings {
     // Create a result decoding function
     //   (resultNode: Node, responseContext: Context) => codec.decode[ResultType](resultNode)
     //     OR
-    //   (resultNode: Node, responseContext: Context) => Contextual(
-    //     codec.decode[ContextualResultType](resultNode),
+    //   (resultNode: Node, responseContext: Context) => RpcResult(
+    //     codec.decode[RpcResultResultType](resultNode),
     //     responseContext
     //   )
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
-    MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
+    MethodReflection.contextualResult[C, Context, RpcResult[?, ?]](ref.c)(resultType).map { contextualResultType =>
       ref.c.Expr[(Node, Context) => Any](q"""
-        (resultNode: $nodeType, responseContext: $contextType) => automorph.Contextual(
+        (resultNode: $nodeType, responseContext: $contextType) => automorph.RpcResult(
           $codec.decode[$contextualResultType](resultNode),
           responseContext
         )

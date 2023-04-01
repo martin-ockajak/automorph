@@ -1,7 +1,6 @@
 package automorph.reflection
 
-import automorph.Contextual
-import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import automorph.{RpcResult, RpcFunction}
 import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 
 /** Method introspection. */
@@ -16,15 +15,17 @@ private[automorph] object MethodReflection:
   given functionToExpr: ToExpr[RpcFunction] =
     new ToExpr[RpcFunction]:
 
-      given parameterToExpr: ToExpr[RpcParameter] =
-        new ToExpr[RpcParameter]:
+      given parameterToExpr: ToExpr[RpcFunction.Parameter] =
+        new ToExpr[RpcFunction.Parameter]:
 
-          override def apply(v: RpcParameter)(using Quotes): Expr[RpcParameter] =
-            '{ RpcParameter(${ Expr(v.name) }, ${ Expr(v.`type`) }) }
+          override def apply(v: RpcFunction.Parameter)(using Quotes): Expr[RpcFunction.Parameter] =
+            '{ RpcFunction.Parameter(${ Expr(v.name) }, ${ Expr(v.`type`) }) }
 
       override def apply(v: RpcFunction)(using Quotes): Expr[RpcFunction] =
         '{
-          RpcFunction(${ Expr(v.name) }, ${ Expr(v.parameters) }, ${ Expr(v.resultType) }, ${ Expr(v.documentation) })
+          RpcFunction(
+            ${ Expr(v.name) }, ${ Expr(v.parameters) }, ${ Expr(v.resultType) }, ${ Expr(v.documentation) }
+          )
         }
 
   /**
@@ -82,19 +83,19 @@ private[automorph] object MethodReflection:
    *   wrapped type
    * @tparam Context
    *   RPC message context type
-   * @tparam Contextual
+   * @tparam RpcResult
    *   contextual result type
    * @return
    *   contextual result type if applicable
    */
-  def contextualResult[Context: Type, Contextual[_, _]: Type](q: Quotes)(
+  def contextualResult[Context: Type, RpcResult[_, _]: Type](q: Quotes)(
     someType: q.reflect.TypeRepr
   ): Option[q.reflect.TypeRepr] =
     import q.reflect.{AppliedType, TypeRepr}
 
     someType.dealias match {
       case appliedType: AppliedType
-        if appliedType.tycon <:< TypeRepr.of[Contextual] && appliedType.args.size > 1 &&
+        if appliedType.tycon <:< TypeRepr.of[RpcResult] && appliedType.args.size > 1 &&
         appliedType.args(1) =:= TypeRepr.of[Context] => Some(appliedType.args(0))
       case _ => None
     }

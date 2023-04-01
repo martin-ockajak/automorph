@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.reflection.MethodReflection
 import automorph.spi.MessageCodec
-import automorph.Contextual
+import automorph.RpcResult
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -370,9 +370,9 @@ object RemoteInvoke {
     val resultType = weakTypeOf[Result]
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    MethodReflection.contextualResult[c.type, Context, Contextual[?, ?]](c)(resultType).map { contextualResultType =>
+    MethodReflection.contextualResult[c.type, Context, RpcResult[?, ?]](c)(resultType).map { contextualResultType =>
       c.Expr[(Node, Context) => Result](q"""
-          (resultNode: $nodeType, responseContext: $contextType) => Contextual(
+          (resultNode: $nodeType, responseContext: $contextType) => RpcResult(
             $codec.decode[$contextualResultType](resultNode),
             responseContext
           )

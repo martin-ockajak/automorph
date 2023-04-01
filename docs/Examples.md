@@ -917,7 +917,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.Default.{ClientContext, ServerContext}
 import automorph.transport.http.HttpContext
-import automorph.{Contextual, Default}
+import automorph.{Default, RpcResult}
 import java.net.URI
 ```
 
@@ -928,7 +928,7 @@ import java.net.URI
 class ServerApi {
 
   // Return HTTP response context consumed by the server message transport plugin
-  def hello(message: String): Contextual[String, ServerContext] = Contextual(
+  def hello(message: String): RpcResult[String, ServerContext] = RpcResult(
     message,
     HttpContext().headers("X-Test" -> "value", "Cache-Control" -> "no-cache").statusCode(200)
   )
@@ -946,7 +946,7 @@ val server = Default.serverSync(7000, "/api").bind(api).init()
 trait ClientApi {
 
   // Return HTTP response context provided by the client message transport plugin
-  def hello(message: String): Contextual[String, ClientContext]
+  def hello(message: String): RpcResult[String, ClientContext]
 }
 
 // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
@@ -959,7 +959,7 @@ println(static.result)
 println(static.context.header("X-Test"))
 
 // Call the remote API function dynamically retrieving a result with HTTP response metadata
-val dynamic = client.call[Contextual[String, ClientContext]]("hello")("message" -> "test")
+val dynamic = client.call[RpcResult[String, ClientContext]]("hello")("message" -> "test")
 println(dynamic.result)
 println(dynamic.context.header("X-Test"))
 ```

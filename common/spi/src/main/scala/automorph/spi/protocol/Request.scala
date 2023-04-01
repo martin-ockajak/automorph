@@ -22,8 +22,8 @@ package automorph.spi.protocol
  * @tparam Context
  * message context type
  */
-final case class RpcRequest[Node, Metadata, Context](
-  message: RpcMessage[Metadata],
+final case class Request[Node, Metadata, Context](
+  message: Message[Metadata],
   function: String,
   arguments: Seq[Either[Node, (String, Node)]],
   responseRequired: Boolean,

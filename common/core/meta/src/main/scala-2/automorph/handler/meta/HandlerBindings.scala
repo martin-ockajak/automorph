@@ -1,10 +1,9 @@
 package automorph.handler.meta
 
-import automorph.Contextual
+import automorph.{RpcResult, RpcFunction}
 import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.reflection.{MethodReflection, ClassReflection}
-import automorph.spi.protocol.RpcFunction
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -163,12 +162,12 @@ object HandlerBindings {
     //     codec.encode[ResultType](result.asInstanceOf[ResultType]) -> Option.empty[Context]
     //       OR
     //   (result: Any) =>
-    //     codec.encode[ContextualResultType](result.asInstanceOf[ResultType].result) -> Some(
+    //     codec.encode[RpcResultResultType](result.asInstanceOf[ResultType].result) -> Some(
     //       result.asInstanceOf[ResultType].context
     //     )
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
     ref.c.Expr[Any => (Node, Option[Context])](
-      MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
+      MethodReflection.contextualResult[C, Context, RpcResult[?, ?]](ref.c)(resultType).map { contextualResultType =>
         q"""
           (result: Any) =>
             $codec.encode[$contextualResultType](result.asInstanceOf[$resultType].result) -> Some(

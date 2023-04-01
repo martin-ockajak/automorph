@@ -1,4 +1,6 @@
-package automorph.spi.protocol
+package automorph
+
+import automorph.RpcFunction.Parameter
 
 /**
  * Remote function descriptor.
@@ -14,7 +16,7 @@ package automorph.spi.protocol
  */
 final case class RpcFunction(
   name: String,
-  parameters: Seq[RpcParameter],
+  parameters: Seq[Parameter],
   resultType: String,
   documentation: Option[String],
 ) {
@@ -26,12 +28,15 @@ final case class RpcFunction(
   }
 }
 
-/**
- * Function parameter descriptor.
- *
- * @param name
- *   name
- * @param `type`
- *   type
- */
-final case class RpcParameter(name: String, `type`: String)
+object RpcFunction {
+
+  /**
+   * Function parameter descriptor.
+   *
+   * @param name
+   *   name
+   * @param `type`
+   *   type
+   */
+  final case class Parameter(name: String, `type`: String)
+}

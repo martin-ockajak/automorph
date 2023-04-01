@@ -1,17 +1,17 @@
 package automorph.schema
 
-import automorph.schema.OpenRpc
+import automorph.RpcFunction
 import automorph.schema.openrpc.{ContentDescriptor, Info, Method, Schema}
-import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import RpcFunction.Parameter
 import test.base.BaseTest
 
 class OpenRpcTest extends BaseTest {
   private val function = RpcFunction(
     "test",
     Seq(
-      RpcParameter("foo", "String"),
-      RpcParameter("bar", "Integer"),
-      RpcParameter("alt", "Option[Map[String, Boolean]"),
+      Parameter("foo", "String"),
+      Parameter("bar", "Integer"),
+      Parameter("alt", "Option[Map[String, Boolean]"),
     ),
     "Seq[String]",
     Some("Test function"),

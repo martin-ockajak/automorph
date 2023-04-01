@@ -12,7 +12,7 @@ package automorph.spi.protocol
  * @tparam Metadata
  *   protocol-specific message metadata type
  */
-final case class RpcError[Metadata](
+final case class ParseError[Metadata](
   exception: Throwable,
-  message: RpcMessage[Metadata],
+  message: Message[Metadata],
 )

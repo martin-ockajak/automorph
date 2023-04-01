@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.reflection.MethodReflection
 import automorph.spi.MessageCodec
-import automorph.Contextual
+import automorph.RpcResult
 import scala.quoted.{Expr, Quotes, Type}
 
 /**
@@ -204,10 +204,10 @@ object RemoteInvoke:
     import quotes.reflect.{TypeRepr, asTerm}
 
     val resultType = TypeRepr.of[R].dealias
-    MethodReflection.contextualResult[Context, Contextual](quotes)(resultType).map { contextualResultType =>
+    MethodReflection.contextualResult[Context, RpcResult](quotes)(resultType).map { contextualResultType =>
       contextualResultType.asType match
         case '[resultValueType] => '{ (resultNode: Node, responseContext: Context) =>
-            Contextual(
+            RpcResult(
               ${
                 MethodReflection.call(
                   quotes,

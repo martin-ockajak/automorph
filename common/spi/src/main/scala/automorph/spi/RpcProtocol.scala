@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{ApiSchema, ParseError, Request, Response}
 import java.io.InputStream
 import scala.util.Try
 
@@ -49,7 +49,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     responseRequired: Boolean,
     requestContext: Context,
     requestId: String,
-  ): Try[RpcRequest[Node, Metadata, Context]]
+  ): Try[Request[Node, Metadata, Context]]
 
   /**
    * Parses an RPC request.
@@ -67,7 +67,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]]
+  ): Either[ParseError[Metadata], Request[Node, Metadata, Context]]
 
   /**
    * Creates an RPC response.
@@ -79,7 +79,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    * @return
    *   RPC response
    */
-  def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]]
+  def createResponse(result: Try[Node], requestMetadata: Metadata): Try[Response[Node, Metadata]]
 
   /**
    * Parses an RPC response.
@@ -94,8 +94,8 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   def parseResponse(
     responseBody: InputStream,
     responseContext: Context,
-  ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
+  ): Either[ParseError[Metadata], Response[Node, Metadata]]
 
   /** RPC API schema operations. */
-  def apiSchemas: Seq[RpcApiSchema[Node]]
+  def apiSchemas: Seq[ApiSchema[Node]]
 }

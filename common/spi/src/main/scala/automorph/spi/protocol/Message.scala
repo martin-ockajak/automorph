@@ -16,7 +16,7 @@ import java.io.InputStream
  * @tparam Metadata
  *   protocol-specific message metadata type
  */
-final case class RpcMessage[Metadata](
+final case class Message[Metadata](
   metadata: Metadata,
   body: InputStream,
   properties: Map[String, String] = Map.empty,

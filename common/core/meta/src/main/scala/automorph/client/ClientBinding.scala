@@ -1,6 +1,6 @@
 package automorph.client
 
-import automorph.spi.protocol.RpcFunction
+import automorph.RpcFunction
 
 /**
  * RPC client remote API function binding.

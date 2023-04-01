@@ -1,11 +1,11 @@
 package automorph.schema
 
+import automorph.RpcFunction
 import automorph.schema.OpenApi.{Components, Paths}
 import automorph.schema.openapi.Operation.SecurityRequirement
 import automorph.schema.openapi.{
   ExternalDocumentation, Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Schema, Server, Tag,
 }
-import automorph.spi.protocol.RpcFunction
 
 /**
  * OpenAPI API schema.

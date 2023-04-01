@@ -1,6 +1,6 @@
 package automorph.reflection
 
-import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import automorph.RpcFunction
 
 /**
  * Method descriptor.
@@ -45,7 +45,7 @@ final private[automorph] case class Method(
   /** RPC function descriptor. */
   lazy val rpcFunction: RpcFunction = RpcFunction(
     name,
-    parameters.flatten.map { case Parameter(name, dataType, _) => RpcParameter(name, dataType) },
+    parameters.flatten.map { case Parameter(name, dataType, _) => RpcFunction.Parameter(name, dataType) },
     resultType,
     documentation,
   )

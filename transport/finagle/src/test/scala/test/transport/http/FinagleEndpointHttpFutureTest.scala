@@ -9,6 +9,7 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import test.standard.StandardHttpServerTest
+import test.transport.http.FinagleEndpointHttpFutureTest.FinagleServer
 
 class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
@@ -28,6 +29,12 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     FinagleHttpEndpoint(system)
+}
+
+object FinagleEndpointHttpFutureTest {
+
+  type Effect[T] = Future[T]
+  type Context = FinagleHttpEndpoint.Context
 
   private final case class FinagleServer(
     effectSystem: EffectSystem[Effect],

@@ -1,5 +1,6 @@
 package automorph.spi
 
+import automorph.spi.RequestHandler.Result
 import java.io.InputStream
 
 /**
@@ -27,13 +28,32 @@ trait RequestHandler[Effect[_], Context] {
    * @return
    *   request processing result
    */
-  def processRequest(body: InputStream, context: Context, id: String): Effect[Option[RpcResult[Context]]]
+  def processRequest(body: InputStream, context: Context, id: String): Effect[Option[Result[Context]]]
 
   /** Message format media (MIME) type. */
   def mediaType: String
 }
 
-private[automorph] object RequestHandler {
+object RequestHandler {
+
+  /**
+   * RPC handler request processing result.
+   *
+   * @param responseBody
+   *   response message body
+   * @param exception
+   *   failed call exception
+   * @param context
+   *   response context
+   * @tparam Context
+   *   response context type
+   */
+  final case class Result[Context](
+    responseBody: InputStream,
+    exception: Option[Throwable],
+    context: Option[Context],
+  )
+
   /**
    * Dummy RPC request handler.
    *
@@ -44,13 +64,13 @@ private[automorph] object RequestHandler {
    * @return
    *   dummy RPC request handler
    */
-  def dummy[Effect[_], Context]: RequestHandler[Effect, Context] =
+  private[automorph] def dummy[Effect[_], Context]: RequestHandler[Effect, Context] =
     new RequestHandler[Effect, Context] {
       def processRequest(
         body: InputStream,
         context: Context,
         id: String,
-      ): Effect[Option[RpcResult[Context]]] =
+      ): Effect[Option[Result[Context]]] =
         throw new IllegalStateException("RPC request handler not initialized")
 
       /** Message format media (MIME) type. */
