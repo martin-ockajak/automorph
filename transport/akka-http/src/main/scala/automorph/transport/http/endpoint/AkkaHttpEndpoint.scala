@@ -102,7 +102,7 @@ case class AkkaHttpEndpoint[Effect[_]](
       Try {
         val requestBody = requestEntity.data.asByteBuffer.toInputStream
         handler.processRequest(requestBody, getRequestContext(request), requestId).either.map { processRequestResult =>
-          handleRequestResult.success(processRequestResult.fold(
+          val response = processRequestResult.fold(
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
@@ -111,7 +111,8 @@ case class AkkaHttpEndpoint[Effect[_]](
                 .getOrElse(StatusCodes.OK)
               createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
             },
-          ))
+          )
+          handleRequestResult.success(response)
         }.runAsync
       }.foldError { error =>
         handleRequestResult.success(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
