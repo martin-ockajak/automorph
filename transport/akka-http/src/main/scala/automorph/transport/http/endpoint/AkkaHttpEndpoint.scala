@@ -65,7 +65,7 @@ case class AkkaHttpEndpoint[Effect[_]](
       extractClientIP { remoteAddress =>
         extractMaterializer { implicit materializer =>
           extractExecutionContext { implicit executionContext =>
-            onComplete(handle(httpRequest, remoteAddress))(
+            onComplete(handleRequest(httpRequest, remoteAddress))(
               _.fold(
                 error => {
                   log.failedProcessRequest(error, Map())
@@ -85,7 +85,7 @@ case class AkkaHttpEndpoint[Effect[_]](
   override def clone(handler: RequestHandler[Effect, Context]): AkkaHttpEndpoint[Effect] =
     copy(handler = handler)
 
-  private def handle(request: HttpRequest, remoteAddress: RemoteAddress)(
+  private def handleRequest(request: HttpRequest, remoteAddress: RemoteAddress)(
     implicit
     materializer: Materializer,
     executionContext: ExecutionContext
@@ -97,12 +97,12 @@ case class AkkaHttpEndpoint[Effect[_]](
     log.receivedRequest(requestProperties)
 
     // Process the request
-    val handleResult = Promise[(HttpResponse, ListMap[String, String])]()
+    val handleRequestResult = Promise[(HttpResponse, ListMap[String, String])]()
     request.entity.toStrict(readTimeout).flatMap { requestEntity =>
       Try {
         val requestBody = requestEntity.data.asByteBuffer.toInputStream
         handler.processRequest(requestBody, getRequestContext(request), requestId).either.map { processRequestResult =>
-          handleResult.success(processRequestResult.fold(
+          handleRequestResult.success(processRequestResult.fold(
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
@@ -114,9 +114,9 @@ case class AkkaHttpEndpoint[Effect[_]](
           ))
         }.runAsync
       }.foldError { error =>
-        handleResult.success(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
+        handleRequestResult.success(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
       }
-      handleResult.future
+      handleRequestResult.future
     }
   }
 
