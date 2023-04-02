@@ -19,7 +19,8 @@ instantiated, configured and combined at will.
 * Synchronous effect: [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957)
 * Asynchronous effect: [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html)
 * Message codec: [Circe](https://circe.github.io/circe)
-* HTTP & WebSocket client: [JRE HTTP client](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
+* HTTP & WebSocket client: [JRE HTTP client](
+https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
 * HTTP & WebSocket server: [Undertow](https://undertow.io/)
 
 Default plugin set can be obtained by using the [automorph-default](
