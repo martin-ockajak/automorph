@@ -49,8 +49,8 @@ jobs:
           path: |
             ~/.sbt
             ~/.ivy2/cache
-            ~/.coursier/cache/v1
-            ~/.cache/coursier/v1
+            ~/.coursier/cache
+            ~/.cache/coursier
           key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
       - name: Cache Yarn
