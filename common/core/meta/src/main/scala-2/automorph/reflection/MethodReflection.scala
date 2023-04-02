@@ -137,7 +137,7 @@ private[automorph] object MethodReflection {
   def methodSignature[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod
   ): String =
-    s"${ref.c.weakTypeOf[Api].typeSymbol.fullName}.${method.lift.signature}"
+    s"${ref.c.weakTypeOf[Api].typeSymbol.fullName}.${method.lift}"
 
   /**
    * Determines whether a method accepts request context as its last parameter.

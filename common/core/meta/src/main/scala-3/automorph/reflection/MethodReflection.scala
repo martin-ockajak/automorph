@@ -151,7 +151,7 @@ private[automorph] object MethodReflection:
   def methodSignature[Api: Type](ref: ClassReflection)(method: ref.RefMethod): String =
     import ref.q.reflect.{Printer, TypeRepr}
 
-    s"${TypeRepr.of[Api].show(using Printer.TypeReprCode)}.${method.lift.signature}"
+    s"${TypeRepr.of[Api].show(using Printer.TypeReprCode)}.${method.lift}"
 
   /**
    * Creates a method call term.

@@ -30,8 +30,15 @@ private[automorph] final case class Method(
   documentation: Option[String],
 ) {
 
-  /** Method signature. */
-  lazy val signature: String = {
+  /** RPC function descriptor. */
+  lazy val rpcFunction: RpcFunction = RpcFunction(
+    name,
+    parameters.flatten.map { case Parameter(name, dataType, _) => RpcFunction.Parameter(name, dataType) },
+    resultType,
+    documentation,
+  )
+
+  override def toString: String = {
     val typeParametersText = typeParameters.map(typeParameter => s"${typeParameter.name}") match {
       case Seq() => ""
       case values => s"[${values.mkString(", ")}]"
@@ -41,14 +48,6 @@ private[automorph] final case class Method(
     }.mkString
     s"$name$typeParametersText$parametersText: $resultType"
   }
-
-  /** RPC function descriptor. */
-  lazy val rpcFunction: RpcFunction = RpcFunction(
-    name,
-    parameters.flatten.map { case Parameter(name, dataType, _) => RpcFunction.Parameter(name, dataType) },
-    resultType,
-    documentation,
-  )
 }
 
 /**

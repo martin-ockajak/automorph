@@ -21,11 +21,8 @@ final case class RpcFunction(
   documentation: Option[String],
 ) {
 
-  /** Function signature. */
-  lazy val signature: String =
+  override def toString: String =
     s"$name(${parameters.mkString(", ")}): $resultType"
-
-  override def toString: String = signature
 }
 
 object RpcFunction {
