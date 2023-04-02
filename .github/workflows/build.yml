@@ -44,14 +44,14 @@ jobs:
             ~/.ivy2/cache
             ~/.coursier/cache/v1
             ~/.cache/coursier/v1
-          key: sbt-cache-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
+          key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
 
       - name: Cache Yarn
         uses: actions/cache@v3
         with:
           path: |
             **/node_modules
-          key: yarn-cache-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build project
 #        run: sbt --client '++${{ matrix.scala }}; test'
