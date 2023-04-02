@@ -27,10 +27,7 @@ final case class RpcFunction(
     s"$name($parametersText): $resultType"
   }
 
-  override def toString: String = {
-    val documentationText = documentation.map(x => s" -- $x").getOrElse("")
-    s"RPC function $signature$documentationText"
-  }
+  override def toString: String = signature
 }
 
 object RpcFunction {
