@@ -16,3 +16,5 @@
 
 -- RcpException
    I like None.orNull instead of null, saying "I wanted an Option here, but java has none" :)
+
+-- correspondence package name <--> path in subproject => checked, all good
