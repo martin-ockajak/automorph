@@ -214,6 +214,7 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
+  publish / skip := true,
   Test / fork := true,
   Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
@@ -404,11 +405,17 @@ deploySite := deploySite.dependsOn(site, ghpagesPushSite).value
 
 
 // Release
-ThisBuild / releaseCrossBuild := false
+ThisBuild / publishTo := {
+  val nexus = "https://s01.oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / publishMavenStyle := true
+ThisBuild / releaseCrossBuild := true
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
-ThisBuild / versionScheme := Some("semver-spec")
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
-ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+ThisBuild / versionScheme := Some("early-semver")
 credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
 credentials += Credentials(Path.userHome / ".sbt/sonatype_credentials")
+
