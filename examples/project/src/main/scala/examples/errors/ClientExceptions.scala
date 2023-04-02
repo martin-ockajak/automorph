@@ -20,7 +20,7 @@ private[examples] object ClientExceptions {
       def hello(some: String, n: Int): Future[String] =
         Future.failed(new IllegalArgumentException("SQL error"))
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(

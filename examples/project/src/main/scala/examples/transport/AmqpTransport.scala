@@ -26,7 +26,7 @@ private[examples] object AmqpTransport {
         def hello(some: String, n: Int): Future[String] =
           Future(s"Hello $some $n!")
       }
-      val api = new ServerApi()
+      val api = new ServerApi
 
       // Start embedded RabbitMQ broker
       val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)

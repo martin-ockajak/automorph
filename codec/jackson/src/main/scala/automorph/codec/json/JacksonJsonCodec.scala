@@ -49,7 +49,7 @@ object JacksonJsonCodec {
   type Node = JsonNode
 
   /** Default Jackson object mapper. */
-  lazy val defaultMapper: ObjectMapper = (new ObjectMapper() with ClassTagExtensions).registerModule(DefaultScalaModule)
+  lazy val defaultMapper: ObjectMapper = (new ObjectMapper with ClassTagExtensions).registerModule(DefaultScalaModule)
     .registerModule(unitModule).registerModule(bigDecimalModule).registerModule(JacksonJsonRpc.module)
     .registerModule(JacksonWebRpc.module).configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
     .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)

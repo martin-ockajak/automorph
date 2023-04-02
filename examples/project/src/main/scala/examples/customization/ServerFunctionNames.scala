@@ -22,7 +22,7 @@ private[examples] object ServerFunctionNames {
       def hidden(): String =
         ""
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Customize exposed API to RPC function name mapping
     val mapName = (name: String) => name match {

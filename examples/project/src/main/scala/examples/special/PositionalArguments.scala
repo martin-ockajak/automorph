@@ -18,7 +18,7 @@ private[examples] object PositionalArguments {
       def hello(some: String, n: Int): Future[String] =
         Future(s"Hello $some $n!")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
     val server = run(

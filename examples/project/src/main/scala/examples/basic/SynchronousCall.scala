@@ -12,7 +12,7 @@ private[examples] object SynchronousCall {
       def hello(some: String, n: Int): String =
         s"Hello $some $n!"
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
     val server = Default.serverSync(7000, "/api").bind(api).init()

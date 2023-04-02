@@ -31,7 +31,7 @@ private[examples] object MessageCodec {
       def hello(some: String, n: Int): Future[Record] =
         Future(Record(List("Hello", some, n.toString)))
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Create a server RPC protocol plugin
     val serverRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](

@@ -21,7 +21,7 @@ private[examples] object HttpStatusCode {
       def hello(some: String, n: Int): Future[String] =
         Future.failed(new SQLException("Bad request"))
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Customize remote API server exception to HTTP status code mapping
     val mapException = (error: Throwable) => error match {

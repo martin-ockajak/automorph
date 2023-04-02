@@ -13,7 +13,7 @@ object ServerTransport {
       def hello(some: String, n: Int): String =
         s"Hello $some $n!"
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Create NanoHTTPD HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
     val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")

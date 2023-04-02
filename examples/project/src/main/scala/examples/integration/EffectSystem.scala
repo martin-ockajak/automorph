@@ -19,7 +19,7 @@ private[examples] object EffectSystem {
       def hello(some: String, n: Int): Task[String] =
         ZIO.succeed(s"Hello $some $n!")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Create ZIO effect system plugin
     val effectSystem = ZioSystem.default

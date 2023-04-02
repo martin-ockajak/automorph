@@ -20,7 +20,7 @@ private[examples] object RpcProtocol {
       def hello(some: String, n: Int): Future[String] =
         Future(s"Hello $some $n!")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Create a server Web-RPC protocol plugin with '/api' path prefix
     val serverRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](

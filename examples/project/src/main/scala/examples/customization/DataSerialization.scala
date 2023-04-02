@@ -43,7 +43,7 @@ private[examples] object DataSerialization {
       def hello(some: String, record: Record): Future[Record] =
         Future(record.copy(value = s"Hello $some!"))
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(

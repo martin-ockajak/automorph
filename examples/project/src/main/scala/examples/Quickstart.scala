@@ -18,7 +18,7 @@ private[examples] object Quickstart {
 
       def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
     val server = run(

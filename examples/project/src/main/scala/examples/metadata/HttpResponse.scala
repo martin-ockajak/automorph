@@ -18,7 +18,7 @@ private[examples] object HttpResponse {
         HttpContext().headers("X-Test" -> "value", "Cache-Control" -> "no-cache").statusCode(200)
       )
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = Default.serverSync(7000, "/api").bind(api).init()

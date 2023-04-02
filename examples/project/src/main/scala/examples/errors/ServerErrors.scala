@@ -26,7 +26,7 @@ private[examples] object ServerErrors {
           Future.failed(JsonRpcException("Application error", 1))
         }
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Customize remote API server exception to RPC error mapping
     val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ match {

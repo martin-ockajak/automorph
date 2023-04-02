@@ -20,7 +20,7 @@ private[examples] object EndpointTransport {
       def hello(some: String, n: Int): Future[String] =
         Future(s"Hello $some $n!")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Create Undertow JSON-RPC endpoint transport
     val endpointTransport = UndertowHttpEndpoint(Default.effectSystemAsync)

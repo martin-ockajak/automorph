@@ -19,7 +19,7 @@ private[examples] object HttpRequest {
           httpRequest.header("X-Test")
         ).flatten.mkString(",")
     }
-    val api = new ServerApi()
+    val api = new ServerApi
 
     // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = Default.serverSync(7000, "/api").bind(api).init()
