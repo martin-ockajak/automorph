@@ -152,7 +152,7 @@ private[automorph] object Extensions {
       }
 
     /**
-     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
+     * Applies ''onFailure'' on `Failure`.
      *
      * @param onFailure
      *   function to apply if this is a `Failure`
