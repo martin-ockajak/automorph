@@ -7,7 +7,7 @@ on:
     branches: [ main ]
     tags: [ v* ]
 
-  workflow_dispatch:
+#  workflow_dispatch:
 
 # permissions:
 #   contents: read
@@ -34,26 +34,26 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'adopt'
+#      - name: Setup Java
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: ${{ matrix.java }}
+#          distribution: 'adopt'
 
 #      - name: Setup Node
 #        uses: actions/setup-node@v3
 #        with:
 #          node-version: 19
 
-      - name: Cache SBT
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache/v1
-            ~/.cache/coursier/v1
-          key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
+#      - name: Cache SBT
+#        uses: actions/cache@v3
+#        with:
+#          path: |
+#            ~/.sbt
+#            ~/.ivy2/cache
+#            ~/.coursier/cache/v1
+#            ~/.cache/coursier/v1
+#          key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
 
 #      - name: Cache Yarn
 #        uses: actions/cache@v3
