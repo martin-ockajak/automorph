@@ -58,7 +58,7 @@ jobs:
           key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build project
-#        run: sbt --client '+ test'
+#        run: sbt --client '+ test ; site'
         run: echo sbt --client 'compile'
 
 #      - name: Setup Pages
