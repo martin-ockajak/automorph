@@ -209,7 +209,9 @@ final case class HttpClient[Effect[_]](
     requestContext: Context,
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)], URI)] = {
     val requestUrl = requestContext.overrideUrl {
-       requestContext.transportContext.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
+       requestContext.transportContext.flatMap { transport =>
+         Try(transport.request.build).toOption
+       }.map(_.uri).getOrElse(url)
     }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
