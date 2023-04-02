@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.{ConnectionListener, Context}
-import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers

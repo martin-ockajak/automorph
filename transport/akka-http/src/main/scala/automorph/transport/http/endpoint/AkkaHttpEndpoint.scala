@@ -12,9 +12,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.AkkaHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{
-  ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps
-}
+import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import java.io.InputStream
 import java.io.InputStream.nullInputStream

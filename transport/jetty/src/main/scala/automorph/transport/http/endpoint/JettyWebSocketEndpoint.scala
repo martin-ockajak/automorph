@@ -5,7 +5,7 @@ import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.endpoint.JettyWebSocketEndpoint.ResponseCallback
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import java.io.{ByteArrayInputStream, InputStream}
 import java.io.InputStream.nullInputStream
