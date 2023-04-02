@@ -44,13 +44,13 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
   extends ComplexApi[Effect, Context] {
 
   override def method0(): Effect[Unit] =
-    backend.successful(())
+    backend.successful {}
 
   override def method1(): Effect[Double] =
     backend.successful(1.2d)
 
   override def method2(p0: String): Effect[Unit] =
-    backend.successful(())
+    backend.successful {}
 
   override def method3(p0: Float, p1: Long, p2: Option[List[Int]]): Effect[List[String]] =
     backend.successful(p2.getOrElse(List(0)).map(number => (p1 + p0 + number).toString))
@@ -105,10 +105,10 @@ trait InvalidApi[Effect[_]] {
 final case class InvalidApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends InvalidApi[Effect] {
 
   override def nomethod(p0: String): Effect[Unit] =
-    backend.successful(())
+    backend.successful {}
 
   override def method1(p0: String): Effect[Unit] =
-    backend.successful(())
+    backend.successful {}
 
   override def method2(p0: String): Effect[String] =
     backend.successful("")

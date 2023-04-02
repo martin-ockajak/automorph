@@ -73,10 +73,10 @@ final case class UrlClient[Effect[_]](
     Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 
   override def close(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 
   override def tell(
     requestBody: InputStream,

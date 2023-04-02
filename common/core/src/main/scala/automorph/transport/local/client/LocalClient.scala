@@ -50,10 +50,10 @@ final case class LocalClient[Effect[_]](
     handler.processRequest(requestBody, requestContext, requestId).map(_ => ())
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 
   override def close(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 }
 
 object LocalClient {

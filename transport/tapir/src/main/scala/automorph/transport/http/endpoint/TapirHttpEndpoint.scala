@@ -147,7 +147,7 @@ object TapirHttpEndpoint {
     method: Option[Method],
   ): Context =
     HttpContext(
-      message = Some(()),
+      message = Some {},
       method = method.map(_.toString).map(HttpMethod.valueOf),
       path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,

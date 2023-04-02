@@ -11,5 +11,5 @@ final case class LocalContext(value: Any)
 object LocalContext {
 
   /** Implicit default context value. */
-  implicit val defaultContext: LocalContext = LocalContext(())
+  implicit val defaultContext: LocalContext = LocalContext {}
 }

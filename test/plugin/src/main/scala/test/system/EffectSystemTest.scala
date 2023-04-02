@@ -62,7 +62,7 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         run(effect).should(equal(Right(s"$text$number")))
       }
       "Failure" in {
-        Try(system.flatMap(system.failed(error))(_ => system.successful(()))) match {
+        Try(system.flatMap(system.failed(error))(_ => system.successful {})) match {
           case Success(effect) => run(effect).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }

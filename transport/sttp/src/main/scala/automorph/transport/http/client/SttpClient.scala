@@ -104,10 +104,10 @@ final case class SttpClient[Effect[_]] private (
     Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 
   override def close(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful {}
 
   private def send[R](
     sttpRequest: Request[R, WebSocket],
