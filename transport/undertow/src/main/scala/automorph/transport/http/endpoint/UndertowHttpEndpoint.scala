@@ -87,7 +87,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
         if (exchange.isInIoThread) {
           exchange.dispatch(handlerRunnable)
           ()
-        } else { handlerRunnable.run() }
+        } else {
+          handlerRunnable.run()
+        }
       }
     }
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
