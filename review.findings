@@ -4,3 +4,5 @@
    In my understanding, .foldError is never is executed in case of errror, because the whole Try (handler processing) is executed in .runAsync
 
 
+-- fixed scaladoc
+   #commit 77d3ac09
