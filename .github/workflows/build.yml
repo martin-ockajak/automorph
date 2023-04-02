@@ -9,17 +9,17 @@ on:
 
   workflow_dispatch:
 
-# permissions:
-#   contents: read
-#   pages: write
-#   id-token: write
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# concurrency:
-#   group: "build"
-#   cancel-in-progress: false
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "build"
+  cancel-in-progress: false
 
 jobs:
   build:
