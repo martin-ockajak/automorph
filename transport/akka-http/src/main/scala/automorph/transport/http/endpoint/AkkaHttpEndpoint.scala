@@ -101,8 +101,8 @@ case class AkkaHttpEndpoint[Effect[_]](
     request.entity.toStrict(readTimeout).flatMap { requestEntity =>
       Try {
         val requestBody = requestEntity.data.asByteBuffer.toInputStream
-        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map { processResult =>
-          handleResult.success(processResult.fold(
+        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map { handlerResult =>
+          handleResult.success(handlerResult.fold(
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
