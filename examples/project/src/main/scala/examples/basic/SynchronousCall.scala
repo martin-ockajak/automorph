@@ -36,10 +36,10 @@ private[examples] object SynchronousCall {
       client.call[String]("hello").apply("some" -> "world", "n" -> 1)
     )
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

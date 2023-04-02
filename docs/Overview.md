@@ -4,7 +4,9 @@ sidebar_position: 1
 
 # Overview
 
-**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [Web-RPC](Web-RPC) protocols.
+**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for
+[Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using
+[JSON-RPC](https://www.jsonrpc.org/specification) and [Web-RPC](Web-RPC) protocols.
 
 
 ## Goals
@@ -18,21 +20,21 @@ sidebar_position: 1
 
 Entry points for the application logic to invoke or expose remote APIs:
 
-* [Client](/api/automorph/RpcClient.html) - invoke remote APIs
-* [Server](/api/automorph/RpcServer.html) - serve APIs as remote
-* [Endpoint](/api/automorph/RpcEndpoint.html) - expose APIs as remote within an existing server
+* [RPC client](/api/automorph/RpcClient.html) - invoke remote APIs
+* [RPC server](/api/automorph/RpcServer.html) - serve APIs as remote
+* [RPC endpoint](/api/automorph/RpcEndpoint.html) - expose APIs as remote within an existing server
 
 
 ## SPI
 
-Interfaces for implementation of various integration plugins:
+Traits for implementation of various integration plugins:
 
-* [EffectSystem](/api/automorph/spi/EffectSystem.html) - accessing remote APIs using various effect handling abstractions
-* [MessageCodec](/api/automorph/spi/MessageCodec.html) - serialization of RPC messages into structured data formats
-* [ClientTransport](/api/automorph/spi/ClientTransport.html) - tranmitting messages for RPC clients
-* [ServerTransport](/api/automorph/spi/ServerTransport.html) - transmitting messages for RPC servers
-* [EndpointTransport](/api/automorph/spi/EndpointTransport.html) - adding RPC support to existing servers
-* [RpcProtocol](/api/automorph/spi/RpcProtocol.html) - specific RPC protocol implementations
+* [Effect system](/api/automorph/spi/EffectSystem.html) - accessing remote APIs using various effect handling abstractions
+* [Message codec](/api/automorph/spi/MessageCodec.html) - serialization of RPC messages into structured data formats
+* [Client transport](/api/automorph/spi/ClientTransport.html) - tranmitting messages for RPC clients
+* [Server transport](/api/automorph/spi/ServerTransport.html) - transmitting messages for RPC servers
+* [Endpoint transport](/api/automorph/spi/EndpointTransport.html) - adding RPC support to existing servers
+* [RPC protocol](/api/automorph/spi/RpcProtocol.html) - specific RPC protocol implementations
 
 
 ## Limitations
@@ -40,8 +42,10 @@ Interfaces for implementation of various integration plugins:
 * Remote APIs must not contain [overloaded methods](https://en.wikipedia.org/wiki/Function_overloading)
 * Remote API methods must not use [type parameters](https://docs.scala-lang.org/tour/polymorphic-methods.html)
 * Remote API methods must not be [inline](https://docs.scala-lang.org/scala3/guides/macros/inline.html)
-* Remote APIs must not be used from within the [App](https://scala-lang.org/api/3.x/scala/App.html) trait nor from within any other [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) scope
-* Due to Scala 2 [type inference](https://docs.scala-lang.org/tour/type-inference.html) constraints it may be necessary to explicitly supply type parameters when creating RPC protocol plugin instances
+* Remote APIs must not be used from within the [App](https://scala-lang.org/api/3.x/scala/App.html) trait nor from
+within any other [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) scope
+* Due to Scala 2 [type inference](https://docs.scala-lang.org/tour/type-inference.html) constraints it may be necessary
+to explicitly supply type parameters when creating RPC protocol plugin instances
 
 
 ## Supported standards

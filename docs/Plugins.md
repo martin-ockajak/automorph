@@ -55,7 +55,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [ArgonautJsonCodec](/api/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
 
 
-## [Client message transport](/api/automorph/spi/ClientTransport.html)
+## [Client transport](/api/automorph/spi/ClientTransport.html)
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [UrlClient](/api/automorph/transport/http/client/UrlClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqClient](/api/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-## [Server message transport](/api/automorph/spi/ServerTransport.html)
+## [Server transport](/api/automorph/spi/ServerTransport.html)
 
 | Class | Artifact                                                                                    | Library                                               | Protocol |
 | --- |---------------------------------------------------------------------------------------------|-------------------------------------------------------| --- |
@@ -81,7 +81,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [AkkaServer](/api/automorph/transport/http/server/AkkaServer.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqServer](/api/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq)   | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-### [Endpoint message transport](/api/automorph/spi/EndpointTransport.html)
+### [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
 | Class | Artifact                                                                                    | Library | Protocol |
 | --- |---------------------------------------------------------------------------------------------| --- | --- |

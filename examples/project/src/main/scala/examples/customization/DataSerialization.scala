@@ -66,10 +66,10 @@ private[examples] object DataSerialization {
       remoteApi.hello("world", Record("test", State.On))
     ))
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     run(server.close())
   }
 }

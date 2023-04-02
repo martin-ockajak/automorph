@@ -50,10 +50,10 @@ private[examples] object HttpStatusCode {
       remoteApi.hello("world", 1)
     )).failed.get)
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     run(server.close())
   }
 }

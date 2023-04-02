@@ -42,10 +42,10 @@ private[examples] object DynamicPayload {
       client.call[Seq[Int]]("hello").apply("some" -> Json.fromInt(0), "n" -> 1)
     )
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

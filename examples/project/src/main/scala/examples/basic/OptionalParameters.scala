@@ -37,10 +37,10 @@ private[examples] object OptionalParameters {
     // Call the remote API function dynamically
     client.call[String]("hi").apply("n" -> 1) // String
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

@@ -40,10 +40,10 @@ private[examples] object OneWayMessage {
       client.tell("hello").apply("some" -> "world", "n" -> 1)
     )
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     run(server.close())
   }
 }

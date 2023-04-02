@@ -6,29 +6,28 @@ sidebar_position: 3
 
 ## Components
 
-**Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate with existing systems by freely combining various plugins:
+**Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate
+with existing systems by freely combining its primary componvarious plugins:
 
-* [Client](/api/automorph/RpcClient.html)
-* [Server](/api/automorph/RpcServer.html)
-* [Endpoint](/api/automorph/RpcEndpoint.html)
+* [RPC client](/api/automorph/RpcClient.html)
+* [RPC server](/api/automorph/RpcServer.html)
+* [RPC endpoint](/api/automorph/RpcEndpoint.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 * [Effect system](/api/automorph/spi/EffectSystem.html)
 * [Message transport](/api/automorph/spi/MessageTransport.html)
 * [Message codec](/api/automorph/spi/MessageCodec.html)
 
 
-## Diagram
+### RPC client & server composition
 
-### Client & Server
+![RPC client & server](images/architecture-server.jpg)
 
-![architecture](images/architecture-server.jpg)
+### RPC client & endpoint composition
 
-### Client & Endpoint
-
-![architecture](images/architecture-endpoint.jpg)
+![RPC client & endpoint](images/architecture-endpoint.jpg)
 
 
-## Client
+## RPC client
 
 Used to perform type-safe remote API calls or send one-way messages.
 
@@ -45,7 +44,7 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 * Applications
 
 
-## Server
+## RPC server
 
 Used to serve remote API requests using specific message transport protocol and invoke bound API
 methods to process them.
@@ -62,7 +61,7 @@ Automatically derives remote API bindings for existing API instances.
 * Applications
 
 
-## Endpoint
+## RPC endpoint
 
 Integrates with an existing message transport layer to receive remote API requests using
 specific message transport protocol and invoke bound API methods to process them.
@@ -78,8 +77,6 @@ Automatically derives remote API bindings for existing API instances.
 
 * Applications
 
-
-## Plugins
 
 ### RPC protocol
 

@@ -42,10 +42,10 @@ object Quickstart extends App {
       Duration.Inf
     ))
 
-    // Close the client
+    // Close the RPC client
     Await.result(client.close(), Duration.Inf)
 
-    // Stop the server
+    // Stop the RPC server
     Await.result(server.close(), Duration.Inf)
   }
 }

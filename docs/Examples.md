@@ -65,10 +65,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -138,10 +138,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -203,10 +203,10 @@ client.call[String]("hi")("n" -> 1) // String
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -303,10 +303,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -375,10 +375,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -459,10 +459,10 @@ println(Try(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -545,10 +545,10 @@ println(Try(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -637,10 +637,10 @@ println(Try(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -715,10 +715,10 @@ println(Try(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -813,10 +813,10 @@ val remoteApi = client.bind[ClientApi]
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -895,10 +895,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -967,10 +967,10 @@ println(dynamic.context.header("X-Test"))
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -1040,10 +1040,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1110,10 +1110,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -1178,10 +1178,10 @@ run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1253,10 +1253,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1330,10 +1330,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1431,10 +1431,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1517,10 +1517,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1583,10 +1583,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -1646,10 +1646,10 @@ println(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 client.close()
 
-// Stop the server
+// Stop the RPC server
 server.close()
 ```
 
@@ -1725,10 +1725,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 server.stop()
 ```
 
@@ -1792,10 +1792,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -1882,10 +1882,10 @@ println(run(
 **Cleanup**
 
 ```scala
-// Close the client
+// Close the RPC client
 run(client.close())
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 
 // Stop embedded RabbitMQ broker

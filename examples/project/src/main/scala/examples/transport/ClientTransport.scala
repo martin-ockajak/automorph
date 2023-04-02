@@ -35,10 +35,10 @@ private[examples] object ClientTransport {
       remoteApi.hello("world", 1)
     )
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

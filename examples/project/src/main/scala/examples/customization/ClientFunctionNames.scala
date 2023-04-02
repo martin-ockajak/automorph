@@ -44,10 +44,10 @@ private[examples] object ClientFunctionNames {
       remoteApi.hi("world", 1)
     )
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

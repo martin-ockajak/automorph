@@ -70,10 +70,10 @@ private[examples] object MessageCodec {
       remoteApi.hello("world", 1)
     ))
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     run(server.close())
   }
 }

@@ -52,10 +52,10 @@ private[examples] object HttpRequest {
       client.call[String]("hello").apply("message" -> "test")
     )
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

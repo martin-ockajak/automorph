@@ -67,10 +67,10 @@ private[examples] object HttpAuthentication {
       ).failed.get)
     }
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

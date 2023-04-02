@@ -51,10 +51,10 @@ private[examples] object EndpointTransport {
       remoteApi.hello("world", 1)
     ))
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     server.stop()
   }
 }

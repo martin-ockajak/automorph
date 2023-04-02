@@ -44,10 +44,10 @@ private[examples] object HttpResponse {
     println(dynamic.result)
     println(dynamic.context.header("X-Test"))
 
-    // Close the client
+    // Close the RPC client
     client.close()
 
-    // Stop the server
+    // Stop the RPC server
     server.close()
   }
 }

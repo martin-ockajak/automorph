@@ -42,10 +42,10 @@ private[examples] object ApiSchema {
       client.call[OpenApi](JsonRpcProtocol.openApiFunction).apply(),
     ).paths.get.keys.toList)
 
-    // Close the client
+    // Close the RPC client
     run(client.close())
 
-    // Stop the server
+    // Stop the RPC server
     run(server.close())
   }
 }

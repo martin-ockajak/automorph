@@ -44,7 +44,7 @@ val server = run(
   Default.serverAsync(7000, "/api").bind(api).init()
 )
 
-// Stop the server
+// Stop the RPC server
 run(server.close())
 ```
 
@@ -78,7 +78,7 @@ println(run(
   remoteApi.hello("world", 1)
 ))
 
-// Close the client
+// Close the RPC client
 run(client.close())
 ```
 
@@ -106,7 +106,7 @@ println(run(
   client.call[String]("hello")("some" -> "world", "n" -> 1)
 ))
 
-// Close the client
+// Close the RPC client
 run(client.close())
 ```
 
