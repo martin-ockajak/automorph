@@ -27,7 +27,7 @@ final case class RpcFunction(
     s"$name($parametersText): $resultType"
   }
 
-  override def toString = {
+  override def toString: String = {
     val documentationText = documentation.map(x => s" -- $x").getOrElse("")
     s"RPC function $signature$documentationText"
   }
@@ -43,7 +43,7 @@ object RpcFunction {
    * @param `type`
    *   type
    */
-  final case class Parameter(name: String, `type`: String){
+  final case class Parameter(name: String, `type`: String) {
     override def toString = s"$name: ${`type`}"
   }
 }
