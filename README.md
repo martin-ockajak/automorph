@@ -8,7 +8,7 @@
 <br>
 <br>
 
-![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
+![automorph](https://github.com/martin-ockajak/automorph/raw/main/site/static/banner.jpg)
 
 [![Documentation](https://img.shields.io/badge/Website-Documentation-blueviolet)](https://automorph.org)
 [![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/automorph/index.html)
