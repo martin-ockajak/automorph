@@ -7,12 +7,23 @@ on:
     branches: [ main ]
     tags: [ v* ]
 
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+concurrency:
+  group: "build"
+  cancel-in-progress: false
+
 jobs:
   build:
-    name: Build and Test
+    name: Build, Test & Deploy
     strategy:
       matrix:
         os: [ ubuntu-latest ]
@@ -20,10 +31,8 @@ jobs:
         java: [ 11 ]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout current branch (full)
+      - name: Checkout current branch
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -56,3 +65,18 @@ jobs:
       - name: Build project
 #        run: sbt --client '++${{ matrix.scala }}; test'
         run: sbt --client '++${{ matrix.scala }}; compile'
+
+#      - name: Setup Pages
+#        uses: actions/configure-pages@v3
+#
+      - name: Build site
+        run: sbt --client 'site'
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: site/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
