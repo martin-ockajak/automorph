@@ -119,7 +119,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
     val headers = request.getHeaders.asScala.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }.toSeq
-    HttpContext(message = None, method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
+    HttpContext(transportContext = None, method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
       .url(request.getRequestURI)
   }
 

@@ -112,7 +112,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
 
   private def getRequestContext(request: ServerWebSocket): Context = {
     val headers = request.headers.entries.asScala.map(entry => entry.getKey -> entry.getValue).toSeq
-    HttpContext(message = Some(Right(request).withLeft[HttpServerRequest]), headers = headers).url(request.uri)
+    HttpContext(transportContext = Some(Right(request).withLeft[HttpServerRequest]), headers = headers).url(request.uri)
   }
 
   private def getRequestProperties(request: ServerWebSocket, requestId: String): Map[String, String] =

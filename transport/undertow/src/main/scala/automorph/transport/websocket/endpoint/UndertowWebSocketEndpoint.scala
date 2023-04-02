@@ -160,7 +160,7 @@ object UndertowWebSocketEndpoint {
       val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
         values.map(value => name -> value)
       }.toSeq
-      HttpContext(message = Some(Right(exchange).withLeft[HttpServerExchange]), headers = headers)
+      HttpContext(transportContext = Some(Right(exchange).withLeft[HttpServerExchange]), headers = headers)
         .url(exchange.getRequestURI)
     }
 

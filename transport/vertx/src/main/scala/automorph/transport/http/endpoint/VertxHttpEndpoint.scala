@@ -124,7 +124,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private def getRequestContext(request: HttpServerRequest): Context = {
     val headers = request.headers.entries.asScala.map(entry => entry.getKey -> entry.getValue).toSeq
     HttpContext(
-      message = Some(Left(request).withRight[ServerWebSocket]),
+      transportContext = Some(Left(request).withRight[ServerWebSocket]),
       method = Some(HttpMethod.valueOf(request.method.name)),
       headers = headers,
     ).url(request.absoluteURI)

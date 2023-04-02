@@ -131,7 +131,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
-    HttpContext(message = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
+    HttpContext(transportContext = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
       .url(request.getRequestURI)
   }
 

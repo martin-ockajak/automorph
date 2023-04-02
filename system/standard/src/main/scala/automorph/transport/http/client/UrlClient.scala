@@ -119,7 +119,7 @@ final case class UrlClient[Effect[_]](
     }
 
   private def createConnection(requestContext: Context): HttpURLConnection = {
-    val requestUrl = requestContext.overrideUrl(requestContext.message.map(_.connection.getURL.toURI).getOrElse(url))
+    val requestUrl = requestContext.overrideUrl(requestContext.transportContext.map(_.connection.getURL.toURI).getOrElse(url))
     requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
@@ -130,9 +130,9 @@ final case class UrlClient[Effect[_]](
     requestContext: Context,
   ): String = {
     // Method
-    val transportConnection = requestContext.message.map(_.connection).getOrElse(connection)
+    val transportConnection = requestContext.transportContext.map(_.connection).getOrElse(connection)
     val requestMethod =
-      requestContext.method.map(_.name).orElse(requestContext.message.map(_.connection.getRequestMethod))
+      requestContext.method.map(_.name).orElse(requestContext.transportContext.map(_.connection.getRequestMethod))
         .getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)

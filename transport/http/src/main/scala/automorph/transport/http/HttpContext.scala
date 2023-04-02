@@ -39,12 +39,12 @@ import scala.concurrent.duration.Duration
  *   automatically follow redirects if true
  * @param timeout
  *   response timeout
- * @param message
+ * @param transportContext
  *   message properties for specific transport plugin
- * @tparam Message
- *   type of message properties for specific transport plugin
+ * @tparam TransportContext
+ *   type of context for specific transport plugin
  */
-final case class HttpContext[Message](
+final case class HttpContext[TransportContext](
   scheme: Option[String] = None,
   userInfo: Option[String] = None,
   host: Option[String] = None,
@@ -57,7 +57,7 @@ final case class HttpContext[Message](
   statusCode: Option[Int] = None,
   followRedirects: Option[Boolean] = None,
   timeout: Option[Duration] = None,
-  message: Option[Message] = None,
+  transportContext: Option[TransportContext] = None,
 ) {
 
   private val headerAuthorizationBasic = "Basic"
@@ -100,7 +100,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def url(url: String): HttpContext[Message] =
+  def url(url: String): HttpContext[TransportContext] =
     this.url(new URI(url))
 
   /**
@@ -111,7 +111,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def url(url: URI): HttpContext[Message] = {
+  def url(url: URI): HttpContext[TransportContext] = {
     val httpContext = copy(
       scheme = Option(url.getScheme),
       userInfo = Option(url.getUserInfo),
@@ -131,7 +131,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def query(queryString: String): HttpContext[Message] = {
+  def query(queryString: String): HttpContext[TransportContext] = {
     val entries = queryString.replaceFirst("^\\?(.*)$", "$1")
     val parameters = entries.split("&").flatMap(_.split("=", 2) match {
       case Array(name, value) if name.nonEmpty => Some((name, value))
@@ -149,7 +149,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def scheme(scheme: String): HttpContext[Message] =
+  def scheme(scheme: String): HttpContext[TransportContext] =
     copy(scheme = Some(scheme))
 
   /**
@@ -160,7 +160,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def authority(authority: String): HttpContext[Message] = {
+  def authority(authority: String): HttpContext[TransportContext] = {
     val (userInfo, endpoint) = authority.split("@", 2) match {
       case Array(userInfo, endpoint) => Some(userInfo) -> Some(endpoint)
       case Array(endpoint) => None -> Some(endpoint)
@@ -182,7 +182,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def userInfo(userInfo: String): HttpContext[Message] =
+  def userInfo(userInfo: String): HttpContext[TransportContext] =
     copy(userInfo = Some(userInfo))
 
   /**
@@ -193,7 +193,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def host(host: String): HttpContext[Message] =
+  def host(host: String): HttpContext[TransportContext] =
     copy(host = Some(host))
 
   /**
@@ -204,7 +204,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def port(port: Int): HttpContext[Message] =
+  def port(port: Int): HttpContext[TransportContext] =
     copy(port = Some(port))
 
   /**
@@ -215,7 +215,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def path(path: String): HttpContext[Message] =
+  def path(path: String): HttpContext[TransportContext] =
     copy(path = Some(path))
 
   /**
@@ -226,7 +226,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def fragment(fragment: String): HttpContext[Message] =
+  def fragment(fragment: String): HttpContext[TransportContext] =
     copy(fragment = Some(fragment))
 
   /**
@@ -239,7 +239,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def parameter(name: String, value: String): HttpContext[Message] =
+  def parameter(name: String, value: String): HttpContext[TransportContext] =
     parameter(name, value, replace = false)
 
   /**
@@ -254,7 +254,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def parameter(name: String, value: String, replace: Boolean): HttpContext[Message] = {
+  def parameter(name: String, value: String, replace: Boolean): HttpContext[TransportContext] = {
     val originalParameters =
       if (replace) { parameters.filter(_._1 != name) }
       else parameters
@@ -269,7 +269,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def parameters(entries: (String, String)*): HttpContext[Message] =
+  def parameters(entries: (String, String)*): HttpContext[TransportContext] =
     parameters(entries, replace = false)
 
   /**
@@ -282,7 +282,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def parameters(entries: Iterable[(String, String)], replace: Boolean): HttpContext[Message] = {
+  def parameters(entries: Iterable[(String, String)], replace: Boolean): HttpContext[TransportContext] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
     val originalParameters =
       if (replace) { parameters.filter { case (name, _) => !entryNames.contains(name) } }
@@ -320,7 +320,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def headers(entries: (String, String)*): HttpContext[Message] =
+  def headers(entries: (String, String)*): HttpContext[TransportContext] =
     headers(entries, replace = false)
 
   /**
@@ -333,7 +333,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def headers(entries: Iterable[(String, String)], replace: Boolean): HttpContext[Message] = {
+  def headers(entries: Iterable[(String, String)], replace: Boolean): HttpContext[TransportContext] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
     val originalHeaders =
       if (replace) headers.filter { case (name, _) => !entryNames.contains(name) }
@@ -349,7 +349,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def method(method: HttpMethod): HttpContext[Message] =
+  def method(method: HttpMethod): HttpContext[TransportContext] =
     copy(method = Some(method))
 
   /**
@@ -360,7 +360,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def statusCode(statusCode: Int): HttpContext[Message] =
+  def statusCode(statusCode: Int): HttpContext[TransportContext] =
     copy(statusCode = Some(statusCode))
 
   /** `Content-Type` header value. */
@@ -405,10 +405,10 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def cookies(entries: (String, String)*): HttpContext[Message] =
+  def cookies(entries: (String, String)*): HttpContext[TransportContext] =
     cookies(entries, headerCookie)
 
-  private def cookies(values: Iterable[(String, String)], headerName: String): HttpContext[Message] = {
+  private def cookies(values: Iterable[(String, String)], headerName: String): HttpContext[TransportContext] = {
     val headerValue = (headers(headerName) ++ values.map { case (name, value) => s"$name=$value" }).mkString("; ")
     header(headerName, headerValue, replace = true)
   }
@@ -445,7 +445,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def setCookies(entries: (String, String)*): HttpContext[Message] =
+  def setCookies(entries: (String, String)*): HttpContext[TransportContext] =
     cookies(entries, headerSetCookie)
 
   /** `Authorization` header value. */
@@ -470,7 +470,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def authorizationBasic(user: String, password: String): HttpContext[Message] = {
+  def authorizationBasic(user: String, password: String): HttpContext[TransportContext] = {
     val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
@@ -485,7 +485,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def header(name: String, value: String): HttpContext[Message] =
+  def header(name: String, value: String): HttpContext[TransportContext] =
     header(name, value, replace = false)
 
   /**
@@ -500,7 +500,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def header(name: String, value: String, replace: Boolean): HttpContext[Message] = {
+  def header(name: String, value: String, replace: Boolean): HttpContext[TransportContext] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
     copy(headers = originalHeaders :+ name -> value)
   }
@@ -513,7 +513,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def authorizationBasic(token: String): HttpContext[Message] =
+  def authorizationBasic(token: String): HttpContext[TransportContext] =
     header(headerAuthorization, s"$headerAuthorizationBasic $token")
 
   /**
@@ -524,7 +524,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def authorizationBearer(token: String): HttpContext[Message] =
+  def authorizationBearer(token: String): HttpContext[TransportContext] =
     header(headerAuthorization, s"$headerAuthorizationBearer $token")
 
   /** `Proxy-Authorization` header value. */
@@ -555,7 +555,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def proxyAuthBasic(user: String, password: String): HttpContext[Message] = {
+  def proxyAuthBasic(user: String, password: String): HttpContext[TransportContext] = {
     val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
@@ -568,7 +568,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def proxyAuthBasic(token: String): HttpContext[Message] =
+  def proxyAuthBasic(token: String): HttpContext[TransportContext] =
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
 
   /**
@@ -579,7 +579,7 @@ final case class HttpContext[Message](
    * @return
    *   HTTP message context
    */
-  def proxyAuthBearer(token: String): HttpContext[Message] =
+  def proxyAuthBearer(token: String): HttpContext[TransportContext] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
 
   private[automorph] def overrideUrl(url: URI): URI = {

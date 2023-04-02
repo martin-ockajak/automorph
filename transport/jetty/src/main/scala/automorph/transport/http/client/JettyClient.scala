@@ -214,7 +214,7 @@ final case class JettyClient[Effect[_]](
     requestContext: Context,
   ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)], URI)] = {
     val requestUrl = requestContext
-      .overrideUrl(requestContext.message.map(transport => transport.request.getURI).getOrElse(url))
+      .overrideUrl(requestContext.transportContext.map(transport => transport.request.getURI).getOrElse(url))
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
@@ -244,9 +244,9 @@ final case class JettyClient[Effect[_]](
   ): Request = {
     // URL, method & body
     val requestMethod = http.HttpMethod.valueOf(httpContext.method.orElse {
-      httpContext.message.map(_.request.getMethod).map(HttpMethod.valueOf)
+      httpContext.transportContext.map(_.request.getMethod).map(HttpMethod.valueOf)
     }.getOrElse(method).name)
-    val transportRequest = httpContext.message.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
+    val transportRequest = httpContext.transportContext.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
     val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody.toArray))
 
     // Headers
@@ -310,7 +310,7 @@ final case class JettyClient[Effect[_]](
 
   private def createWebSocketRequest(httpContext: Context, requestUrl: URI): ClientUpgradeRequest = {
     // Headers
-    val transportRequest = httpContext.message.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
+    val transportRequest = httpContext.transportContext.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
     val headers = transportRequest.getHeaders.asScala.map(field => field.getName -> field.getValue) ++
       httpContext.headers
     val request = new ClientUpgradeRequest

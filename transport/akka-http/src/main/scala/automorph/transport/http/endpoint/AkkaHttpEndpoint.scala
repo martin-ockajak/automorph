@@ -164,7 +164,7 @@ case class AkkaHttpEndpoint[Effect[_]](
 
   private def getRequestContext(request: HttpRequest): Context =
     HttpContext(
-      message = Some(request),
+      transportContext = Some(request),
       method = Some(HttpMethod.valueOf(request.method.value)),
       headers = request.headers.map(header => header.name -> header.value),
     ).url(request.uri.toString)

@@ -142,7 +142,7 @@ final case class SttpClient[Effect[_]] private (
     requestContext: Context,
   ): Request[Array[Byte], WebSocket] = {
     // URL & method
-    val transportRequest = requestContext.message.map(_.request).getOrElse(basicRequest)
+    val transportRequest = requestContext.transportContext.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(requestContext.overrideUrl(defaultUrl))
     val requestMethod = Method.unsafeApply(requestContext.method.getOrElse(method).name)
 

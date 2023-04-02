@@ -209,7 +209,7 @@ final case class HttpClient[Effect[_]](
     requestContext: Context,
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)], URI)] = {
     val requestUrl = requestContext.overrideUrl {
-       requestContext.message.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
+       requestContext.transportContext.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
     }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
@@ -239,7 +239,7 @@ final case class HttpClient[Effect[_]](
     httpContext: Context,
   ): HttpRequest = {
     // Method & body
-    val requestBuilder = httpContext.message.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val requestBuilder = httpContext.transportContext.map(_.request).getOrElse(HttpRequest.newBuilder)
     val transportRequest = Try(requestBuilder.build).toOption
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
@@ -297,7 +297,7 @@ final case class HttpClient[Effect[_]](
 
   private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
     // Headers
-    val transportBuilder = httpContext.message.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val transportBuilder = httpContext.transportContext.map(_.request).getOrElse(HttpRequest.newBuilder)
     val headers = transportBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     } ++ httpContext.headers
