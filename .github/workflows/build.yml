@@ -36,7 +36,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Setup SBT
-        run: mdkir -p ~/.sbt && echo -e 'host=\nuser=\npassword=\n' > ~/.sbt/sonatype_credentials
+        run: mkdir -p ~/.sbt && echo -e 'host=\nuser=\npassword=\n' > ~/.sbt/sonatype_credentials
 
       - name: Setup Node
         uses: actions/setup-node@v3
