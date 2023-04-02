@@ -1,15 +1,3 @@
-
--- RpcFunction.toString
-   I have beautified this a bit.
-   Before:
-   RpcFunction(hello,List(Parameter(some,String), Parameter(n,Int)),scala.concurrent.Future[String],Some(here we go with the documentation!))
-
-   After:
-   RPC function hello(some: String, n: Int): scala.concurrent.Future[String] -- here we go with the documentation!
-
-   RpcFunction.signature is refactored and functionally equivalent
-   => see branch rpc-function
-
 -- RcpException
    I like None.orNull instead of null, saying "I wanted an Option here, but java has none" :)
 
