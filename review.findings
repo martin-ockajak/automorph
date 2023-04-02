@@ -1,8 +1,3 @@
--- removed unnecessary parenthesis in new operators
-   -    val api = new ServerApi()
-   +    val api = new ServerApi
-   => see commit #6588ec
-
 -- unit as argument
    passing () as argument results in (()), but it can be written as {}, which means exactly the same, but it as bit simpler.
    matter of taste, I put the changes on a branch unit-as-argument, feel free to merge or disregard :)
