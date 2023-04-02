@@ -395,14 +395,6 @@ cleanFiles ++= Seq(
 )
 
 
-// Deploy
-siteSourceDirectory := (docs / baseDirectory).value / "build"
-git.remoteRepo := repositoryShell
-val deploySite = taskKey[Unit]("Deploys project website.")
-deploySite := {}
-deploySite := deploySite.dependsOn(site, ghpagesPushSite).value
-
-
 // Release
 ThisBuild / publishTo := {
   val nexus = "https://s01.oss.sonatype.org/"

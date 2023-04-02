@@ -35,6 +35,9 @@ jobs:
           java-version: 11
           distribution: 'adopt'
 
+      - name: Setup SBT
+        run: echo -e 'host=\nuser=\npassword=\n' > ~/.sbt/sonatype_credentials
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
