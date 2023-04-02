@@ -1,17 +1,6 @@
--- unit as argument
-   passing () as argument results in (()), but it can be written as {}, which means exactly the same, but it as bit simpler.
-   matter of taste, I put the changes on a branch unit-as-argument, feel free to merge or disregard :)
-
 -- error handling
    looking at this in general. Just took one example and I have doubts about the correctness.
    I do not understand how the error handling can work in AkkaHttpEndpoint.handle
    In my understanding, .foldError is never is executed in case of errror, because the whole Try (handler processing) is executed in .runAsync
-
--- some packages are named
-   'examples.*' => I think it should be renamed to 'automorph.examples.*'
-   'test.*'     => I think it should be renamed to 'automorph.test.*'
-   (since it possibly involves documentation, too, I have not done this)
-
-   NOTE: let's do renamings at the very end, otherwise merging branches will result in merge conflicts
 
 
