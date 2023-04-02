@@ -114,8 +114,7 @@ case class AkkaHttpEndpoint[Effect[_]](
           ))
         ).runAsync
       }.foldError { error =>
-        Future(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
-        ()
+        handleResult.success(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
       }
       handleResult.future
     }
