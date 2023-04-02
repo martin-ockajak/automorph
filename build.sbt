@@ -396,7 +396,6 @@ cleanFiles ++= Seq(
 
 
 // Deploy
-enablePlugins(GhpagesPlugin)
 siteSourceDirectory := (docs / baseDirectory).value / "build"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
