@@ -65,7 +65,9 @@ final case class FinagleHttpEndpoint[Effect[_]](
           error => createErrorResponse(error, request, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = Reader.fromBuf(Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(Array())))
+            val responseBody = Reader.fromBuf(
+              Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(Array()))
+            )
             val status = result.flatMap(_.exception).map(mapException).map(Status.apply).getOrElse(Status.Ok)
             createResponse(responseBody, status, result.flatMap(_.context), request, requestId)
           },
