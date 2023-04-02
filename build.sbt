@@ -170,7 +170,14 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
 val tapirVersion = "1.2.11"
 lazy val tapir = source(project, "transport/tapir", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
+//    ("com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
+//      .exclude("com.softwaremill.sttp.tapir", "tapir-server:2.13"),
+    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion % Test,
+    ("com.softwaremill.sttp.tapir" %% "tapir-finatra-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
+      .exclude("com.softwaremill.sttp.tapir", "tapir-server_2.13")
+      .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
+      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13"),
     "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )

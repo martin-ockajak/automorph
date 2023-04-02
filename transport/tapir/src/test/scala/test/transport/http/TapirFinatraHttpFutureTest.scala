@@ -9,13 +9,9 @@
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import sttp.model.Method
-//import sttp.tapir.server.vertx.VertxFutureServerInterpreter
-//import sttp.tapir.server.vertx.VertxFutureServerInterpreter.VertxFutureToScalaFuture
-//import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 //import sttp.tapir.server.finatra.FinatraServerInterpreter
 //import test.standard.StandardHttpServerTest
-//import test.transport.http.TapirVertxHttpFutureTest.TapirServer
+//import test.transport.http.TapirFinatraHttpFutureTest.FinatraServer
 //
 //class TapirVertxHttpFutureTest extends StandardHttpServerTest {
 //
@@ -31,16 +27,16 @@
 //    HttpContextGenerator.arbitrary
 //
 //  def serverTransport(id: Int): ServerTransport[Effect, Context] =
-//    TapirServer(system, port(id))
+//    FinatraServer(system, port(id))
 //
 //}
 //
-//case object TapirVertxHttpFutureTest {
+//case object TapirFinatraHttpFutureTest {
 //
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
 //
-//  final case class TapirServer(
+//  final case class FinatraServer(
 //    effectSystem: EffectSystem[Effect],
 //    port: Int
 //  ) extends ServerTransport[Effect, Context] {
@@ -52,7 +48,7 @@
 //      val tapirEndpoint = TapirHttpEndpoint[Future](effectSystem)
 //      val vertx = Vertx.vertx()
 //      val router = Router.router(vertx)
-//      VertxFutureServerInterpreter().route(tapirEndpoint)(router)
+//      val route = FinatraServerInterpreter().toRoute(tapirEndpoint.adapter)
 //      server = vertx.createHttpServer().requestHandler(router)
 //      this
 //    }
