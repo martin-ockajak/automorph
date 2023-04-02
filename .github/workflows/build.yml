@@ -7,7 +7,7 @@ on:
     branches: [ main ]
     tags: [ v* ]
 
-#  workflow_dispatch:
+  workflow_dispatch:
 
 # permissions:
 #   contents: read
@@ -29,11 +29,11 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3
 
-#      - name: Setup Java
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: 11
-#          distribution: 'adopt'
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: 'adopt'
 
 #      - name: Setup Node
 #        uses: actions/setup-node@v3
