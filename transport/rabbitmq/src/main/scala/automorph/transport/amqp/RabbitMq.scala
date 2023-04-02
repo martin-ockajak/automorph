@@ -81,7 +81,7 @@ object RabbitMq extends Logging {
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
         ()
       }.get
-    }.getOrElse{}
+    }.getOrElse {}
 
   /**
    * Close AMQP broker connection.

@@ -155,7 +155,7 @@ final case class JettyClient[Effect[_]](
                   requestBody.toByteBuffer,
                   new WriteCallback {
                     override def writeSuccess(): Unit =
-                      completableRequestSent.succeed{}.runAsync
+                      completableRequestSent.succeed {}.runAsync
 
                     override def writeFailed(error: Throwable): Unit =
                       completableRequestSent.fail(error).runAsync
