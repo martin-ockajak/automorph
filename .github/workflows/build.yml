@@ -40,22 +40,22 @@ jobs:
         with:
           node-version: 19
 
-      - name: Cache SBT
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache/v1
-            ~/.cache/coursier/v1
-          key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
-
-#      - name: Cache Yarn
+#      - name: Cache SBT
 #        uses: actions/cache@v3
 #        with:
 #          path: |
-#            **/node_modules
-#          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
+#            ~/.sbt
+#            ~/.ivy2/cache
+#            ~/.coursier/cache/v1
+#            ~/.cache/coursier/v1
+#          key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties')
+
+      - name: Cache Yarn
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build project
 #        run: sbt --client '+ test'
