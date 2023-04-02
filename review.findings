@@ -1,8 +1,0 @@
--- error handling
-   looking at this in general. Just took one example and I have doubts about the correctness.
-   I do not understand how the error handling can work in AkkaHttpEndpoint.handle
-   In my understanding, .foldError is never is executed in case of errror, because the whole Try (handler processing) is executed in .runAsync
-
-
--- fixed scaladoc
-   #commit 77d3ac09
