@@ -24,12 +24,7 @@ env:
 jobs:
   build:
     name: Build, Test & Deploy
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-        scala: [ 2.13.10, 3.2.2 ]
-        java: [ 11 ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v3
@@ -37,7 +32,7 @@ jobs:
 #      - name: Setup Java
 #        uses: actions/setup-java@v3
 #        with:
-#          java-version: ${{ matrix.java }}
+#          java-version: 11
 #          distribution: 'adopt'
 
 #      - name: Setup Node
@@ -63,8 +58,8 @@ jobs:
 #          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build project
-#        run: sbt --client '++${{ matrix.scala }}; test'
-        run: sbt --client '++${{ matrix.scala }}; compile'
+#        run: sbt --client '+ test'
+        run: sbt --client 'compile'
 
 #      - name: Setup Pages
 #        uses: actions/configure-pages@v3
