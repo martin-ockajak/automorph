@@ -82,10 +82,10 @@ lazy val automorph = project.in(file(".")).settings(name := projectName, publish
 // Dependencies
 def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectReference]*): Project = {
   val sourceDependency = project.in(file(path)).dependsOn(dependsOn: _*)
-  path.split('/').toSeq match {
-    case Seq("test", _ @_*) => sourceDependency
-    case Seq("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
-    case Seq(_, directories @ _*) => sourceDependency.settings(
+  path.split('/') match {
+    case Array("test", _ @_*) => sourceDependency
+    case Array("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
+    case Array(_, directories @ _*) => sourceDependency.settings(
         name := s"$projectName-${directories.mkString("-")}",
         Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master")
       )

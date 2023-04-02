@@ -2,7 +2,9 @@ package automorph.transport.websocket.endpoint
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
-import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
+import automorph.transport.http.endpoint.TapirHttpEndpoint.{
+  clientAddress, getRequestContext, getRequestProperties, pathInput
+}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint.{Context, EffectStreams, Request}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -30,6 +32,8 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
  *   Creates a Tapir WebSocket endpoint with the specified RPC request handler.
  * @param effectSystem
  *   effect system plugin
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
  * @param handler
@@ -37,6 +41,7 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
  */
 final case class TapirWebSocketEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
+  pathPrefix: String = "/",
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with EndpointTransport[
@@ -57,7 +62,8 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
-    endpoint.in(paths).in(queryParams).in(headers).in(clientIp)
+    val publicEndpoint = pathInput(pathPrefix).map(endpoint.in).getOrElse(endpoint)
+    publicEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
       .serverLogic { case (paths, queryParams, headers, clientIp) =>
         // Log the request

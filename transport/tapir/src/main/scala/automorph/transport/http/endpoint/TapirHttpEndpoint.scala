@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  Context, Request, clientAddress, getRequestContext, getRequestProperties
+  Context, Request, clientAddress, getRequestContext, getRequestProperties, pathInput
 }
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
@@ -13,7 +13,9 @@ import scala.util.Try
 import scala.Array.emptyByteArray
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
+import sttp.tapir.{
+  EndpointInput, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
+}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
@@ -31,6 +33,8 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
  *   Creates a Tapir HTTP endpoint message transport plugin with specified effect system and request handler.
  * @param effectSystem
  *   effect system plugin
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param method
  *   HTTP method
  * @param mapException
@@ -40,6 +44,7 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
  */
 final case class TapirHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
+  pathPrefix: String = "/",
   method: Method = Method.POST,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
@@ -58,7 +63,8 @@ final case class TapirHttpEndpoint[Effect[_]](
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 
     // Define server endpoint
-    endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
+    val publicEndpoint = pathInput(pathPrefix).map(endpoint.in).getOrElse(endpoint)
+    publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
       .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
         case (requestBody, paths, queryParams, headers, clientIp) =>
           // Log the request
@@ -131,6 +137,24 @@ object TapirHttpEndpoint {
   /** Endpoint request type. */
   type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
+  private val leadingSlashPattern = "^/+".r
+  private val trailingSlashPattern = "/+$".r
+  private val multiSlashPattern = "/+".r
+
+  private[automorph] def pathInput(path: String): Option[EndpointInput[Unit]] = {
+    val canonicalPath = multiSlashPattern.replaceAllIn(
+      trailingSlashPattern.replaceAllIn(leadingSlashPattern.replaceAllIn(path, ""), ""),
+      "/"
+    )
+    canonicalPath.split("/") match {
+      case Array(head) if head.isEmpty => None
+      case Array(head, tail*) =>
+        Some(tail.foldLeft[EndpointInput[Unit]](stringToPath(head)) { case (current, next) =>
+          current.and(stringToPath(next))
+        })
+      case _ => None
+    }
+  }
 
   private[automorph] def getRequestContext(
     paths: List[String],
