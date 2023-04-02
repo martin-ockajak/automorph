@@ -49,8 +49,6 @@ final case class TapirHttpEndpoint[Effect[_]](
   ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
 ] {
 
-  private type LogicResult = (Array[Byte], StatusCode)
-
   private lazy val contentType = Header.contentType(MediaType.parse(handler.mediaType).getOrElse {
     throw new IllegalArgumentException(s"Invalid content type: ${handler.mediaType}")
   })
@@ -60,8 +58,8 @@ final case class TapirHttpEndpoint[Effect[_]](
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 
     // Define server endpoint
-    endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp).out(byteArrayBody)
-      .out(statusCode).out(header(contentType)).serverLogic {
+    endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
+      .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
         case (requestBody, paths, queryParams, headers, clientIp) =>
           // Log the request
           val requestId = Random.id
@@ -73,27 +71,21 @@ final case class TapirHttpEndpoint[Effect[_]](
             val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
             handler.processRequest(requestBody.toInputStream, requestContext, requestId).either.map(
               _.fold(
-                error => Right[Unit, LogicResult](
-                  createErrorResponse(error, clientIp, requestId, requestProperties, log)
-                ).withLeft[Unit],
+                error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
                 result => {
                   // Create the response
                   val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
                   val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
                     .getOrElse(StatusCode.Ok)
-                  Right[Unit, LogicResult](
-                    createResponse(responseBody, status, clientIp, requestId, log)
-                  ).withLeft[Unit]
+                  createResponse(responseBody, status, clientIp, requestId, log)
                 },
               )
             )
           }.foldError { error =>
-            system.evaluate(
-              Right[Unit, LogicResult](
-                createErrorResponse(error, clientIp, requestId, requestProperties, log)
-              ).withLeft[Unit]
+            effectSystem.evaluate(
+              createErrorResponse(error, clientIp, requestId, requestProperties, log)
             )
-          }
+          }.map(Right.apply)
       }
   }
 
