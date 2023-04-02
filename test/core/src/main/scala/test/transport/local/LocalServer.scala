@@ -20,8 +20,8 @@ final case class LocalServer[Effect[_]](
   }
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful{}
 
   override def close(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.successful{}
 }
