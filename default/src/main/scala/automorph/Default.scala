@@ -34,7 +34,7 @@ object Default extends DefaultMessageCodec {
    * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -66,7 +66,7 @@ object Default extends DefaultMessageCodec {
    * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -94,7 +94,7 @@ object Default extends DefaultMessageCodec {
    * The client can be used to perform RPC calls and notifications.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -116,7 +116,7 @@ object Default extends DefaultMessageCodec {
    * specified effect system plugin.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -148,7 +148,7 @@ object Default extends DefaultMessageCodec {
    * The server can be used to serve remote API requests and invoke bound API methods to process them.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -192,7 +192,7 @@ object Default extends DefaultMessageCodec {
    * The server can be used to serve remote API requests and invoke bound API methods to process them.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -231,7 +231,7 @@ object Default extends DefaultMessageCodec {
    * The server can be used to serve remote API requests and invoke bound API methods to process them.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
@@ -266,7 +266,7 @@ object Default extends DefaultMessageCodec {
    * specified effect system plugin.
    *
    * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
    * @see
    *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see

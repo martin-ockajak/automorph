@@ -28,7 +28,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *   - Processes only HTTP requests starting with specified URL path.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://jetty.io Library documentation]]
  * @see

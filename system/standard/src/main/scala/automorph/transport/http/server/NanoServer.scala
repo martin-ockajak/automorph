@@ -27,7 +27,7 @@ import scala.util.Try
  *   - Processes only HTTP requests starting with specified URL path.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
  * @see

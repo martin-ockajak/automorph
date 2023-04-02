@@ -27,7 +27,7 @@ import scala.util.Try
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see

@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
-import automorph.transport.http.client.HttpClient.{Context, Message, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, TransportContext, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps}
 import java.io.{ByteArrayOutputStream, InputStream}
@@ -27,7 +27,7 @@ import scala.util.Try
  * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see
@@ -104,7 +104,7 @@ final case class HttpClient[Effect[_]](
     }
 
   override def context: Context =
-    Message.defaultContext.url(url).method(method)
+    TransportContext.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful{}
@@ -316,17 +316,17 @@ final case class HttpClient[Effect[_]](
 object HttpClient {
 
   /** Message context type. */
-  type Context = HttpContext[Message]
+  type Context = HttpContext[TransportContext]
 
   /** Default HTTP client builder. */
   val defaultBuilder: Builder = java.net.http.HttpClient.newBuilder
 
-  /** Message properties. */
-  final case class Message(request: HttpRequest.Builder)
+  /** Transport context. */
+  final case class TransportContext(request: HttpRequest.Builder)
 
-  object Message {
+  object TransportContext {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Message] = HttpContext()
+    implicit val defaultContext: HttpContext[TransportContext] = HttpContext()
   }
 }

@@ -3,13 +3,12 @@
 //import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 //import automorph.system.FutureSystem
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
-//import io.vertx.core.Vertx
-//import io.vertx.core.http.HttpServer
-//import io.vertx.ext.web.Router
+//import com.twitter.finatra.http.routing.HttpRouter
+//import com.twitter.finatra.http.{Controller, HttpServer}
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import sttp.tapir.server.finatra.FinatraServerInterpreter
+//import sttp.tapir.server.finatra.{FinatraRoute, FinatraServerInterpreter, TapirController}
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.TapirFinatraHttpFutureTest.FinatraServer
 //
@@ -35,6 +34,15 @@
 //
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
+//
+//  final case class FinatraController(route: FinatraRoute) extends Controller with TapirController {
+//    addTapirRoute(route)
+//  }
+//
+//  final case class FinatraHttpServer extends HttpServer {
+//    override protected def configureHttp(router: HttpRouter): Unit =
+//      router.add[FinatraController]
+//  }
 //
 //  final case class FinatraServer(
 //    effectSystem: EffectSystem[Effect],

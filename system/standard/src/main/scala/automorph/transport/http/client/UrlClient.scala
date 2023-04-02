@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
-import automorph.transport.http.client.UrlClient.{Context, Message}
+import automorph.transport.http.client.UrlClient.{Context, TransportContext}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
 import java.io.InputStream
@@ -18,7 +18,7 @@ import scala.util.Using
  * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor
@@ -70,7 +70,7 @@ final case class UrlClient[Effect[_]](
     }
 
   override def context: Context =
-    Message.defaultContext.url(url).method(method)
+    TransportContext.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful {}
@@ -173,14 +173,14 @@ final case class UrlClient[Effect[_]](
 object UrlClient {
 
   /** Message context type. */
-  type Context = HttpContext[Message]
+  type Context = HttpContext[TransportContext]
 
-  /** Message properties. */
-  final case class Message(connection: HttpURLConnection)
+  /** Transport context. */
+  final case class TransportContext(connection: HttpURLConnection)
 
-  object Message {
+  object TransportContext {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Message] = HttpContext()
+    implicit val defaultContext: HttpContext[TransportContext] = HttpContext()
   }
 }

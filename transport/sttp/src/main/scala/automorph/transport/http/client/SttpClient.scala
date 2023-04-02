@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
-import automorph.transport.http.client.SttpClient.{Context, Message}
+import automorph.transport.http.client.SttpClient.{Context, TransportContext}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
 import java.io.InputStream
@@ -20,7 +20,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see
@@ -37,8 +37,6 @@ import sttp.model.{Header, MediaType, Method, Uri}
  *   remote API HTTP or WebSocket URL
  * @param method
  *   HTTP request method
- * @param webSocket
- *   true if WebSocket protocol is supported, false otherwise
  * @tparam Effect
  *   effect type
  */
@@ -101,7 +99,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   override def context: Context =
-    Message.defaultContext.url(url).method(method)
+    TransportContext.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful {}
@@ -176,26 +174,29 @@ final case class SttpClient[Effect[_]] private (
 
   private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] =
     if (sttpRequest.isWebSocket) {
-      if (webSocket) { effectSystem.successful(Protocol.WebSocket) }
-      else {
+      if (webSocket) {
+        effectSystem.successful(Protocol.WebSocket)
+      } else {
         effectSystem.failed(
           throw new IllegalArgumentException(
             s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}"
           )
         )
       }
-    } else effectSystem.successful(Protocol.Http)
+    } else {
+      effectSystem.successful(Protocol.Http)
+    }
 }
 
 object SttpClient {
 
   /** Request context type. */
-  type Context = HttpContext[Message]
+  type Context = HttpContext[TransportContext]
 
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
    *
-   * @param system
+   * @param effectSystem
    *   effect system plugin
    * @param backend
    *   STTP backend
@@ -209,17 +210,17 @@ object SttpClient {
    *   STTP HTTP & WebSocket client message transport plugin
    */
   def apply[Effect[_]](
-    system: EffectSystem[Effect],
-    backend: SttpBackend[Effect, ?],
+    effectSystem: EffectSystem[Effect],
+    backend: SttpBackend[Effect, WebSockets],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
   ): SttpClient[Effect] =
-    SttpClient[Effect](system, backend, url, method, webSocket = true)
+    SttpClient[Effect](effectSystem, backend, url, method, webSocket = true)
 
   /**
    * Creates an STTP HTTP client message transport plugin with the specified STTP backend.
    *
-   * @param system
+   * @param effectSystem
    *   effect system plugin
    * @param backend
    *   STTP backend
@@ -233,19 +234,19 @@ object SttpClient {
    *   STTP HTTP client message transport plugin
    */
   def http[Effect[_]](
-    system: EffectSystem[Effect],
+    effectSystem: EffectSystem[Effect],
     backend: SttpBackend[Effect, ?],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
   ): SttpClient[Effect] =
-    SttpClient[Effect](system, backend, url, method, webSocket = false)
+    SttpClient[Effect](effectSystem, backend, url, method, webSocket = false)
 
-  /** Message properties. */
-  final case class Message(request: PartialRequest[Either[String, String], Any])
+  /** Transport context. */
+  final case class TransportContext(request: PartialRequest[Either[String, String], Any])
 
-  object Message {
+  object TransportContext {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Message] = HttpContext()
+    implicit val defaultContext: HttpContext[TransportContext] = HttpContext()
   }
 }

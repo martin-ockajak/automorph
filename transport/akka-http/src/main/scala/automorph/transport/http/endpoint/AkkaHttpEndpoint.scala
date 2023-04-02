@@ -29,7 +29,7 @@ import scala.util.Try
  *   - The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://doc.akka.io/docs/akka-http Library documentation]]
  * @see
