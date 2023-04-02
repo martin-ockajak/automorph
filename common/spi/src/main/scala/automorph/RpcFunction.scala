@@ -23,8 +23,13 @@ final case class RpcFunction(
 
   /** Function signature. */
   lazy val signature: String = {
-    val parametersText = s"(${parameters.map(parameter => s"${parameter.name}: ${parameter.`type`}").mkString(", ")})"
-    s"$name$parametersText: $resultType"
+    val parametersText = parameters.mkString(", ")
+    s"$name($parametersText): $resultType"
+  }
+
+  override def toString = {
+    val documentationText = documentation.map(x => s" -- $x").getOrElse("")
+    s"RPC function $signature$documentationText"
   }
 }
 
@@ -38,5 +43,7 @@ object RpcFunction {
    * @param `type`
    *   type
    */
-  final case class Parameter(name: String, `type`: String)
+  final case class Parameter(name: String, `type`: String){
+    override def toString = s"$name: ${`type`}"
+  }
 }
