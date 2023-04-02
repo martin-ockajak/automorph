@@ -22,10 +22,10 @@ final case class RpcFunction(
 ) {
 
   /** Function signature. */
-  lazy val signature: String = {
-    val parametersText = s"(${parameters.map(parameter => s"${parameter.name}: ${parameter.`type`}").mkString(", ")})"
-    s"$name$parametersText: $resultType"
-  }
+  lazy val signature: String =
+    s"$name(${parameters.mkString(", ")}): $resultType"
+
+  override def toString: String = signature
 }
 
 object RpcFunction {
@@ -38,5 +38,8 @@ object RpcFunction {
    * @param `type`
    *   type
    */
-  final case class Parameter(name: String, `type`: String)
+  final case class Parameter(name: String, `type`: String) {
+    override def toString =
+      s"$name: ${`type`}"
+  }
 }
