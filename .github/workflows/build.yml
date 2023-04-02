@@ -17,9 +17,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-concurrency:
-  group: "build"
-  cancel-in-progress: false
+# concurrency:
+#   group: "build"
+#   cancel-in-progress: false
 
 jobs:
   build:
@@ -40,10 +40,10 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'adopt'
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19
+#      - name: Setup Node
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 19
 
       - name: Cache SBT
         uses: actions/cache@v3
@@ -69,8 +69,8 @@ jobs:
 #      - name: Setup Pages
 #        uses: actions/configure-pages@v3
 #
-      - name: Build site
-        run: sbt --client 'site'
+#      - name: Build site
+#        run: sbt --client 'site'
 
 #      - name: Upload artifact
 #        uses: actions/upload-pages-artifact@v1
