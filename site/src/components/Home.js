@@ -1,7 +1,7 @@
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import React from 'react'
-import bannerImage from '../../../docs/images/banner.jpg'
+import bannerImage from '../../static/banner.jpg'
 
 const style = {
   list: {
