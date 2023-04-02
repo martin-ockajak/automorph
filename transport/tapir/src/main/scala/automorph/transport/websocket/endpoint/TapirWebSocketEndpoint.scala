@@ -21,7 +21,7 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
  * The response returned by the RPC handler is used as WebSocket response body.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://tapir.softwaremill.com Library documentation]]
  * @see

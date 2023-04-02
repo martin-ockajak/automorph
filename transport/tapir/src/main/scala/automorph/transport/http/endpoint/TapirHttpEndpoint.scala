@@ -22,7 +22,7 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
  *   - The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
- *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ *   [[https://en.wikipedia.org/wiki/HTTP Transport protocol]]
  * @see
  *   [[https://tapir.softwaremill.com Library documentation]]
  * @see

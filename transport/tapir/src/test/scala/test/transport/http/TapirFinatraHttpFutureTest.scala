@@ -39,7 +39,11 @@
 //    addTapirRoute(route)
 //  }
 //
-//  final case class FinatraHttpServer extends HttpServer {
+//  final case class FinatraHttpServer(port: Int) extends HttpServer {
+//
+//    override protected def defaultHttpPort: String =
+//      s":$port"
+//
 //    override protected def configureHttp(router: HttpRouter): Unit =
 //      router.add[FinatraController]
 //  }
@@ -54,10 +58,8 @@
 //    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.clone(handler)
 //      val tapirEndpoint = TapirHttpEndpoint[Future](effectSystem)
-//      val vertx = Vertx.vertx()
-//      val router = Router.router(vertx)
 //      val route = FinatraServerInterpreter().toRoute(tapirEndpoint.adapter)
-//      server = vertx.createHttpServer().requestHandler(router)
+//      server = FinatraHttpServer()
 //      this
 //    }
 //

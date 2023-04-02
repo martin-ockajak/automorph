@@ -9,11 +9,7 @@
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import sttp.model.Method
 //import sttp.tapir.server.vertx.VertxFutureServerInterpreter
-//import sttp.tapir.server.vertx.VertxFutureServerInterpreter.VertxFutureToScalaFuture
-//import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
-//import sttp.tapir.server.finatra.FinatraServerInterpreter
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.TapirVertxHttpFutureTest.TapirServer
 //
@@ -49,10 +45,9 @@
 //
 //    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.clone(handler)
-//      val tapirEndpoint = TapirHttpEndpoint[Future](effectSystem)
 //      val vertx = Vertx.vertx()
 //      val router = Router.router(vertx)
-//      VertxFutureServerInterpreter().route(tapirEndpoint)(router)
+//      VertxFutureServerInterpreter().route(endpoint.adapter)(router)
 //      server = vertx.createHttpServer().requestHandler(router)
 //      this
 //    }
