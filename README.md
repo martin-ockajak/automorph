@@ -34,10 +34,22 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 
 ## Commands
 
-### Build
+### Test
 
 ```bash
 sbt '+ test'
+```
+
+### Generate documentation
+
+```bash
+sbt site
+```
+
+#### Serve documentation
+
+```bash
+sbt serveSite
 ```
 
 #### Set console log level
@@ -62,16 +74,4 @@ export LOG_CODE=true
 
 ```bash
 export TEST_BASIC=true
-```
-
-### Generate documentation
-
-```bash
-sbt site
-```
-
-#### Serve documentation
-
-```bash
-sbt serveSite
 ```
