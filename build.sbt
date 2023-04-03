@@ -29,7 +29,7 @@ onLoadMessage := ""
 
 
 // Structure
-lazy val automorph = project.in(file(".")).settings(name := projectName, publish / skip := true).aggregate(
+lazy val main = project.in(file(".")).settings(name := projectName, publish / skip := true).aggregate(
   // Common
   spi,
   util,
@@ -328,9 +328,9 @@ def flattenTasks[A](tasks: Seq[Def.Initialize[Task[A]]]): Def.Initialize[Task[Se
     case Seq(head, tail @ _*) => Def.taskDyn(flattenTasks(tail).map(_.+:(head.value)))
   }
 
-lazy val allSources = Def.taskDyn(flattenTasks(automorph.uses.map(_ / Compile / doc / sources)))
-lazy val allTastyFiles = Def.taskDyn(flattenTasks(automorph.uses.map(_ / Compile / doc / tastyFiles)))
-lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(automorph.uses.map(_ / Compile / doc / dependencyClasspath)))
+lazy val allSources = Def.taskDyn(flattenTasks(main.uses.map(_ / Compile / doc / sources)))
+lazy val allTastyFiles = Def.taskDyn(flattenTasks(main.uses.map(_ / Compile / doc / tastyFiles)))
+lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(main.uses.map(_ / Compile / doc / dependencyClasspath)))
 lazy val docs = project.in(file("site")).settings(
   name := projectName,
   mdocVariables := Map(
