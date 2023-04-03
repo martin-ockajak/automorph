@@ -48,6 +48,11 @@ within any other [delayed initialization](https://scala-lang.org/api/3.x/scala/D
 to explicitly supply type parameters when creating RPC protocol plugin instances
 
 
+## Known issues
+
+- Mangled Scaladoc signatures for a few nonessential methods
+
+
 ## Supported standards
 
 ### RPC protocols
