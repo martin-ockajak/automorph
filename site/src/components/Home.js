@@ -1,4 +1,4 @@
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+i/automorphmport useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import React from 'react'
 import bannerImage from '../../static/banner.jpg'
@@ -125,7 +125,7 @@ function BannerRow() {
       <div className="row">
         <div className={'col col--12'}>
           <img src={bannerImage} alt={config.title}/>
-          <h2>This is a preview of an upcoming release. Please do not use it for any purpose other than review.</h2>
+          <h2>This is a preview of an upcoming to be published release. Please do not use it for any purpose other than review.</h2>
         </div>
       </div>
   )
