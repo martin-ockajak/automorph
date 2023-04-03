@@ -142,7 +142,7 @@ git clone @REPOSITORY_URL@
 cd automorph/examples/project
 ```
 
-### Try
+### Test
 
 Run any of the examples:
 
