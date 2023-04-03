@@ -43,10 +43,16 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 sbt '+ test'
 ```
 
-#### Set log level
+#### Set console log level
 
 ```bash
-export LOG_LEVEL=OFF
+export LOG_LEVEL=INFO
+```
+
+#### Review test logs
+
+```
+less target/test.log
 ```
 
 #### Enable generated code logging
@@ -61,24 +67,12 @@ export LOG_CODE=true
 export TEST_BASIC=true
 ```
 
-#### Review test logs
-
-```
-target/test.log
-```
-
 ### Documentation
 
 #### Generate
 
 ```bash
 sbt site
-```
-
-#### Generate continuously
-
-```bash
-sbt startSite
 ```
 
 #### Serve
