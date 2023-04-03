@@ -1,19 +1,19 @@
 //package test.transport.http
 //
+//import akka.actor.typed.ActorSystem
+//import akka.actor.typed.scaladsl.Behaviors
+//import akka.http.scaladsl.Http
 //import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 //import automorph.system.FutureSystem
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
-//import io.vertx.core.Vertx
-//import io.vertx.core.http.HttpServer
-//import io.vertx.ext.web.Router
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import sttp.tapir.server.vertx.VertxFutureServerInterpreter
+//import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 //import test.standard.StandardHttpServerTest
-//import test.transport.http.TapirVertxHttpFutureTest.TapirServer
+//import test.transport.http.TapirAkkaHttpFutureTest.TapirServer
 //
-//class TapirVertxHttpFutureTest extends StandardHttpServerTest {
+//class TapirAkkaHttpFutureTest extends StandardHttpServerTest {
 //
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
@@ -30,42 +30,31 @@
 //    TapirServer(system, port(id))
 //}
 //
-//case object TapirVertxHttpFutureTest {
+//case object TapirAkkaHttpFutureTest {
 //
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
-//    private var server = Option.empty[HttpServer]
+//    private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
 //
 //    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.clone(handler)
-//      val vertx = Vertx.vertx()
-//      val router = Router.router(vertx)
-////      router.route(HttpMethod.POST, "/").handler { context =>
-////        println(context.request().path())
-////        context.response().write("TEST")
-////        context.response().end()
-////      }
-//      VertxFutureServerInterpreter().route(endpoint.adapter)(router)
-//      println(router.getRoutes.get(0).getPath)
-//      println(router.getRoutes.get(0).methods())
-//      server = Some(vertx.createHttpServer().requestHandler(router))
 //      this
 //    }
 //
-//    override def init(): Effect[Unit] =
-//      effectSystem.evaluate {
-//        server = server.map(_.listen(port).toCompletionStage.toCompletableFuture.get())
+//    override def init(): Effect[Unit] = {
+//      implicit val actorSystem: ActorSystem[Any] = ActorSystem(Behaviors.empty[Any], getClass.getSimpleName)
+//      val route = AkkaHttpServerInterpreter().toRoute(endpoint.adapter)
+//      Http().newServerAt("0.0.0.0", port).bind(route).map { serverBinding =>
+//        server = Some((actorSystem, serverBinding))
 //      }
+//    }
 //
 //    override def close(): Effect[Unit] = {
-//      server.map { activeServer =>
-//        effectSystem.evaluate {
-//          activeServer.close().toCompletionStage.toCompletableFuture.get()
-//          ()
-//        }
+//      server.map { case (actorSystem, serverBinding) =>
+//        serverBinding.unbind().map(_ => actorSystem.terminate()).flatMap(_ => actorSystem.whenTerminated).map(_ => ())
 //      }.getOrElse(effectSystem.successful {})
 //    }
 //  }

@@ -27,7 +27,6 @@
 //
 //  def serverTransport(id: Int): ServerTransport[Effect, Context] =
 //    FinatraServer(system, port(id))
-//
 //}
 //
 //case object TapirFinatraHttpFutureTest {
@@ -48,12 +47,9 @@
 //      router.add[FinatraController]
 //  }
 //
-//  final case class FinatraServer(
-//    effectSystem: EffectSystem[Effect],
-//    port: Int
-//  ) extends ServerTransport[Effect, Context] {
+//  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
-//    private var server: HttpServer = None.orNull
+//    private var server = Option.empty[HttpServer]
 //
 //    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.clone(handler)
@@ -70,6 +66,7 @@
 //
 //    override def close(): Effect[Unit] =
 //      effectSystem.evaluate {
+//
 //        server.close().toCompletionStage.toCompletableFuture.get()
 //      }
 //  }

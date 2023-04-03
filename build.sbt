@@ -36,7 +36,7 @@ lazy val automorph = project.in(file(".")).settings(name := projectName, publish
   coreMeta,
   core,
 
-  // Specification
+  // API schema
   openrpc,
   openapi,
 
@@ -45,10 +45,6 @@ lazy val automorph = project.in(file(".")).settings(name := projectName, publish
   jsonrpc,
   webrpcMeta,
   webrpc,
-
-  // Transport protocol
-  http,
-  amqp,
 
   // Message codec
   circe,
@@ -64,14 +60,22 @@ lazy val automorph = project.in(file(".")).settings(name := projectName, publish
   scalazEffect,
 
   // Message transport
+  http,
+  amqp,
+  rabbitmq,
+
+  // Client transport
   sttp,
+
+  // Server transport
   tapir,
   undertow,
   vertx,
   jetty,
   akkaHttp,
+
+  // Endpoint transport
   finagle,
-  rabbitmq,
 
   // Misc
   default,
@@ -105,11 +109,11 @@ lazy val util = source(project, "common/util", spi)
 lazy val coreMeta = source(project, "common/core/meta", spi, util)
 lazy val core = source(project, "common/core", coreMeta, testPlugin % Test, jsonrpc % Test, webrpc % Test)
 
-// Specification
+// API schema
 lazy val openrpc = source(project, "schema/openrpc", spi, testBase % Test)
 lazy val openapi = source(project, "schema/openapi", spi, testBase % Test)
 
-// Protocol
+// RPC protocol
 lazy val jsonrpcMeta = source(project, "protocol/jsonrpc/meta", spi)
 lazy val jsonrpc = source(project, "protocol/jsonrpc", jsonrpcMeta, openrpc, openapi, util)
 lazy val webrpcMeta = source(project, "protocol/webrpc/meta", spi, http)
@@ -146,15 +150,6 @@ lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugi
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.8.13"
-val sttpHttpClientVersion = "3.5.2"
-lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
-  )
-)
 val embeddedRabbitMqVersion = "1.5.0"
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
   .settings(
@@ -166,19 +161,33 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
     )
   )
 
-// Server
+// Client transport
+val sttpVersion = "3.8.13"
+val sttpHttpClientVersion = "3.5.2"
+lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
+  )
+)
+
+// Server transport
 val tapirVersion = "1.2.11"
 lazy val tapir = source(project, "transport/tapir", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
 //    ("com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
-//      .exclude("com.softwaremill.sttp.tapir", "tapir-server:2.13"),
+//      .exclude("com.softwaremill.sttp.tapir", "tapir-server_2.13")
+//      .exclude("com.softwaremill.sttp.shared", "core_2.13"),
+//    ("com.typesafe.akka" %% "akka-actor-typed" % akkaVersion % Test).cross(CrossVersion.for3Use2_13),
+//    ("com.typesafe.akka" %% "akka-stream" % akkaVersion % Test).cross(CrossVersion.for3Use2_13),
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion % Test,
     ("com.softwaremill.sttp.tapir" %% "tapir-finatra-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
       .exclude("com.softwaremill.sttp.tapir", "tapir-server_2.13")
       .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
-      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13"),
-    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
+      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13")
+//    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
@@ -205,6 +214,8 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStand
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
   )
 )
+
+// Endpoint transport
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "22.12.0")
@@ -408,9 +419,11 @@ cleanFiles ++= Seq(
 
 // Release
 ThisBuild / publishTo := {
-  val nexus = "https://s01.oss.sonatype.org/"
-  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  Some(if (isSnapshot.value) {
+    "snapshots".at("https://s01.oss.sonatype.org/content/repositories/snapshots")
+  } else {
+    "releases".at("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+  })
 }
 ThisBuild / pomIncludeRepository := { _ => false }
 ThisBuild / publishMavenStyle := true
@@ -418,6 +431,5 @@ ThisBuild / releaseCrossBuild := true
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("early-semver")
-credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
+credentials += Credentials("GnuPG Key ID", "gpg", "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63", "")
 credentials += Credentials(Path.userHome / ".sbt/sonatype_credentials")
-
