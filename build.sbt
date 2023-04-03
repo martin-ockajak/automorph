@@ -345,7 +345,7 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
   Compile / doc / scalacOptions := docScalacOptions ++ Seq(
-    "-skip-by-id:automorph.handler",
+    "-skip-by-id:automorph.client,automorph.handler",
     s"-source-links:src=github://$repositoryPath/master"
   ),
   Compile / doc / sources ++= allSources.value.flatten,
