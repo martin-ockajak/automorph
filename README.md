@@ -52,25 +52,25 @@ sbt site
 sbt serveSite
 ```
 
-#### Set console log level
+### Set console log level
 
 ```bash
 export LOG_LEVEL=INFO
 ```
 
-#### Review test logs
+### Review test logs
 
 ```
 less target/test.log
 ```
 
-#### Enable generated code logging
+### Enable generated code logging
 
 ```bash
 export LOG_CODE=true
 ```
 
-#### Enable basic tests only
+### Enable basic tests only
 
 ```bash
 export TEST_BASIC=true
