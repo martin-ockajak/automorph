@@ -2,7 +2,7 @@
 
 # Important
 
-**This is a preview of an upcoming to be published release. Please do not use it for any purpose other than review.**
+**This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.**
 
 <br>
 <br>
@@ -28,6 +28,7 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 * [Documentation](https://automorph.org)
 * [API](https://automorph.org/api/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
+* [Contact](mailto:automorph.org@proton.me)
 
 
 # Build

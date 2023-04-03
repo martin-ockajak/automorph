@@ -90,4 +90,3 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 * [http4s](https://http4s.org)
 * [STTP](https://sttp.softwaremill.com)
 * [ZIO](https://zio.dev)
-
