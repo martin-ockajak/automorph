@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.Await
-import scala.util.Try
 
 /**
  * Akka HTTP server transport plugin.
@@ -102,9 +101,7 @@ final case class AkkaServer[Effect[_]](
       server.fold(
         throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
       ) { case (actorSystem, serverBinding) =>
-        Try(Await.result(serverBinding.unbind(), Duration.Inf)).failed.foreach { error =>
-          logger.error(s"Failed to unbind port: $port", error)
-        }
+        Await.result(serverBinding.unbind(), Duration.Inf)
         actorSystem.terminate()
         Await.result(actorSystem.whenTerminated, Duration.Inf)
         server = None
