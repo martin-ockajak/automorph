@@ -1,4 +1,4 @@
-i/automorphmport useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import React from 'react'
 import bannerImage from '../../static/banner.jpg'
