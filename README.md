@@ -30,12 +30,10 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 ## Requirements
 
 * [JDK](https://openjdk.java.net/) 11+
-* [SBT](https://www.scala-sbt.org/)
-
-### Documentation only
-
+* [SBT](https://www.scala-sbt.org/) 1.8+
 * [NodeJS](https://nodejs.org/) 19+
 * [Yarn](https://yarnpkg.com/) 1.22+
+
 
 ## Commands
 
@@ -69,7 +67,7 @@ export TEST_BASIC=true
 target/test.log
 ```
 
-### Website
+### Documentation
 
 #### Generate
 
@@ -88,10 +86,3 @@ sbt startSite
 ```bash
 sbt serveSite
 ```
-
-## Notes
-
-* uPickle codec compilation for Scala 2 takes a long time
-* Monix effect system is missing from API index
-* Documentation build breaks API reference links
-

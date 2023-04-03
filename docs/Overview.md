@@ -51,6 +51,7 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 ## Known issues
 
 - Mangled Scaladoc signatures for a few nonessential methods
+- Missing Monix effect system in Scaladoc index
 
 
 ## Supported standards
