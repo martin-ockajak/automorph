@@ -131,7 +131,7 @@ git clone @REPOSITORY_URL@
 cd automorph/examples/project
 ```
 
-### Test
+### Try
 
 Run any of the examples:
 
@@ -139,8 +139,9 @@ Run any of the examples:
 sbt run
 ```
 
-### Modify
+### Customize
 
 - Integrate with preferred platforms by including additional plugins
 - Configure RPC client, server or endpoint properties
 - Remove unused examples and build dependencies
+
