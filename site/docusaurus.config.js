@@ -79,6 +79,11 @@ const config = {
             label: 'Artifacts',
             position: 'left',
           },
+          {
+            href: 'mailto:automorph.org@proton.me',
+            label: 'Contact',
+            position: 'left',
+          },
         ],
       },
       prism: {
