@@ -125,6 +125,7 @@ function BannerRow() {
       <div className="row">
         <div className={'col col--12'}>
           <img src={bannerImage} alt={config.title}/>
+          <h2>This is a preview of an upcoming release. Please do not use it for any purpose other than review.</h2>
         </div>
       </div>
   )

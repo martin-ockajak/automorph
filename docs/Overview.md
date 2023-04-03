@@ -2,8 +2,6 @@
 sidebar_position: 1
 ---
 
-**This is a preview of an upcoming release. Please do not use it for any purpose other than design or code review.**
-
 # Overview
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for
