@@ -53,12 +53,12 @@ jobs:
             ~/.cache/coursier
           key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
-#      - name: Cache Yarn
-#        uses: actions/cache@v3
-#        with:
-#          path: |
-#            **/node_modules
-#          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Cache Yarn
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build project & site
 #        run: sbt --client '+ test ; site'
