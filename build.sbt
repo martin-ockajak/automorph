@@ -365,7 +365,8 @@ def relativizeScaladocLinks(content: String, path: String): String = {
       paths :+ s"${paths.last}$packageName/"
     }.reverse
     val replacements = if (searchData) Seq("", s"$apiUrl/") else Range(0, patterns.size).map("../" * _)
-    patterns.zip(replacements).foldLeft(content) { case (text, (pattern, replacement)) =>
+    val titledContent = content.replaceAll(">root<", s">${projectName.capitalize}<")
+    patterns.zip(replacements).foldLeft(titledContent) { case (text, (pattern, replacement)) =>
       text.replaceAll(s"$apiLinkPrefix$pattern", s""""$replacement""")
     }
   } else {
