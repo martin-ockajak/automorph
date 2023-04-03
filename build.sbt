@@ -420,6 +420,11 @@ cleanFiles ++= Seq(
 
 // Release
 val repositoryCredentialsPath = Path.userHome / ".sbt/sonatype_credentials"
+val repositoryCredentials = if (repositoryCredentialsPath.isFile) {
+  Seq(Credentials(repositoryCredentialsPath))
+} else {
+  Seq()
+}
 ThisBuild / publishTo := {
   Some(if (isSnapshot.value) {
     "snapshots".at("https://s01.oss.sonatype.org/content/repositories/snapshots")
@@ -433,10 +438,6 @@ ThisBuild / releaseCrossBuild := true
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("early-semver")
-credentials ++= (Seq(
+credentials ++= Seq(
   Credentials("GnuPG Key ID", "gpg", "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63", "")
-) ++ (if (repositoryCredentialsPath.isFile) {
-  Seq(Credentials(repositoryCredentialsPath))
-} else {
-  Seq()
-}))
+) ++ repositoryCredentials
