@@ -7,6 +7,17 @@ sidebar_position: 2
 Expose and call a remote JSON-RPC API over HTTP.
 
 
+## [Project template](@REPOSITORY_URL@.g8)
+
+Create SBT project from a [Giter8](http://www.foundweekends.org/giter8/) template:
+
+```
+sbt new martin-ockajak/automorph.g8
+cd automorph-example
+sbt run
+```
+
+
 ## [Existing project](@REPOSITORY_URL@/blob/main/examples/project/src/main/scala/examples/Quickstart.scala)
 
 ### Build
