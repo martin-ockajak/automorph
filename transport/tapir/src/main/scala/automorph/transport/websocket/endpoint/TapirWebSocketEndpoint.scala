@@ -3,7 +3,7 @@ package automorph.transport.websocket.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  clientAddress, getRequestContext, getRequestProperties, pathInput
+  clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint.{Context, EffectStreams, Request}
@@ -62,7 +62,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
-    val publicEndpoint = pathInput(pathPrefix).map(endpoint.in).getOrElse(endpoint)
+    val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
     publicEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
       .serverLogic { case (paths, queryParams, headers, clientIp) =>

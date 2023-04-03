@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  Context, Request, clientAddress, getRequestContext, getRequestProperties, pathInput
+  Context, Request, clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
@@ -63,7 +63,7 @@ final case class TapirHttpEndpoint[Effect[_]](
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 
     // Define server endpoint
-    val publicEndpoint = pathInput(pathPrefix).map(endpoint.in).getOrElse(endpoint)
+    val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
     publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
       .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
         case (requestBody, paths, queryParams, headers, clientIp) =>
@@ -141,7 +141,7 @@ object TapirHttpEndpoint {
   private val trailingSlashPattern = "/+$".r
   private val multiSlashPattern = "/+".r
 
-  private[automorph] def pathInput(path: String): Option[EndpointInput[Unit]] = {
+  private[automorph] def pathEndpointInput(path: String): Option[EndpointInput[Unit]] = {
     val canonicalPath = multiSlashPattern.replaceAllIn(
       trailingSlashPattern.replaceAllIn(leadingSlashPattern.replaceAllIn(path, ""), ""),
       "/"
