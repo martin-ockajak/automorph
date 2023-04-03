@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Expose and call a remote JSON-RPC API over HTTP.
 
-## [Existing project](../../examples/project/src/main/scala/examples/Quickstart.scala)
+## [Existing project](@REPOSITORY_URL@/examples/project/src/main/scala/examples/Quickstart.scala)
 
 ### Build
 
@@ -118,18 +118,18 @@ println(run(
 run(client.close())
 ```
 
-## [Example project](https://github.com/martin-ockajak/automorph/examples/project)
+## [Example project](@REPOSITORY_URL@/examples/project)
 
 ### Download
 
 Clone the repository and enter the example project directory:
 
 ```shell
-git clone https://github.com/martin-ockajak/automorph
+git clone @REPOSITORY_URL@
 cd automorph/examples/project
 ```
 
-### Try
+### Test
 
 Run any of the examples:
 
@@ -137,6 +137,6 @@ Run any of the examples:
 sbt run
 ```
 
-### Adjust
+### Modify
 
-- Remove unused examples in and build dependencies
+- Remove unused examples and build dependencies

@@ -322,7 +322,11 @@ lazy val allTastyFiles = Def.taskDyn(flattenTasks(automorph.uses.map(_ / Compile
 lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(automorph.uses.map(_ / Compile / doc / dependencyClasspath)))
 lazy val docs = project.in(file("site")).settings(
   name := projectName,
-  mdocVariables := Map("PROJECT_VERSION" -> version.value, "SCALADOC_VERSION" -> scalaVersion.value),
+  mdocVariables := Map(
+    "PROJECT_VERSION" -> version.value,
+    "SCALADOC_VERSION" -> scalaVersion.value,
+    "REPOSITORY_URL" -> repositoryUrl
+  ),
   mdocOut := baseDirectory.value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
