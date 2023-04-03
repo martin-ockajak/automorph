@@ -62,7 +62,8 @@ jobs:
 
       - name: Build project & site
 #        run: sbt --client '+ test ; site'
-        run: sbt --client '+ compile ; site'
+#        run: sbt --client '+ compile ; site'
+        run: sbt --client 'compile ; site'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
