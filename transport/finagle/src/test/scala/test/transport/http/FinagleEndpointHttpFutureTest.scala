@@ -41,7 +41,7 @@ object FinagleEndpointHttpFutureTest {
     port: Int
   ) extends ServerTransport[Effect, Context] {
     private var endpoint = FinagleHttpEndpoint(effectSystem)
-    private var server: ListeningServer = None.orNull
+    private var server = Option.empty[ListeningServer]
 
     override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
       endpoint = endpoint.clone(handler)
@@ -50,17 +50,19 @@ object FinagleEndpointHttpFutureTest {
 
     override def init(): Effect[Unit] =
       Future {
-        server = Http.serve(s":$port", endpoint)
+        server = Some(Http.serve(s":$port", endpoint))
         ()
       }
 
     override def close(): Effect[Unit] = {
-      val promise = Promise[Unit]()
-      server.close().respond {
-        case Return(result) => promise.success(result)
-        case Throw(error) => promise.failure(error)
-      }
-      promise.future
+      server.map { activeServer =>
+        val promise = Promise[Unit]()
+        activeServer.close().respond {
+          case Return(result) => promise.success(result)
+          case Throw(error) => promise.failure(error)
+        }
+        promise.future
+      }.getOrElse(effectSystem.successful {})
     }
   }
 }
