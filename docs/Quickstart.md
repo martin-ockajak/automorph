@@ -6,16 +6,24 @@ sidebar_position: 2
 
 Expose and call a remote JSON-RPC API over HTTP.
 
-## [Source](../../examples/project/src/main/scala/examples/Quickstart.scala)
+## [Existing project](../../examples/project/src/main/scala/examples/Quickstart.scala)
 
 ### Build
 
-Add the following to your `build.sbt` file:
+Add the following dependency to your build configuration:
+
+#### SBT
 
 ```scala
 libraryDependencies ++= Seq(
   "org.automorph" %% "automorph-default" % "@PROJECT_VERSION@"
 )
+```
+
+#### Gradle
+
+```scala
+implementation group: 'org.automorph', name: 'automorph-default_3', version: '@PROJECT_VERSION@'
 ```
 
 ### Server
@@ -110,7 +118,7 @@ println(run(
 run(client.close())
 ```
 
-## [Example Project](https://github.com/martin-ockajak/automorph/examples/project)
+## [Example project](https://github.com/martin-ockajak/automorph/examples/project)
 
 ### Download
 
