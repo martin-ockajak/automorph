@@ -1,12 +1,12 @@
 scalaVersion := "3.2.2"
 name := "automorph"
 organization := "example"
-version := "0.0.0"
+version := "0.0.1"
 
 Test / parallelExecution := false
 
-val automorphVersion = "0.0.0"
-val sttpVersion = "3.8.11"
+val automorphVersion = "0.0.1"
+val sttpVersion = "3.8.13"
 libraryDependencies ++= Seq(
   // Default
   "org.automorph" %% "automorph-default" % automorphVersion,
