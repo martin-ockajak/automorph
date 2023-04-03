@@ -6,9 +6,9 @@ dist
 *.swp
 .bsp
 .idea
-*.iml
 .vscode
 .project
 .settings
 out
 null
+
