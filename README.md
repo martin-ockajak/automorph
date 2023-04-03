@@ -10,7 +10,7 @@
 
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/site/static/banner.jpg)
 
-[![Documentation](https://img.shields.io/badge/Website-Documentation-blueviolet)](https://automorph.org)
+[![Documentation](https://img.shields.io/badge/Website-Documentation-purple)](https://automorph.org)
 [![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/index.html)
 [![Artifacts](https://img.shields.io/badge/Releases-Artifacts-yellow)](
 https://mvnrepository.com/artifact/org.automorph/automorph)
