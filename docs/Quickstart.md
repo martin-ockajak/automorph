@@ -139,5 +139,4 @@ sbt run
 
 ### Adjust
 
-- Remove unused examples in `examples/project/src/main/scala`
-- Remove unused dependencies in `examples/project/build.sbt`
+- Remove unused examples in and build dependencies
