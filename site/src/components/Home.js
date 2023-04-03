@@ -52,8 +52,7 @@ const features = [
     description: (
         <>
           Access transport protocol <a href="docs/Examples/index.html#http-request">request</a> and <a
-            href="docs/Examples/index.html#http-response">response</a> metadata (e.g. headers)
-          via optional abstractions.
+            href="docs/Examples/index.html#http-response">response</a> metadata via optional abstractions.
         </>
     ),
   },
