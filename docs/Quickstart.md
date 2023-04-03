@@ -6,6 +6,7 @@ sidebar_position: 2
 
 Expose and call a remote JSON-RPC API over HTTP.
 
+
 ## [Existing project](@REPOSITORY_URL@/examples/project/src/main/scala/examples/Quickstart.scala)
 
 ### Build
@@ -117,6 +118,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 ```
+
 
 ## [Example project](@REPOSITORY_URL@/examples/project)
 
