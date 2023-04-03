@@ -64,15 +64,13 @@ export LOG_CODE=true
 export TEST_BASIC=true
 ```
 
-### Documentation
-
-#### Generate
+### Generate documentation
 
 ```bash
 sbt site
 ```
 
-#### Serve
+#### Serve documentation
 
 ```bash
 sbt serveSite
