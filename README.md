@@ -1,13 +1,5 @@
 <br>
 
-# Important
-
-**This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.**
-
-<br>
-<br>
-<br>
-
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/site/static/banner.jpg)
 
 [![Documentation](https://img.shields.io/badge/Website-Documentation-purple)](https://automorph.org)
@@ -16,6 +8,8 @@
 https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](
 https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
+
+## This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.
 
 
 # Overview
