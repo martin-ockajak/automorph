@@ -9,7 +9,7 @@ https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](
 https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 
-## This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.
+### This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.
 
 
 # Overview
