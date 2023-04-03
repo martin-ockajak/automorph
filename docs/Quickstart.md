@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
 
 #### Gradle
 
-```scala
+```groovy
 implementation group: 'org.automorph', name: 'automorph-default_3', version: '@PROJECT_VERSION@'
 ```
 
