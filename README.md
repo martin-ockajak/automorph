@@ -46,7 +46,7 @@ sbt '+ test'
 sbt site
 ```
 
-#### Serve documentation
+### Serve documentation
 
 ```bash
 sbt serveSite
