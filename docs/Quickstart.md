@@ -12,7 +12,7 @@ Expose and call a remote JSON-RPC API over HTTP.
 Create an SBT project from a [Giter8](http://www.foundweekends.org/giter8/) template:
 
 ```
-sbt new martin-ockajak/automorph.g8
+sbt new automorph-org/automorph.g8
 cd automorph-example
 sbt run
 ```
