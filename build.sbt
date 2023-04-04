@@ -70,11 +70,18 @@ lazy val root = project.in(file(".")).settings(name := projectName, publish / sk
 def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectReference]*): Project = {
   val sourceDependency = project.in(file(path)).dependsOn(dependsOn: _*)
   path.split('/') match {
-    case Array("test", _ @_*) => sourceDependency
-    case Array("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
+    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => sourceDependency.settings(
+        Compile / doc / scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _)) => docScalac3Options
+          case _ => docScalac2Options
+        }),
+      )
     case Array(_, directories @ _*) => sourceDependency.settings(
-        name := s"$projectName-${directories.mkString("-")}",
-        Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master")
+        Compile / doc / scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((3, _)) => docScalac3Options
+          case _ => docScalac2Options
+        }),
+        name := s"$projectName-${directories.mkString("-")}"
       )
   }
 }
@@ -243,46 +250,54 @@ lazy val testPlugin = source(project, "test/plugin", testCodec, core, circe, jac
 ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
-val commonScalacOptions =
-  Seq(
-    "-language:higherKinds",
-    "-feature",
-    "-deprecation",
-    "-unchecked",
-    "-release", "11",
-    "-encoding",
-    "utf8"
-  )
-val docScalacOptions = commonScalacOptions ++ Seq(
+val commonScalacOptions = Seq(
+  "-language:higherKinds",
+  "-feature",
+  "-deprecation",
+  "-unchecked",
+  "-release",
+  "11",
+  "-encoding",
+  "utf8"
+)
+val compileScalac3Options = commonScalacOptions ++ Seq(
+  "-source",
+  "3.2",
+//  "-Wunused",
   "-language:adhocExtensions",
   "-pagewidth",
   "120"
 )
-ThisBuild / scalacOptions ++=
-  (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) => docScalacOptions ++ Seq(
-      "-source",
-      "3.2",
-      "-indent",
-//      "-Wunused",
-      "-Xcheck-macros",
-      "-Ysafe-init"
-    )
-    case _ => commonScalacOptions ++ Seq(
-        "-language:existentials",
-        "-Xsource:3",
-        "-Xlint:_,-byname-implicit",
-        "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
-        "-Wextra-implicit",
-        "-Wnumeric-widen",
-        "-Wvalue-discard",
-        "-Wunused:imports,patvars,privates,locals,params",
-        "-Vfree-terms",
-        "-Vimplicits",
-        "-Ybackend-parallelism",
-        "4"
-      )
-  })
+val compileScalac2Options = commonScalacOptions ++ Seq(
+  "-language:existentials",
+  "-Xsource:3",
+  "-Xlint:_,-byname-implicit",
+  "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
+  "-Wextra-implicit",
+  "-Wnumeric-widen",
+  "-Wvalue-discard",
+  "-Wunused:imports,patvars,privates,locals,params",
+  "-Vfree-terms",
+  "-Vimplicits",
+  "-Ybackend-parallelism",
+  "4"
+)
+val docScalac3Options = compileScalac3Options ++ Seq(
+  s"-source-links:src=github://$repositoryPath/master",
+  "-skip-by-id:automorph.client,automorph.handler,automorph.spi.codec"
+)
+val docScalac2Options = compileScalac2Options ++ Seq(
+  "-skip-packages",
+  "automorph.client:automorph.handler:automorph.spi.codec"
+)
+ThisBuild / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+  case Some((3, _)) => compileScalac3Options ++ Seq(
+    "-indent",
+    "-Xcheck-macros",
+    "-Ysafe-init"
+  )
+  case _ => compileScalac2Options
+})
 
 
 // Analyze
@@ -317,10 +332,7 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
-  Compile / doc / scalacOptions := docScalacOptions ++ Seq(
-    "-skip-by-id:automorph.client,automorph.handler",
-    s"-source-links:src=github://$repositoryPath/master"
-  ),
+  Compile / doc / scalacOptions := docScalac3Options,
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=
