@@ -68,19 +68,18 @@ lazy val root = project.in(file(".")).settings(name := projectName, publish / sk
 
 // Dependencies
 def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectReference]*): Project = {
-  val sourceDependency = project.in(file(path)).dependsOn(dependsOn: _*)
+  val subProject = project.in(file(path)).dependsOn(dependsOn: _*).settings(
+    Compile / doc / scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => docScalac3Options
+      case _ => docScalac2Options
+    }),
+  )
   path.split('/') match {
-    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => sourceDependency.settings(
-        Compile / doc / scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((3, _)) => docScalac3Options
-          case _ => docScalac2Options
-        }),
+    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => subProject
+    case Array(directory) => subProject.settings(
+        name := s"$projectName-$directory"
       )
-    case Array(_, directories @ _*) => sourceDependency.settings(
-        Compile / doc / scalacOptions := (CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((3, _)) => docScalac3Options
-          case _ => docScalac2Options
-        }),
+    case Array(_, directories @ _*) => subProject.settings(
         name := s"$projectName-${directories.mkString("-")}"
       )
   }
