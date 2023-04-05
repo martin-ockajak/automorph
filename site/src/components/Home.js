@@ -16,8 +16,8 @@ const features = [
     link: 'docs/Examples/index.html#basic',
     description: (
         <>
-          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and <a
-            href="docs/Web-RPC">Web-RPC</a> 0.1 client or server at compile-time from public API class methods.
+          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 or <a
+            href="docs/Web-RPC">Web-RPC</a> 0.1 client and server at compile-time from public API class methods.
         </>
     ),
   },
