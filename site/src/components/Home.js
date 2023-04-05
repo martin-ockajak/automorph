@@ -13,55 +13,55 @@ const style = {
 const features = [
   {
     title: 'Seamless',
-    link: 'docs/Examples/index.html#basic',
+    link: 'docs/Examples#basic',
     description: (
         <>
           Generate optimized <a
             href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> <a
-            href="docs/Quickstart/index.html#static-client">client</a> or <a
-            href="docs/Quickstart/index.html#server">server</a> bindings from existing
+            href="docs/Quickstart#static-client">client</a> or <a
+            href="docs/Quickstart#server">server</a> bindings from existing
             public API methods at compile time.
         </>
     ),
   },
   {
     title: 'Flexible',
-    link: 'docs/Examples/index.html#dynamic-payload',
+    link: 'docs/Examples#dynamic-payload',
     description: (
         <>
           Customize <a
-            href="docs/Examples/index.html#data-serialization">data serialization</a>, <a
-            href="docs/Examples/index.html#client-function-names">remote API function names</a>, <a
-            href="docs/Examples/index.html#client-exceptions">RPC protocol errors</a> and <a
-            href="docs/Examples/index.html#http-authentication">authentication</a>.
+            href="docs/Examples#data-serialization">data serialization</a>, <a
+            href="docs/Examples#client-function-names">remote API function names</a>, <a
+            href="docs/Examples#client-exceptions">RPC protocol errors</a> and <a
+            href="docs/Examples#http-authentication">authentication</a>.
         </>
     ),
   },
   {
     title: 'Modular',
-    link: 'docs/Examples/index.html#integration',
+    link: 'docs/Examples#integration',
     description: (
         <>
-          Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC protocol</a>, <a
-            href="docs/Plugins/index.html#effect-system">effect handling</a>, <a
-            href="docs/Plugins/index.html#message-transport">transport protocol</a> and <a
-            href="docs/Plugins/index.html#message-codec">message format</a>.
+          Choose plugins for <a href="docs/Plugins#rpc-protocol">RPC protocol</a>, <a
+            href="docs/Plugins#effect-system">effect handling</a>, <a
+            href="docs/Plugins#message-transport">transport protocol</a> and <a
+            href="docs/Plugins#message-codec">message format</a>.
         </>
     ),
   },
   {
     title: 'Permissive',
-    link: 'docs/Examples/index.html#metadata',
+    link: 'docs/Examples#metadata',
     description: (
         <>
-          Access transport protocol <a href="docs/Examples/index.html#http-request">request</a> and <a
-            href="docs/Examples/index.html#http-response">response</a> metadata via optional abstractions.
+          Access transport protocol <a href="docs/Examples#http-request">request</a> and <a
+            href="docs/Examples#http-response">response</a> metadata via optional abstractions.
         </>
     ),
   },
   {
     title: 'Discoverable',
-    link: 'docs/Examples/index.html#api-schema',
+    link: 'docs/Examples#api-schema',
     description: (
         <>
           Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
@@ -83,7 +83,7 @@ const features = [
   },
   {
     title: 'RPC protocols',
-    link: 'docs/Plugins/index.html#rpc-protocol',
+    link: 'docs/Plugins#rpc-protocol',
     description: (
         <>
           <ul style={style.list}>
@@ -95,26 +95,26 @@ const features = [
   },
   {
     title: 'Transport protocols',
-    link: 'docs/Plugins/index.html#message-transport',
+    link: 'docs/Plugins#message-transport',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples/index.html#http-authentication">HTTP</a></li>
-            <li><a href="docs/Examples/index.html#websocket-transport">WebSocket</a></li>
-            <li><a href="docs/Examples/index.html#amqp-transport">AMQP</a></li>
+            <li><a href="docs/Examples#http-authentication">HTTP</a></li>
+            <li><a href="docs/Examples#websocket-transport">WebSocket</a></li>
+            <li><a href="docs/Examples#amqp-transport">AMQP</a></li>
           </ul>
         </>
     ),
   },
   {
     title: 'Effect handling',
-    link: 'docs/Plugins/index.html#effect-system',
+    link: 'docs/Plugins#effect-system',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples/index.html#synchronous-call">Synchronous</a></li>
-            <li><a href="docs/Examples/index.html#asynchronous-call">Asynchronous</a></li>
-            <li><a href="docs/Examples/index.html#effect-system">Monadic</a></li>
+            <li><a href="docs/Examples#synchronous-call">Synchronous</a></li>
+            <li><a href="docs/Examples#asynchronous-call">Asynchronous</a></li>
+            <li><a href="docs/Examples#effect-system">Monadic</a></li>
           </ul>
         </>
     ),
@@ -175,7 +175,7 @@ function DocumentationRow() {
       <div className="row">
         <div className={'col col--12'}>
           <div className="text--center padding-bottom--xl">
-            <a className="button" href="docs/Quickstart/index.html" style={{
+            <a className="button" href="docs/Quickstart" style={{
               color: 'var(--sidebar-background-color)',
               backgroundColor: 'var(--ifm-link-color)',
               fontSize: '1.5rem',
