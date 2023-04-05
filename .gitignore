@@ -12,3 +12,6 @@ dist
 out
 null
 
+# Misc
+.DS_Store
+
