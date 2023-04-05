@@ -16,7 +16,11 @@ const features = [
     link: 'docs/Examples/index.html#basic',
     description: (
         <>
-          Generate optimized RPC client or server bindings from existing public API methods at compile time.
+          Generate optimized <a
+            href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> <a
+            href="docs/Quickstart/index.html#static-client">client</a> or <a
+            href="docs/Quickstart/index.html#server">server</a> bindings from existing
+            public API methods at compile time.
         </>
     ),
   },

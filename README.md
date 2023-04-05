@@ -12,7 +12,7 @@ https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 ## This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](
-https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](
+https://www.scala-lang.org/) providing an easy way to invoke and expose remote APIs using [JSON-RPC](
 https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 
 * [Quick Start](docs/Quickstart.md)
