@@ -12,12 +12,12 @@ const style = {
 
 const features = [
   {
-    title: 'Automatic',
+    title: 'Seamless',
     link: 'docs/Examples/index.html#basic',
     description: (
         <>
-          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 or <a
-            href="docs/Web-RPC">Web-RPC</a> 0.1 client and server at compile-time from public API class methods.
+          Generate RPC client or server from existing public API methods at compile time with
+          a single line of code.
         </>
     ),
   },
@@ -79,20 +79,19 @@ const features = [
     ),
   },
   {
-    title: 'Effect Handling',
-    link: 'docs/Plugins/index.html#effect-system',
+    title: 'RPC protocols',
+    link: 'docs/Plugins/index.html#rpc-protocol',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples/index.html#synchronous-call">Synchronous</a></li>
-            <li><a href="docs/Examples/index.html#asynchronous-call">Asynchronous</a></li>
-            <li><a href="docs/Examples/index.html#effect-system">Monadic</a></li>
+            <li><a href="https://www.jsonrpc.org/specification">JSON-RPC</a></li>
+            <li><a href="docs/Web-RPC">Web-RPC</a></li>
           </ul>
         </>
     ),
   },
   {
-    title: 'Transport Protocols',
+    title: 'Transport protocols',
     link: 'docs/Plugins/index.html#message-transport',
     description: (
         <>
@@ -105,13 +104,14 @@ const features = [
     ),
   },
   {
-    title: 'Message Formats',
-    link: 'docs/Plugins/index.html#message-codec',
+    title: 'Effect handling',
+    link: 'docs/Plugins/index.html#effect-system',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples/index.html#data-serialization">JSON</a></li>
-            <li><a href="docs/Examples/index.html#message-codec">MessagePack</a></li>
+            <li><a href="docs/Examples/index.html#synchronous-call">Synchronous</a></li>
+            <li><a href="docs/Examples/index.html#asynchronous-call">Asynchronous</a></li>
+            <li><a href="docs/Examples/index.html#effect-system">Monadic</a></li>
           </ul>
         </>
     ),
