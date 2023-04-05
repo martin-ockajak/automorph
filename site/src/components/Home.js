@@ -16,8 +16,7 @@ const features = [
     link: 'docs/Examples/index.html#basic',
     description: (
         <>
-          Generate RPC client or server from existing public API methods at compile time with
-          a single line of code.
+          Generate optimized RPC client or server bindings from existing public API methods at compile time.
         </>
     ),
   },
