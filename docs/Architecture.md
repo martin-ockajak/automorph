@@ -14,8 +14,10 @@ with existing systems by freely combining its primary componvarious plugins:
 * [RPC endpoint](/api/automorph/RpcEndpoint.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 * [Effect system](/api/automorph/spi/EffectSystem.html)
-* [Message transport](/api/automorph/spi/MessageTransport.html)
 * [Message codec](/api/automorph/spi/MessageCodec.html)
+* [Client transport](/api/automorph/spi/ClientTransport.html)
+* [Server transport](/api/automorph/spi/ServerTransport.html)
+* [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
 
 ### RPC client & server composition
@@ -78,9 +80,9 @@ Automatically derives remote API bindings for existing API instances.
 * Applications
 
 
-### RPC protocol
+## [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
-Remote procedure call [protocol](/api/automorph/spi/RpcProtocol.html) plugin.
+Remote procedure call protocol plugin.
 
 The underlying RPC protocol must support remote function invocation.
 
@@ -94,21 +96,22 @@ The underlying RPC protocol must support remote function invocation.
 * [Server](/api/automorph/RpcServer.html)
 * [Endpoint](/api/automorph/RpcEndpoint.html)
 
-### Effect system
 
-Computational [effect system](/api/automorph/spi/EffectSystem.html) plugin.
+## [Effect system](/api/automorph/spi/EffectSystem.html)
+
+Computational effect system plugin.
 
 The underlying runtime must support monadic composition of effectful values.
 
 **Used by**
 
-* [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
-* [Server message transport](/api/automorph/spi/ServerMessageTransport.html)
-* [Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html)
+* [Client transport](/api/automorph/spi/ClientTransport.html)
+* [Server transport](/api/automorph/spi/ServerTransport.html)
+* [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
-### Message codec
+### [Message codec](/api/automorph/spi/MessageCodec.html)
 
-Structured [message format codec](/api/automorph/spi/MessageCodec.html) plugin.
+Structured message format codec plugin.
 
 The underlying data format must support storing arbitrarily nested structures of basic data types.
 
@@ -116,15 +119,12 @@ The underlying data format must support storing arbitrarily nested structures of
 
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
-### Message transport
-
-Binary [message transport](/api/automorph/spi/MessageTransport.html) protocol plugin.
-
 The underlying transport protocol must support request/response messaging pattern.
 
-#### Client transport
 
-[Client message transport](/api/automorph/spi/transport/ClientMessageTransport.html) protocol plugin.
+## [Client transport](/api/automorph/spi/transport/ClientTransport.html)
+
+Client message transport protocol plugin.
 
 Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
 
@@ -136,9 +136,10 @@ Passively sends requests and receives responses to and from a remote endpoint us
 
 * [Client](/api/automorph/RpcClientMessageTransport.html)
 
-#### Server transport
 
-[Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html) protocol plugin.
+## [Server transport](/api/automorph/spi/transport/ServerTransport.html)
+
+Server message transport protocol plugin.
 
 Actively receives requests to be processed by the RPC handler and sends responses using specific transport protocol.
 
@@ -150,9 +151,10 @@ Actively receives requests to be processed by the RPC handler and sends response
 
 * Applications
 
-#### Endpoint transport
 
-[Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html) protocol plugin.
+## [Endpoint transport](/api/automorph/spi/transport/EndpointTransport.html)
+
+Existing server layer integration plugin.
 
 Passively parses requests to be processed by the RPC handler and creates responses for specific transport protocol.
 
@@ -163,4 +165,3 @@ Passively parses requests to be processed by the RPC handler and creates respons
 **Used by**
 
 * Applications
-
