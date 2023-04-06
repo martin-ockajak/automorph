@@ -23,7 +23,7 @@ sidebar_position: 1
 * [SLF4J](http://www.slf4j.org/) logger implementation (optional)
 
 
-## API
+## [API](https://en.wikipedia.org/wiki/API)
 
 Entry points for the application logic to invoke or expose remote APIs:
 
@@ -32,7 +32,7 @@ Entry points for the application logic to invoke or expose remote APIs:
 * [RPC endpoint](/api/automorph/RpcEndpoint.html) - expose APIs as remote within an existing server
 
 
-## SPI
+## [SPI](https://en.wikipedia.org/wiki/Service_provider_interface)
 
 Traits for implementation of various integration plugins:
 
