@@ -11,9 +11,15 @@ sidebar_position: 1
 
 ## Goals
 
-* Enable consuming and exposing **remote APIs** transparently **without** needing to create **intermediate layer**
-* Preserve user's **freedom** to make **technical decisions** and **access transport protocol** metadata
-* Strive for **smooth integration** with other **libraries** and existing **applications**
+* Enable **remote access** to **existing APIs** with **no need to create an intermediate layer**
+* Support working with **dynamic message data** and accessing **transport protocol metadata**
+* Provide **smooth integration** with related **libraries** and existing **applications**
+
+
+## Requirements
+
+* [Scala](https://www.scala-lang.org/) 3.2+ or 2.13+
+* [Java Runtime Environment](https://openjdk.java.net/) 11+
 
 
 ## API
@@ -62,12 +68,6 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 * [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
 * [Web-RPC](Web-RPC)
 
-### Effect Handling
-
-* [Synchronous](https://docs.scala-lang.org/scala3/book/taste-functions.html) (*Default*)
-* [Asynchronous](https://docs.scala-lang.org/overviews/core/futures.html) (*Default*)
-* [Monadic](https://blog.softwaremill.com/figuring-out-scala-functional-programming-libraries-af8230efccb4)
-
 ### Transport protocols
 
 * [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) (*Default*)
@@ -78,6 +78,12 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 
 * [JSON](https://www.json.org) (*Default*)
 * [MessagePack](https://msgpack.org)
+
+### Effect Handling
+
+* [Synchronous](https://docs.scala-lang.org/scala3/book/taste-functions.html) (*Default*)
+* [Asynchronous](https://docs.scala-lang.org/overviews/core/futures.html) (*Default*)
+* [Monadic](https://blog.softwaremill.com/figuring-out-scala-functional-programming-libraries-af8230efccb4)
 
 ### API schemas
 
