@@ -228,6 +228,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.Default
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto.*
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -253,7 +254,6 @@ case class Record(
 )
 
 // Provide custom data type serialization and deserialization logic
-import io.circe.generic.auto.*
 implicit lazy val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
   State.Off -> 0,
   State.On -> 1
