@@ -54,8 +54,10 @@ const features = [
     link: 'docs/Examples#metadata',
     description: (
         <>
-          Access transport protocol <a href="docs/Examples#http-request">request</a> and <a
-            href="docs/Examples#http-response">response</a> metadata via optional abstractions.
+          Work with <a
+            href="docs/Examples#dynamic-payload">dynamic message payload</a> and access transport protocol <a
+            href="docs/Examples#http-request">request</a> and <a
+            href="docs/Examples#http-response">response</a> metadata.
         </>
     ),
   },
@@ -66,7 +68,7 @@ const features = [
         <>
           Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
             href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> 3.1+ API schemas
-          via generated discovery functions.
+          using standard API discovery functions.
         </>
     ),
   },
