@@ -4,7 +4,7 @@ import automorph.transport.http.{HttpContext, HttpMethod}
 import java.net.URLEncoder
 import org.scalacheck.{Arbitrary, Gen}
 
-object HttpContextGenerator {
+case object HttpContextGenerator {
 
   private val charset = "UTF-8"
   private val methods = Seq(HttpMethod.Post, HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete)

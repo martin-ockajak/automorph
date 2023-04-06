@@ -153,7 +153,7 @@ final case class JettyHttpEndpoint[Effect[_]](
   }
 }
 
-object JettyHttpEndpoint {
+case object JettyHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[HttpServletRequest]

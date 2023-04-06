@@ -166,7 +166,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
 
 }
 
-object RemoteInvoke {
+case object RemoteInvoke {
 
   def apply1Macro[Result, T1: c.WeakTypeTag, Context](
     c: blackbox.Context

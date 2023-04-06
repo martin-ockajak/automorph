@@ -64,7 +64,7 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   }
 }
 
-object ZioSystem {
+case object ZioSystem {
 
   /**
    * ZIO effect type with specified environment.

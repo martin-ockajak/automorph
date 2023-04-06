@@ -8,7 +8,7 @@ import upack.{Arr, Msg, Obj, Str}
 import upickle.core.Abort
 
 /** JSON-RPC protocol support for Circe message codec plugin using JSON format. */
-private[automorph] object UpickleOpenApi {
+private[automorph] case object UpickleOpenApi {
 
   @nowarn("msg=used")
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[OpenApi] = {

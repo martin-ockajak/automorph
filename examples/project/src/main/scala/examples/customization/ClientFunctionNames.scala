@@ -3,7 +3,7 @@ package examples.customization
 import automorph.Default
 import java.net.URI
 
-private[examples] object ClientFunctionNames {
+private[examples] case object ClientFunctionNames {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

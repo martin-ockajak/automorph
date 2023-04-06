@@ -6,7 +6,7 @@ import org.scalacheck.Arbitrary.{
 import org.scalacheck.{Arbitrary, Gen}
 import test.Enum.Enum
 
-object Generators {
+case object Generators {
 
   implicit val arbitraryEnum: Arbitrary[Enum] = Arbitrary(Gen.choose(0, Enum.values.size - 1).map(Enum.fromOrdinal))
 

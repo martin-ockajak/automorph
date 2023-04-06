@@ -4,7 +4,7 @@ import automorph.Default
 import io.circe.Json
 import java.net.URI
 
-private[examples] object DynamicPayload {
+private[examples] case object DynamicPayload {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

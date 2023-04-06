@@ -12,7 +12,7 @@ import scala.util.{Failure, Try}
 /**
  * RPC handler API bindings generator.
  */
-private[automorph] object HandlerBindings:
+private[automorph] case object HandlerBindings:
 
   /**
    * Generates handler bindings for all valid public methods of an API type.

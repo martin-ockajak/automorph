@@ -71,7 +71,7 @@ private[automorph] trait DefaultRpcProtocol {
     macro DefaultRpcProtocol.rpcProtocolMacro[NodeType, CodecType, Context]
 }
 
-object DefaultRpcProtocol {
+case object DefaultRpcProtocol {
 
   def rpcProtocolMacro[NodeType, CodecType <: MessageCodec[NodeType], Context](
     c: blackbox.Context

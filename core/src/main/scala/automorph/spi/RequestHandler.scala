@@ -34,7 +34,7 @@ trait RequestHandler[Effect[_], Context] {
   def mediaType: String
 }
 
-object RequestHandler {
+case object RequestHandler {
 
   /**
    * RPC handler request processing result.

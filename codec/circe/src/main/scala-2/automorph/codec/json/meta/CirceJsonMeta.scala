@@ -15,7 +15,7 @@ private[automorph] trait CirceJsonMeta extends MessageCodec[Json] {
     macro CirceJsonMeta.decodeExpr[T]
 }
 
-private[automorph] object CirceJsonMeta {
+private[automorph] case object CirceJsonMeta {
 
   def encodeExpr[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Json] = {
     import c.universe.Quasiquote

@@ -39,7 +39,7 @@ final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     performCall(functionName, arguments.map(_._1).zip(argumentNodes), decodeResult, Some(requestContext))
 }
 
-object RemoteCall {
+case object RemoteCall {
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag, Effect[
     _

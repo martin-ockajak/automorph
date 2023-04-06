@@ -4,7 +4,7 @@ import automorph.{Default, RpcServer}
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 
-object ServerTransport {
+case object ServerTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

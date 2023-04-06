@@ -66,7 +66,7 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends AsyncE
   }
 }
 
-object MonixSystem {
+case object MonixSystem {
 
   /**
    * Effect type.

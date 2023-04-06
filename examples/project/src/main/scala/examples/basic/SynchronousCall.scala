@@ -3,7 +3,7 @@ package examples.basic
 import automorph.Default
 import java.net.URI
 
-private[examples] object SynchronousCall {
+private[examples] case object SynchronousCall {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

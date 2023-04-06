@@ -56,7 +56,7 @@ final case class LocalClient[Effect[_]](
     effectSystem.successful {}
 }
 
-object LocalClient {
+case object LocalClient {
 
   /** Message context type. */
   type Context = LocalContext

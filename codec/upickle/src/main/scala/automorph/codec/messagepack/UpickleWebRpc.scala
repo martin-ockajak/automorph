@@ -4,7 +4,7 @@ import automorph.protocol.webrpc.{Message, MessageError}
 import upack.Msg
 
 /** Web-RPC protocol support for uPickle message codec using MessagePack format. */
-private[automorph] object UpickleWebRpc {
+private[automorph] case object UpickleWebRpc {
 
   type RpcMessage = Message[Msg]
 

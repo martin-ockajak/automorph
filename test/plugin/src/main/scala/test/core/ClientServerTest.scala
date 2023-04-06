@@ -45,6 +45,6 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
     }
 }
 
-object ClientServerTest {
+case object ClientServerTest {
   private val usedPorts = mutable.HashSet[Int]()
 }

@@ -16,7 +16,7 @@ private[automorph] final case class ResponseError(message: String, code: Option[
     MessageError(message = Some(message), code = code)
 }
 
-private[automorph] object ResponseError {
+private[automorph] case object ResponseError {
 
   def apply(error: MessageError): ResponseError = {
     val message = mandatory(error.message, "message")

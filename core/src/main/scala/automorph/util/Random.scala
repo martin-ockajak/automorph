@@ -1,7 +1,7 @@
 package automorph.util
 
 /** Random value generator. */
-private[automorph] object Random {
+private[automorph] case object Random {
 
   private lazy val random = new scala.util.Random(
     (System.nanoTime()

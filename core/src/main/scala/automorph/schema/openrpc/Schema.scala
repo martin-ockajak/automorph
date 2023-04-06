@@ -14,7 +14,7 @@ final case class Schema(
   $ref: Option[String] = None,
 )
 
-object Schema {
+case object Schema {
 
   type Properties = Map[String, Schema]
 

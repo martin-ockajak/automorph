@@ -47,7 +47,7 @@ trait MessageCodec[Node] extends MessageCodecMeta[Node] {
   def text(node: Node): String
 }
 
-private[automorph] object MessageCodec {
+private[automorph] case object MessageCodec {
 
   /** Encode method name. */
   val encodeMethod: String = "encode"

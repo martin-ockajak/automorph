@@ -40,7 +40,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
     custom.write(node, indent)
 }
 
-object UpickleMessagePackCodec {
+case object UpickleMessagePackCodec {
 
   /** Message node type. */
   type Node = Msg

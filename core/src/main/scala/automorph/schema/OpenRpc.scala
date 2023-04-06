@@ -18,7 +18,7 @@ case class OpenRpc(
   externalDocs: Option[ExternalDocumentation] = None,
 )
 
-object OpenRpc {
+case object OpenRpc {
 
   /** Result value name. */
   val resultName = "result"

@@ -1,7 +1,7 @@
 package automorph.log
 
 /** Compile-time logger used in macros. */
-private[automorph] object MacroLogger {
+private[automorph] case object MacroLogger {
 
   /** Enable generated code logging environment variable. */
   private val logCodeEnvironment = "LOG_CODE"

@@ -188,7 +188,7 @@ final case class SttpClient[Effect[_]] private (
     }
 }
 
-object SttpClient {
+case object SttpClient {
 
   /** Request context type. */
   type Context = HttpContext[TransportContext]
@@ -244,7 +244,7 @@ object SttpClient {
   /** Transport context. */
   final case class TransportContext(request: PartialRequest[Either[String, String], Any])
 
-  object TransportContext {
+  case object TransportContext {
 
     /** Implicit default context value. */
     implicit val defaultContext: HttpContext[TransportContext] = HttpContext()

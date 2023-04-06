@@ -119,7 +119,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(request), "URL" -> request.uri)
 }
 
-object VertxWebSocketEndpoint {
+case object VertxWebSocketEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerRequest, ServerWebSocket]]
