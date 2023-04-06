@@ -17,6 +17,7 @@ class CirceJsonTest extends JsonMessageCodecTest {
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
+// FIXME - restore after bug in Circe for Scala 3 is fixed
 //      Gen.const(Json.Null),
       Gen.resultOf(Json.fromString _),
       Gen.resultOf(Json.fromDoubleOrString _),
