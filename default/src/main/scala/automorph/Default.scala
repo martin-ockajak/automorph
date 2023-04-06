@@ -1,7 +1,7 @@
 package automorph
 
-import automorph.meta.DefaultMessageCodec
-import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem, ServerTransport}
+import automorph.meta.DefaultRpcProtocol
+import automorph.spi.{AsyncEffectSystem, EffectSystem}
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.client.HttpClient
@@ -13,7 +13,7 @@ import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Default component constructors. */
-object Default extends DefaultMessageCodec {
+object Default extends DefaultRpcProtocol {
 
   /** Request context type. */
   type ClientContext = HttpClient.Context
@@ -138,7 +138,7 @@ object Default extends DefaultMessageCodec {
     effectSystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
-  ): ClientTransport[Effect, ClientContext] =
+  ): HttpClient[Effect] =
     HttpClient(effectSystem, url, method)
 
   /**
@@ -300,7 +300,7 @@ object Default extends DefaultMessageCodec {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): ServerTransport[Effect, ServerContext] =
+  ): UndertowServer[Effect] =
     UndertowServer(effectSystem, port, path, methods, webSocket, mapException, builder)
 
   /**
