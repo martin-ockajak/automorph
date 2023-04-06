@@ -20,6 +20,7 @@ sidebar_position: 1
 
 * [Scala](https://www.scala-lang.org/) 3.2+ or 2.13+
 * [Java Runtime Environment](https://openjdk.java.net/) 11+
+* [SLF4J](http://www.slf4j.org/) logger implementation (optional)
 
 
 ## API

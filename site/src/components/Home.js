@@ -77,8 +77,8 @@ const features = [
     description: (
         <>
           Supports <a href="https://www.scala-lang.org/">Scala</a> 3.2+ and 2.13+ on <a
-            href="https://openjdk.java.net/">JRE</a> 11+ and has no dependencies other than <a
-            href="http://www.slf4j.org/">SLF4J</a> logging API.
+            href="https://openjdk.java.net/">JRE</a> 11+ and integrates with various popular <a
+            href="docs/Plugins">libraries</a>.
         </>
     ),
   },
