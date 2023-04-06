@@ -54,10 +54,9 @@ const features = [
     link: 'docs/Examples#metadata',
     description: (
         <>
-          Work with <a
-            href="docs/Examples#dynamic-payload">dynamic message payload</a> and access transport protocol <a
-            href="docs/Examples#http-request">request</a> and <a
-            href="docs/Examples#http-response">response</a> metadata.
+          Manage <a
+            href="docs/Examples#dynamic-payload">dynamic message payload</a> and transparently access <a
+            href="docs/Examples#metadata">transport protocol metadata</a>.
         </>
     ),
   },

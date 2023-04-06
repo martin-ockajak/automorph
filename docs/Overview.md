@@ -11,8 +11,8 @@ sidebar_position: 1
 
 ## Goals
 
-* Enable **remote access** to **existing APIs** with **no need to manually create an intermediate layer**
-* Support working with **dynamic message payload** and accessing **transport protocol metadata**
+* Enable **remote access** to **existing APIs** with **no need to create an intermediate layer**
+* Support managing **dynamic message payload** and accessing **transport protocol metadata**
 * Provide **smooth integration** with related **libraries** and existing **applications**
 
 
