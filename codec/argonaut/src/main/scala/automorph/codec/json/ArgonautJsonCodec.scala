@@ -33,7 +33,7 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
     node.spaces2
 }
 
-object ArgonautJsonCodec {
+case object ArgonautJsonCodec {
 
   /** Message node type. */
   type Node = Json

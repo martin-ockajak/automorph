@@ -44,7 +44,7 @@ final case class Message[Node](
     } ++ id.map(value => "Identifier" -> value.fold(_.toString, identity))
 }
 
-object Message {
+case object Message {
 
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
@@ -80,7 +80,7 @@ sealed abstract class MessageType {
     toString
 }
 
-object MessageType {
+case object MessageType {
 
   /** JSON-RPC method call request. */
   case object Call extends MessageType

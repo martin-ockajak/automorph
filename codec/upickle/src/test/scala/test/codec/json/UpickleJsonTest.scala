@@ -39,7 +39,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
   }
 }
 
-object UpickleJsonTest extends UpickleJsonCustom {
+case object UpickleJsonTest extends UpickleJsonCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

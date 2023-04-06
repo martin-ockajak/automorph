@@ -170,7 +170,7 @@ final case class UrlClient[Effect[_]](
     }*)
 }
 
-object UrlClient {
+case object UrlClient {
 
   /** Message context type. */
   type Context = HttpContext[TransportContext]
@@ -178,7 +178,7 @@ object UrlClient {
   /** Transport context. */
   final case class TransportContext(connection: HttpURLConnection)
 
-  object TransportContext {
+  case object TransportContext {
 
     /** Implicit default context value. */
     implicit val defaultContext: HttpContext[TransportContext] = HttpContext()

@@ -6,7 +6,7 @@ import upack.{Arr, Float64, Msg, Null, Obj, Str}
 import upickle.core.Abort
 
 /** JSON-RPC protocol support for uPickle message codec using MessagePack format. */
-private[automorph] object UpickleJsonRpc {
+private[automorph] case object UpickleJsonRpc {
 
   private[automorph] type RpcMessage = Message[Msg]
 

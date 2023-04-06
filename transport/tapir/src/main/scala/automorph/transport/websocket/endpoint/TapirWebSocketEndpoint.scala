@@ -116,7 +116,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
   }
 }
 
-object TapirWebSocketEndpoint {
+case object TapirWebSocketEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Unit]

@@ -42,10 +42,10 @@ trait BaseTest
   }
 }
 
-object BaseTest {
+case object BaseTest {
   setupLogger
 
-  private object Time extends FormatBlock {
+  private case object Time extends FormatBlock {
     import perfolation.*
 
     override def format(record: LogRecord): LogOutput = {

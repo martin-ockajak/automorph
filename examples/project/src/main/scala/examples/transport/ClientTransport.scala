@@ -4,7 +4,7 @@ import automorph.{RpcClient, Default}
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 
-private[examples] object ClientTransport {
+private[examples] case object ClientTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

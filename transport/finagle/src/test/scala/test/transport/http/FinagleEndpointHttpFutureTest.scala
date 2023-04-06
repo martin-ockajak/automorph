@@ -31,7 +31,7 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
     FinagleHttpEndpoint(system)
 }
 
-object FinagleEndpointHttpFutureTest {
+case object FinagleEndpointHttpFutureTest {
 
   type Effect[T] = Future[T]
   type Context = FinagleHttpEndpoint.Context

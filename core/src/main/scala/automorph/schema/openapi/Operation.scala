@@ -17,7 +17,7 @@ case class Operation(
   servers: Option[List[Server]] = None,
 )
 
-object Operation {
+case object Operation {
 
   type Responses = Map[String, Response]
   type Callback = Map[String, PathItemReference]

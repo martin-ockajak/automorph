@@ -34,7 +34,7 @@ final case class TrySystem() extends EffectSystem[Try] {
     ()
 }
 
-object TrySystem {
+case object TrySystem {
 
   /**
    * Effect type.

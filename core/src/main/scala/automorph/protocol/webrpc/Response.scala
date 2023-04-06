@@ -18,7 +18,7 @@ private[automorph] final case class Response[Node](result: Option[Node], error: 
     Message[Node](result = result, error = error.map(_.formed))
 }
 
-private[automorph] object Response {
+private[automorph] case object Response {
 
   def apply[Node](message: Message[Node]): Response[Node] =
     message.result.map(result => Response(Some(result), None)).getOrElse {

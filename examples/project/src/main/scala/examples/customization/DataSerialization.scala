@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-private[examples] object DataSerialization {
+private[examples] case object DataSerialization {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
@@ -18,7 +18,7 @@ private[examples] object DataSerialization {
     // Introduce custom data types
     sealed abstract class State
 
-    object State {
+    case object State {
       case object On extends State
       case object Off extends State
     }

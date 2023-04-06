@@ -37,7 +37,7 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
     ()
 }
 
-object IdentitySystem {
+case object IdentitySystem {
 
   /**
    * Effect type.

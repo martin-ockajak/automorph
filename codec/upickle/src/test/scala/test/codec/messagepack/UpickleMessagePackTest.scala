@@ -41,7 +41,7 @@ class UpickleMessagePackTest extends MessageCodecTest {
   }
 }
 
-object UpickleMessagePackTest extends UpickleMessagePackCustom {
+case object UpickleMessagePackTest extends UpickleMessagePackCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

@@ -123,7 +123,7 @@ final case class RapidoidHttpEndpoint[Effect[_]](
     Network.address(None, request.realIpAddress)
 }
 
-object RapidoidHttpEndpoint {
+case object RapidoidHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Req]

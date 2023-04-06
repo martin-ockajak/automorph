@@ -24,7 +24,7 @@ trait AsyncEffectSystem[Effect[_]] extends EffectSystem[Effect] {
   def completable[T]: Effect[Completable[Effect, T]]
 }
 
-object AsyncEffectSystem {
+case object AsyncEffectSystem {
 
   /**
    * Externally completable effect.

@@ -5,7 +5,7 @@ import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
 /** Method introspection. */
-private[automorph] object MethodReflection {
+private[automorph] case object MethodReflection {
 
   /**
    * Creates RPC function quoted tree converter.

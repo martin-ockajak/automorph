@@ -61,7 +61,7 @@ final case class FutureSystem()(implicit val executionContext: ExecutionContext)
   }
 }
 
-object FutureSystem {
+case object FutureSystem {
 
   /**
    * Effect type.

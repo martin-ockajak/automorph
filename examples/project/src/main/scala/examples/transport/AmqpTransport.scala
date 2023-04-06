@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.sys.process.Process
 import scala.util.Try
 
-private[examples] object AmqpTransport {
+private[examples] case object AmqpTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
     if (Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {

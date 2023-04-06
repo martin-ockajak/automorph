@@ -32,7 +32,7 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
     node.dropNullValues.spaces2
 }
 
-object CirceJsonCodec {
+case object CirceJsonCodec {
 
   /** Message node type. */
   type Node = Json

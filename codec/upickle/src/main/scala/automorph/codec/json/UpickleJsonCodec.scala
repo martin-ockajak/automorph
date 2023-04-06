@@ -39,7 +39,7 @@ final case class UpickleJsonCodec[Custom <: UpickleJsonCustom](custom: Custom = 
     custom.write(node, indent)
 }
 
-object UpickleJsonCodec {
+case object UpickleJsonCodec {
 
   /** Message node type. */
   type Node = Value

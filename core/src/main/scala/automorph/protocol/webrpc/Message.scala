@@ -26,7 +26,7 @@ final case class Message[Node](result: Option[Node], error: Option[MessageError]
   }
 }
 
-object Message {
+case object Message {
 
   /** Request parameters type. */
   type Request[Node] = Map[String, Node]
@@ -52,7 +52,7 @@ sealed abstract class MessageType {
     toString
 }
 
-object MessageType {
+case object MessageType {
 
   /** Web-RPC function call request. */
   case object Call extends MessageType

@@ -593,7 +593,7 @@ final case class HttpContext[TransportContext](
   }
 }
 
-object HttpContext {
+case object HttpContext {
 
   private val exceptionToStatusCode: Map[Class[?], Int] = Map[Class[?], Int](
     classOf[InvalidRequest] -> 400,

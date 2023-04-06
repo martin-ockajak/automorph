@@ -95,7 +95,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    ): Effect[Result]
 }
 
-object ClientBind {
+case object ClientBind {
 
   def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(implicit
     nodeType: c.WeakTypeTag[Node],

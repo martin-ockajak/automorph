@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, SerializerProvider}
 
 /** Web-RPC protocol support for Jackson message codec plugin using JSON format. */
-private[automorph] object JacksonWebRpc {
+private[automorph] case object JacksonWebRpc {
 
   type RpcMessage = Message[JsonNode]
   type RpcError = MessageError

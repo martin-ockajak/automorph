@@ -126,7 +126,7 @@ final case class AkkaServer[Effect[_]](
   }
 }
 
-object AkkaServer {
+case object AkkaServer {
 
   /** Request context type. */
   type Context = AkkaHttpEndpoint.Context

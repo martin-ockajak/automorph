@@ -129,7 +129,7 @@ final case class TapirHttpEndpoint[Effect[_]](
   }
 }
 
-object TapirHttpEndpoint {
+case object TapirHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Unit]

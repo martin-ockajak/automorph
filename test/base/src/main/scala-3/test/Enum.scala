@@ -2,7 +2,7 @@ package test
 
 import test.Enum.Enum
 
-object Enum:
+case object Enum:
 
   enum Enum:
 

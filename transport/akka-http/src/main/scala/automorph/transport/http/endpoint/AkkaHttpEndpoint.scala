@@ -186,7 +186,7 @@ case class AkkaHttpEndpoint[Effect[_]](
       .getOrElse("")
 }
 
-object AkkaHttpEndpoint extends Logging {
+case object AkkaHttpEndpoint extends Logging {
 
   /** Request context type. */
   type Context = HttpContext[HttpRequest]

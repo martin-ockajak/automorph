@@ -182,7 +182,7 @@ final case class RabbitMqServer[Effect[_]](
   }
 }
 
-object RabbitMqServer {
+case object RabbitMqServer {
 
   /** Request context type. */
   type Context = AmqpContext[Message]

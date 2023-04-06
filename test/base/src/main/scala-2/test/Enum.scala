@@ -1,6 +1,6 @@
 package test
 
-object Enum extends Enumeration {
+case object Enum extends Enumeration {
   type Enum = Value
   val Zero, One = Value
 

@@ -276,7 +276,7 @@ final case class NanoServer[Effect[_]] (
   }
 }
 
-object NanoServer {
+case object NanoServer {
 
   /** Request context type. */
   type Context = HttpContext[IHTTPSession]
