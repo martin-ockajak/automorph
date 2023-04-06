@@ -161,6 +161,7 @@ lazy val tapir = source(project, "transport/tapir", core, testPlugin % Test).set
 //    ("com.typesafe.akka" %% "akka-actor-typed" % akkaVersion % Test).cross(CrossVersion.for3Use2_13),
 //    ("com.typesafe.akka" %% "akka-stream" % akkaVersion % Test).cross(CrossVersion.for3Use2_13),
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion % Test,
+    "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion % Test,
     ("com.softwaremill.sttp.tapir" %% "tapir-finatra-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
       .exclude("com.softwaremill.sttp.tapir", "tapir-server_2.13")
       .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
