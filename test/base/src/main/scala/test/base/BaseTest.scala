@@ -55,16 +55,7 @@ case object BaseTest {
   }
 
   /** Configure test logging. */
-  private lazy val setupLogger: Unit = configureLogger()
-
-  /** Log level environment variable. */
-  private lazy val logLevelEnvironment = "LOG_LEVEL"
-
-  /** Enable basic tests only environment variable. */
-  private val testBasicEnvironment = "TEST_BASIC"
-
-  /** Configure logging. */
-  def configureLogger(): Unit = {
+  private lazy val setupLogger: Unit = {
     System.setProperty("org.jboss.logging.provider", "slf4j")
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format =
@@ -75,6 +66,12 @@ case object BaseTest {
       .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(Level.Debug)).replace()
     ()
   }
+
+  /** Log level environment variable. */
+  private lazy val logLevelEnvironment = "LOG_LEVEL"
+
+  /** Enable basic tests only environment variable. */
+  private val testBasicEnvironment = "TEST_BASIC"
 
   /** Basic tests enabled only. */
   final def testBasic: Boolean =

@@ -6,8 +6,6 @@ import automorph.client.RemoteTell
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.EffectOps
-import automorph.util.Extensions.InputStreamOps
-import automorph.util.Extensions.ByteArrayOps
 import automorph.util.Random
 import java.io.InputStream
 import scala.collection.immutable.ListMap
@@ -136,10 +134,7 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
           transport.call(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType).flatMap {
             case (responseBody, responseContext) =>
               // Process response
-              val x = responseBody.toArray
-              println(x.asString)
-              processResponse[Result](x.toInputStream, responseContext, requestProperties, decodeResult)
-//              processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
+              processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
           }
         },
     )
