@@ -41,7 +41,7 @@ final case class FutureSystem()(implicit val executionContext: ExecutionContext)
   override def completable[T]: Future[Completable[Future, T]] =
     Future.successful(CompletableFuture())
 
-  private case class CompletableFuture[T]() extends Completable[Future, T]() {
+  private final case class CompletableFuture[T]() extends Completable[Future, T]() {
     private val promise: Promise[T] = Promise()
 
     override def effect: Future[T] =
