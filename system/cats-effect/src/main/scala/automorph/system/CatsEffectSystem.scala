@@ -39,7 +39,7 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Asy
     effect.unsafeRunAndForget()
 
   override def completable[T]: IO[Completable[IO, T]] =
-    map(Queue.dropping[IO, Either[Throwable, T]](1))(CompletableIO(_))
+    map(Queue.dropping[IO, Either[Throwable, T]](1))(CompletableIO.apply)
 
   // sealed instead of final in a nested case class avoids a compiler warning
   private sealed case class CompletableIO[T](private val queue: Queue[IO, Either[Throwable, T]])

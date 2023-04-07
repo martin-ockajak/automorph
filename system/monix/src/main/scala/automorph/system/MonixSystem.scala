@@ -39,7 +39,7 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends AsyncE
     effect.runAsyncAndForget
 
   override def completable[T]: Task[Completable[Task, T]] =
-    map(MVar.empty[Task, Either[Throwable, T]]())(CompletableTask(_))
+    map(MVar.empty[Task, Either[Throwable, T]]())(CompletableTask.apply)
 
   // sealed instead of final in a nested case class avoids a compiler warning
   private sealed case class CompletableTask[T](private val mVar: MVar[Task, Either[Throwable, T]])

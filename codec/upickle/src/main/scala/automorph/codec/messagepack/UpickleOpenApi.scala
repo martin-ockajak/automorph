@@ -52,7 +52,7 @@ private[automorph] case object UpickleOpenApi {
           Str("properties") -> Obj(LinkedHashMap[Msg, Msg](v.map { case (key, value) => Str(key) -> fromSchema(value) }
             .toSeq*))
         ),
-        schema.required.map(v => Str("required") -> Arr(v.map(Str.apply)*)),
+        schema.required.map(v => Str("required") -> Arr(v.map(Str)*)),
         schema.default.map(Str("default") -> Str(_)),
         schema.allOf.map(v => Str("allOf") -> Arr(v.map(fromSchema)*)),
         schema.$ref.map(Str("$ref") -> Str(_)),

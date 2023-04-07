@@ -64,7 +64,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
     }
     val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
     publicEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
+      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](streams))
       .serverLogic { case (paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id
