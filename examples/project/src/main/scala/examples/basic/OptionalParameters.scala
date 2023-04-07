@@ -35,7 +35,7 @@ private[examples] case object OptionalParameters {
     )
 
     // Call the remote API function dynamically
-    client.call[String]("hi").apply("n" -> 1) // String
+    client.call[String]("hi")("n" -> 1) // String
 
     // Close the RPC client
     client.close()

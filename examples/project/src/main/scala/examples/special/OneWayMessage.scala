@@ -37,7 +37,7 @@ private[examples] case object OneWayMessage {
 
     // Call the remote API function dynamically without expecting a response
     run(
-      client.tell("hello").apply("some" -> "world", "n" -> 1)
+      client.tell("hello")("some" -> "world", "n" -> 1)
     )
 
     // Close the RPC client

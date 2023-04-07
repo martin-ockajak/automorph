@@ -55,12 +55,12 @@ private[examples] case object ServerFunctionNames {
 
     // Call the remote API function dynamically
     println(
-      client.call[Double]("test.sum").apply("numbers" -> List(1, 2, 3))
+      client.call[Double]("test.sum")("numbers" -> List(1, 2, 3))
     )
 
     // Call the remote API function dynamically and fail with FunctionNotFoundException
     println(Try(
-      client.call[String]("hidden").apply()
+      client.call[String]("hidden")()
     ).failed.get)
 
     // Close the RPC client

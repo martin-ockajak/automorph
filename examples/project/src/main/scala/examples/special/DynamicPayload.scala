@@ -39,7 +39,7 @@ private[examples] case object DynamicPayload {
 
     // Call the remote API function dynamically
     println(
-      client.call[Seq[Int]]("hello").apply("some" -> Json.fromInt(0), "n" -> 1)
+      client.call[Seq[Int]]("hello")("some" -> Json.fromInt(0), "n" -> 1)
     )
 
     // Close the RPC client
