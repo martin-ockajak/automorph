@@ -25,7 +25,7 @@ private[automorph] trait ErrorMapping {
       case ErrorType.MethodNotFound.code => FunctionNotFound(message)
       case ErrorType.InvalidParams.code => InvalidArguments(message)
       case ErrorType.InternalError.code => ServerError(message)
-      case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) =>
+      case _ if Range.inclusive(ErrorType.ReservedError.code, ErrorType.ServerError.code).contains(code) =>
         ServerError(message)
       case _ => ApplicationError(message)
     }
