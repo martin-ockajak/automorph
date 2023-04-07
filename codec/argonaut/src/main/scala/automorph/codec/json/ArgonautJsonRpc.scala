@@ -31,7 +31,7 @@ private[automorph] case object ArgonautJsonRpc {
       },
       cursor =>
         DecodeResult(
-          cursor.focus.obj.map(json => Right(json.toMap)).orElse(cursor.focus.array.map(json => Left(json))) match {
+          cursor.focus.obj.map(json => Right(json.toMap)).orElse(cursor.focus.array.map(Left.apply)) match {
             case Some(value) => Right(value)
             case None => Left(s"Invalid request parameters: ${cursor.focus}", cursor.history)
           }
