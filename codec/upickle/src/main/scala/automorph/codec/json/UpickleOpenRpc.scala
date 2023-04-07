@@ -37,7 +37,7 @@ private[automorph] case object UpickleOpenRpc {
         schema.title.map("title" -> Str(_)),
         schema.description.map("description" -> Str(_)),
         schema.properties.map(v => "properties" -> Obj.from(v.view.mapValues(fromSchema).toSeq)),
-        schema.required.map(v => "required" -> Arr.from(v.map(Str))),
+        schema.required.map(v => "required" -> Arr.from(v.map(Str.apply))),
         schema.default.map("default" -> Str(_)),
         schema.allOf.map(v => "allOf" -> Arr.from(v.map(fromSchema))),
         schema.$ref.map("$ref" -> Str(_)),
