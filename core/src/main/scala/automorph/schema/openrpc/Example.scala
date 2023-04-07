@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Example(
+final case class Example(
   name: Option[String] = None,
   summary: Option[String] = None,
   description: Option[String] = None,

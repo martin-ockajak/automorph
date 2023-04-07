@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Method(
+final case class Method(
   name: String,
   tags: Option[List[Tag]] = None,
   summary: Option[String] = None,

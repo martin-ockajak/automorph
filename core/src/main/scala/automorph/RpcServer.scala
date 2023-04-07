@@ -84,7 +84,7 @@ case object RpcServer {
    * @tparam Context
    *   RPC message context type
    */
-  case class ServerBuilder[Effect[_], Context](transport: ServerTransport[Effect, Context]) {
+  final case class ServerBuilder[Effect[_], Context](transport: ServerTransport[Effect, Context]) {
 
     /**
      * Creates a new RPC server with specified RPC protocol plugin.

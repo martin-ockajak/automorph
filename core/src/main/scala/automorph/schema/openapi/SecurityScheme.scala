@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class SecurityScheme(
+final case class SecurityScheme(
   `type`: String,
   description: Option[String] = None,
   name: Option[String] = None,

@@ -23,7 +23,7 @@ private[examples] case object DataSerialization {
       case object Off extends State
     }
 
-    case class Record(
+    final case class Record(
       value: String,
       state: State
     )

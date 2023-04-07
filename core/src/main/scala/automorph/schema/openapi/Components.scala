@@ -2,7 +2,7 @@ package automorph.schema.openapi
 
 import automorph.schema.openapi.Operation.Callback
 
-case class Components(
+final case class Components(
   schemas: Option[Map[String, Schema]] = None,
   responses: Option[Map[String, Response]] = None,
   parameters: Option[Map[String, Parameter]] = None,

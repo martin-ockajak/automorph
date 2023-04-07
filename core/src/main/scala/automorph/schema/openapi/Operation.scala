@@ -2,7 +2,7 @@ package automorph.schema.openapi
 
 import automorph.schema.openapi.Operation.{Callback, Responses, SecurityRequirement}
 
-case class Operation(
+final case class Operation(
   tags: Option[List[String]] = None,
   summary: Option[String] = None,
   description: Option[String] = None,

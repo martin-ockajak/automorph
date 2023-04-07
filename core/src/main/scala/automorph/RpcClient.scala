@@ -257,7 +257,7 @@ case object RpcClient {
    * @tparam Context
    *   request context type
    */
-  case class ClientBuilder[Effect[_], Context](transport: ClientTransport[Effect, Context]) {
+  final case class ClientBuilder[Effect[_], Context](transport: ClientTransport[Effect, Context]) {
 
     /**
      * Creates a new RPC client with specified RPC protocol plugin.

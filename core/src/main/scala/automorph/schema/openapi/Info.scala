@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class Info(
+final case class Info(
   title: String,
   summary: Option[String] = None,
   description: Option[String] = None,

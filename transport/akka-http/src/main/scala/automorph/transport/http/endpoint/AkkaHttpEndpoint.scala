@@ -47,7 +47,7 @@ import scala.util.Try
  * @tparam Effect
  *   effect type
  */
-case class AkkaHttpEndpoint[Effect[_]](
+final case class AkkaHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),

@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class Parameter(
+final case class Parameter(
   name: String,
   in: String,
   descriptipon: Option[String] = None,

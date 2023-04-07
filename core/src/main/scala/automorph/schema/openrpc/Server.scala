@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Server(
+final case class Server(
   name: String,
   url: String,
   summary: Option[String] = None,

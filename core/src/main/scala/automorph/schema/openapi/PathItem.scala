@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class PathItem(
+final case class PathItem(
   $ref: Option[String] = None,
   summary: Option[String] = None,
   description: Option[String] = None,

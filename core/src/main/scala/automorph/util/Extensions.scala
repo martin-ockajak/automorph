@@ -215,5 +215,5 @@ private[automorph] case object Extensions {
       system.runAsync(effect)
   }
 
-  private case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
+  private final case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
 }

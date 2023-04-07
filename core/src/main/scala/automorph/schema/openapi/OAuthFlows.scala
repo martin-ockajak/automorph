@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class OAuthFlows(
+final case class OAuthFlows(
   `implicit`: Option[OAuthFlow] = None,
   password: Option[OAuthFlow] = None,
   clientCredentials: Option[OAuthFlow] = None,

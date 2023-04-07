@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Tag(
+final case class Tag(
   name: String,
   summary: Option[String] = None,
   description: Option[String] = None,

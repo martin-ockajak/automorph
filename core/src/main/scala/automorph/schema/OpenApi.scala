@@ -13,7 +13,7 @@ import automorph.schema.openapi.{
  * @see
  *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI schema]]
  */
-case class OpenApi(
+final case class OpenApi(
   openapi: String = "3.1.0",
   info: Info,
   jsonSchemaDialect: Option[String] = None,

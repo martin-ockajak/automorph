@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class MediaType(
+final case class MediaType(
   schema: Option[Schema] = None,
   example: Option[String] = None,
   examples: Option[Map[String, Example]] = None,

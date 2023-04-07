@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class Header(
+final case class Header(
   descriptipon: Option[String] = None,
   required: Option[Boolean] = None,
   deprecated: Option[Boolean] = None,

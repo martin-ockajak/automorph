@@ -1,6 +1,6 @@
 package automorph.schema.openapi
 
-case class Link(
+final case class Link(
   operationRef: Option[String] = None,
   operationId: Option[String] = None,
   parameters: Option[Map[String, String]] = None,

@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Link(
+final case class Link(
   name: String,
   summary: Option[String] = None,
   description: Option[String] = None,

@@ -1,3 +1,3 @@
 package automorph.schema.openapi
 
-case class PathItemReference($ref: Option[String]) extends Reference
+final case class PathItemReference($ref: Option[String]) extends Reference

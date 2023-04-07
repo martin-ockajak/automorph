@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class Info(
+final case class Info(
   title: String,
   description: Option[String] = None,
   termsOfService: Option[String] = None,

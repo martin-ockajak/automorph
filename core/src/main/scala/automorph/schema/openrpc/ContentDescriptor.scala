@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class ContentDescriptor(
+final case class ContentDescriptor(
   name: String,
   summary: Option[String] = None,
   description: Option[String] = None,

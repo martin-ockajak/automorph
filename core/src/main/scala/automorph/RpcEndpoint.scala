@@ -74,7 +74,7 @@ case object RpcEndpoint {
    * @tparam Adapter
    *   transport layer transport type
    */
-  case class EndpointBuilder[Effect[_], Context, Adapter](transport: EndpointTransport[Effect, Context, Adapter]) {
+  final case class EndpointBuilder[Effect[_], Context, Adapter](transport: EndpointTransport[Effect, Context, Adapter]) {
 
     /**
      * Creates a new RPC endpoint with specified RPC protocol plugin.

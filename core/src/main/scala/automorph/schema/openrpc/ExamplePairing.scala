@@ -1,6 +1,6 @@
 package automorph.schema.openrpc
 
-case class ExamplePairing(
+final case class ExamplePairing(
   name: String,
   summary: Option[String] = None,
   description: Option[String] = None,

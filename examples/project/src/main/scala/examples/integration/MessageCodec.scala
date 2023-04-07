@@ -8,7 +8,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 // Introduce custom data types
-private[examples] case class Record(values: List[String])
+private[examples] final case class Record(values: List[String])
 
 private[examples] case object MessageCodec {
 
