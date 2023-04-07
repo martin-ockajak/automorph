@@ -48,7 +48,7 @@ final case class FutureSystem()(implicit val executionContext: ExecutionContext)
       promise.future
 
     override def succeed(value: T): Future[Unit] =
-      Future( promise.success(value))
+      Future(promise.success(value))
 
     override def fail(exception: Throwable): Future[Unit] =
       Future(promise.failure(exception))

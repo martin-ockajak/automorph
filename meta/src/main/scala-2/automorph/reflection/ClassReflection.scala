@@ -1,4 +1,4 @@
-package automorph.reflection
+ackage automorph.reflection
 
 import scala.reflect.macros.blackbox
 
@@ -51,14 +51,12 @@ private[automorph] final case class ClassReflection[C <: blackbox.Context](c: C)
   private def availableMethod(methodSymbol: MethodSymbol): Boolean =
     !methodSymbol.isMacro
 
-  // sealed instead of final in a nested case class avoids a compiler warning
   sealed case class RefParameter(name: String, dataType: Type, contextual: Boolean) {
 
     def lift: Parameter =
       Parameter(name, show(dataType), contextual)
   }
 
-  // sealed instead of final in a nested case class avoids a compiler warning
   sealed case class RefMethod(
     name: String,
     resultType: Type,
