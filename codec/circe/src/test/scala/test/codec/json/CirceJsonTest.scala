@@ -25,10 +25,7 @@ class CirceJsonTest extends JsonMessageCodecTest {
           Gen.resultOf(Json.fromString _),
           Gen.resultOf(Json.fromDoubleOrString _),
           Gen.resultOf(Json.fromBoolean _),
-          Gen.listOfN[Node](2, Gen.oneOf(
-            Gen.const(Json.Null),
-            recurse,
-          )).map(Json.fromValues),
+          Gen.listOfN[Node](2, Gen.oneOf(Gen.const(Json.Null), recurse)).map(Json.fromValues),
           Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Json.fromFields),
         )
       }
