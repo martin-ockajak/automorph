@@ -15,17 +15,17 @@ class CirceJsonTest extends JsonMessageCodecTest {
 
   override lazy val codec: ActualCodec = CirceJsonCodec()
 
-  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
-// FIXME - restore after null object value serialization bug in Circe for Scala 3 is fixed
-//      Gen.const(Json.Null),
+      // FIXME - restore after null object value serialization bug in Circe for Scala 3 is fixed
+      // Gen.const(Json.Null),
       Gen.resultOf(Json.fromString _),
       Gen.resultOf(Json.fromDoubleOrString _),
       Gen.resultOf(Json.fromBoolean _),
       Gen.listOfN[Node](2, recurse).map(Json.fromValues),
       Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Json.fromFields),
     )
-  ))
+  })
 
   private implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
   private implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
