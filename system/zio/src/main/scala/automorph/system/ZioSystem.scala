@@ -40,7 +40,6 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
     implicit val trace: Trace = Trace.empty
     Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe.fork(effect)
-      ()
     }
   }
 
