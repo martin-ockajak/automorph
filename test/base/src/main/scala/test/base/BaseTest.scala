@@ -38,6 +38,7 @@ trait BaseTest
   with Fixtures {
 
   override def beforeAll(): Unit = {
+    // Necessary to override incorrect logging configuration caused by initialization of certain HTTP servers
     BaseTest.setupLogger
     super.beforeAll()
   }
