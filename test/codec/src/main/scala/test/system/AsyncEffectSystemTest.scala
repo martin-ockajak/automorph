@@ -18,13 +18,13 @@ trait AsyncEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
             val effect = system.flatMap(completableSystem.completable[String]) { completable =>
               system.flatMap(completable.succeed(text))(_ => completable.effect)
             }
-            run(effect).should(equal(Right(text)))
+            run(effect).shouldEqual(Right(text))
           }
           "Failure" in {
             val effect = system.flatMap(completableSystem.completable[String]) { completable =>
               system.flatMap(completable.fail(error))(_ => completable.effect)
             }
-            run(effect).should(equal(Left(error)))
+            run(effect).shouldEqual(Left(error))
           }
         }
       case _ =>

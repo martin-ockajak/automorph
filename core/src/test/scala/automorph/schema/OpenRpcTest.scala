@@ -52,7 +52,7 @@ class OpenRpcTest extends BaseTest {
   "" - {
     "Description" in {
       val schema = OpenRpc(Seq(function))
-      schema.should(equal(expected))
+      schema.shouldEqual(expected)
     }
   }
 }
