@@ -3,7 +3,6 @@ package test.codec.json
 import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.json.JsonMessageCodecTest
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Null, Num, Obj, Str, Value}
 
@@ -19,7 +18,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
       Gen.const(Null),
       Gen.resultOf[String, Node](Str.apply),
       Gen.resultOf[Double, Node](Num.apply),
-      Gen.resultOf(Bool(_)),
+      Gen.resultOf[Boolean, Node](Bool.apply),
       Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Obj.from)
     )

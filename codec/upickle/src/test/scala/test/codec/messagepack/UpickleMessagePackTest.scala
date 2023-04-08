@@ -20,7 +20,7 @@ class UpickleMessagePackTest extends MessageCodecTest {
       Gen.const(Null),
       Gen.resultOf[String, Node](Str.apply),
       Gen.resultOf[Double, Node](Float64.apply),
-      Gen.resultOf(Bool(_)),
+      Gen.resultOf[Boolean, Node](Bool.apply),
       Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str.apply), recurse)).map { values =>
         Obj(mutable.LinkedHashMap.from(values))
