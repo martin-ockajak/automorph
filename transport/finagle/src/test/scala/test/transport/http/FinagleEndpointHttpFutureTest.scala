@@ -51,7 +51,6 @@ case object FinagleEndpointHttpFutureTest {
     override def init(): Effect[Unit] =
       Future {
         server = Some(Http.serve(s":$port", endpoint))
-        ()
       }
 
     override def close(): Effect[Unit] = {
