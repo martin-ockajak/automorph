@@ -18,8 +18,8 @@ class UpickleMessagePackTest extends MessageCodecTest {
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
       Gen.const(Null),
-      Gen.resultOf[String, Node](Str),
-      Gen.resultOf[Double, Node](Float64),
+      Gen.resultOf[String, Node](Str.apply),
+      Gen.resultOf[Double, Node](Float64.apply),
       Gen.resultOf(Bool(_)),
       Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str.apply), recurse)).map { values =>
