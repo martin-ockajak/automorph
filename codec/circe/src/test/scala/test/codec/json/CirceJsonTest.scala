@@ -34,10 +34,10 @@ class CirceJsonTest extends JsonMessageCodecTest {
 
   "" - {
     "Encode & Decode" in {
-      check { (record: Record) =>
+      forAll { (record: Record) =>
         val encoded = codec.encode(record)
         val decoded = codec.decode[Record](encoded)
-        decoded.equals(record)
+        decoded should equal(record)
       }
     }
   }
