@@ -14,7 +14,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
 
   override lazy val codec: ActualCodec = UpickleJsonCodec(UpickleJsonTest)
 
-  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
       Gen.const(Null),
       Gen.resultOf[String, Node](Str),
@@ -23,7 +23,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
       Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Obj.from)
     )
-  ))
+  })
 
   private lazy val custom = codec.custom
   private implicit lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW

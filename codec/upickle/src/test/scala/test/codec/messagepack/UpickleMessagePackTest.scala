@@ -15,7 +15,7 @@ class UpickleMessagePackTest extends MessageCodecTest {
 
   override lazy val codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackTest)
 
-  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
       Gen.const(Null),
       Gen.resultOf[String, Node](Str),
@@ -26,7 +26,7 @@ class UpickleMessagePackTest extends MessageCodecTest {
         Obj(mutable.LinkedHashMap.from(values))
       }
     )
-  ))
+  })
 
   private lazy val custom = codec.custom
   private implicit lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW

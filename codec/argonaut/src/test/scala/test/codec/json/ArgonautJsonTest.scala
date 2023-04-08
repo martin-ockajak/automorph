@@ -15,7 +15,7 @@ class ArgonautJsonTest extends JsonMessageCodecTest {
 
   override lazy val codec: ActualCodec = ArgonautJsonCodec()
 
-  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
       Gen.const(jNull),
       Gen.resultOf(jString),
@@ -26,7 +26,7 @@ class ArgonautJsonTest extends JsonMessageCodecTest {
         jObjectAssocList(values.toList)
       },
     )
-  ))
+  })
 
   private implicit lazy val enumCodecJson: CodecJson[Enum.Enum] =
     CodecJson((v: Enum.Enum) => jNumber(Enum.toOrdinal(v)), cursor => cursor.focus.as[Int].map(Enum.fromOrdinal))

@@ -18,7 +18,7 @@ class JacksonJsonTest extends JsonMessageCodecTest {
   type ActualCodec = JacksonJsonCodec
   override lazy val codec: ActualCodec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
 
-  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node] { recurse =>
     Gen.oneOf(
       Gen.const(NullNode.instance),
       Gen.resultOf(TextNode.valueOf _),
@@ -31,7 +31,7 @@ class JacksonJsonTest extends JsonMessageCodecTest {
         values => new ObjectNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)
       },
     )
-  ))
+  })
 
   private lazy val enumModule = new SimpleModule().addSerializer(
     classOf[Enum.Enum],
