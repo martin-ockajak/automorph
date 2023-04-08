@@ -2,8 +2,7 @@ package test.codec.messagepack
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import org.scalacheck.{Arbitrary, Gen}
-
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable
 import test.Generators.arbitraryRecord
 import test.codec.MessageCodecTest
 import test.{Enum, Record, Structure}
@@ -19,12 +18,13 @@ class UpickleMessagePackTest extends MessageCodecTest {
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
       Gen.const(Null),
-      Gen.resultOf(Str(_)),
-      Gen.resultOf(Float64(_)),
+      Gen.resultOf[String, Node](Str),
+      Gen.resultOf[Double, Node](Float64),
       Gen.resultOf(Bool(_)),
-      Gen.listOfN[Node](2, recurse).map(Arr(_: _*)),
-      Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str.apply), recurse))
-        .map(values => Obj(LinkedHashMap.from(values)))
+      Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
+      Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str.apply), recurse)).map { values =>
+        Obj(mutable.LinkedHashMap.from(values))
+      }
     )
   ))
 

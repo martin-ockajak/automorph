@@ -24,10 +24,12 @@ class JacksonJsonTest extends JsonMessageCodecTest {
       Gen.resultOf(TextNode.valueOf),
       Gen.resultOf(IntNode.valueOf),
       Gen.resultOf(BooleanNode.valueOf),
-      Gen.listOfN[Node](2, recurse)
-        .map((values: List[Node]) => new ArrayNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)),
-      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse))
-        .map(values => new ObjectNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)),
+      Gen.listOfN[Node](2, recurse).map {
+        (values: List[Node]) => new ArrayNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)
+      },
+      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map {
+        values => new ObjectNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)
+      },
     )
   ))
 

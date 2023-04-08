@@ -17,10 +17,10 @@ class UpickleJsonTest extends JsonMessageCodecTest {
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
       Gen.const(Null),
-      Gen.resultOf(Str(_)),
-      Gen.resultOf(Num(_)),
+      Gen.resultOf[String, Node](Str),
+      Gen.resultOf[Double, Node](Num),
       Gen.resultOf(Bool(_)),
-      Gen.listOfN[Node](2, recurse).map(Arr(_: _*)),
+      Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Obj.from)
     )
   ))

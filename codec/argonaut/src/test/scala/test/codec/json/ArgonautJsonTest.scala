@@ -1,6 +1,7 @@
 package test.codec.json
 
 import argonaut.Argonaut.{jArray, jBool, jNull, jNumber, jObjectAssocList, jString}
+import argonaut.Json.jNumberOrNull
 import argonaut.{Argonaut, CodecJson, Json}
 import automorph.codec.json.ArgonautJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
@@ -18,10 +19,12 @@ class ArgonautJsonTest extends JsonMessageCodecTest {
     Gen.oneOf(
       Gen.const(jNull),
       Gen.resultOf(jString),
-      Gen.resultOf((value: Int) => jNumber(value)),
+      Gen.resultOf[Double, Node](jNumberOrNull),
       Gen.resultOf(jBool),
       Gen.listOfN[Node](2, recurse).map(jArray),
-      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(values => jObjectAssocList(values.toList)),
+      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map { values =>
+        jObjectAssocList(values.toList)
+      },
     )
   ))
 
