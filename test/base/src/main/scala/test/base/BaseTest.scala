@@ -28,13 +28,13 @@ import scribe.{Level, LogRecord, Logger}
  */
 trait BaseTest
   extends AnyFreeSpecLike
-  with ScalaCheckPropertyChecks
   with OptionValues
   with BeforeAndAfterEach
   with BeforeAndAfterAll
   with Matchers
   with AppendedClues
   with Checkers
+  with ScalaCheckPropertyChecks
   with Fixtures {
 
   override def beforeAll(): Unit = {
