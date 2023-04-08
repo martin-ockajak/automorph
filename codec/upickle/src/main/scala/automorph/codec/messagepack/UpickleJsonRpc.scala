@@ -1,9 +1,8 @@
 package automorph.codec.messagepack
 
 import automorph.protocol.jsonrpc.{Message, MessageError}
-import scala.collection.mutable
 import upack.{Arr, Float64, Msg, Null, Obj, Str}
-import upickle.core.Abort
+import upickle.core.{Abort, LinkedHashMap}
 
 /** JSON-RPC protocol support for uPickle message codec using MessagePack format. */
 private[automorph] case object UpickleJsonRpc {
@@ -28,9 +27,9 @@ private[automorph] case object UpickleJsonRpc {
     )
     implicit val paramsRw: ReadWriter[Option[Message.Params[Msg]]] = readwriter[Msg].bimap[Option[Message.Params[Msg]]](
       {
-        case Some(Right(params)) => Obj(mutable.LinkedHashMap[Msg, Msg](params.map { case (key, value) =>
+        case Some(Right(params)) => Obj(LinkedHashMap[Msg, Msg](params.map { case (key, value) =>
             Str(key) -> value
-          }.toSeq: _*))
+          }))
         case Some(Left(params)) => Arr(params: _*)
         case None => Null
       },

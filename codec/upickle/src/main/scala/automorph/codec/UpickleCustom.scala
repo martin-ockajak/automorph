@@ -1,7 +1,7 @@
 package automorph.codec
 
 import upickle.AttributeTagged
-import upickle.core.{Abort, Util, Visitor}
+import upickle.core.{Abort, ParseUtils, Visitor}
 
 /**
  * uPickle message codec customization.
@@ -94,7 +94,7 @@ trait UpickleCustom extends AttributeTagged {
       d.toInt
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Int =
-      Util.parseIntegralNum(s, decIndex, expIndex, index).toInt
+      ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toInt
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
@@ -148,7 +148,7 @@ trait UpickleCustom extends AttributeTagged {
       d.toShort
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Short =
-      Util.parseIntegralNum(s, decIndex, expIndex, index).toShort
+      ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toShort
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
@@ -172,7 +172,7 @@ trait UpickleCustom extends AttributeTagged {
       d.toByte
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Byte =
-      Util.parseIntegralNum(s, decIndex, expIndex, index).toByte
+      ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toByte
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
@@ -202,7 +202,7 @@ trait UpickleCustom extends AttributeTagged {
       d.toChar
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Char =
-      Util.parseIntegralNum(s, decIndex, expIndex, index).toChar
+      ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toChar
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
@@ -214,7 +214,7 @@ trait UpickleCustom extends AttributeTagged {
       "expected number"
 
     override def visitString(d: CharSequence, index: Int): Long =
-      upickle.core.Util.parseLong(d, 0, d.length())
+      ParseUtils.parseLong(d, 0, d.length())
 
     override def visitInt32(d: Int, index: Int): Long =
       d.toLong
@@ -229,7 +229,7 @@ trait UpickleCustom extends AttributeTagged {
       d.toLong
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Long =
-      Util.parseIntegralNum(s, decIndex, expIndex, index)
+      ParseUtils.parseIntegralNum(s, decIndex, expIndex, index)
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")

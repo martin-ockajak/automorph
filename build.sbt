@@ -124,7 +124,7 @@ lazy val jackson = source(project, "codec/jackson", core, testCodec % Test).sett
   libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
 lazy val upickle = source(project, "codec/upickle", core, testCodec % Test).settings(
-  libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0"
+  libraryDependencies += "com.lihaoyi" %% "upickle" % "3.1.0"
 )
 lazy val argonaut = source(project, "codec/argonaut", core, testCodec % Test).settings(
   libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.8"

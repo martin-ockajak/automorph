@@ -2,11 +2,11 @@ package test.codec.messagepack
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import org.scalacheck.{Arbitrary, Gen}
-import scala.collection.mutable
 import test.Generators.arbitraryRecord
 import test.codec.MessageCodecTest
 import test.{Enum, Record, Structure}
 import upack.{Arr, Bool, Float64, Msg, Null, Obj, Str}
+import upickle.core.LinkedHashMap
 
 class UpickleMessagePackTest extends MessageCodecTest {
 
@@ -23,7 +23,7 @@ class UpickleMessagePackTest extends MessageCodecTest {
       Gen.resultOf[Boolean, Node](Bool.apply),
       Gen.listOfN[Node](2, recurse).map(Arr(_ *)),
       Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str.apply), recurse)).map { values =>
-        Obj(mutable.LinkedHashMap.from(values))
+        Obj(LinkedHashMap(values))
       }
     )
   })

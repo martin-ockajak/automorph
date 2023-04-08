@@ -3,9 +3,8 @@ package automorph.codec.messagepack
 import automorph.schema.OpenRpc
 import automorph.schema.openrpc.*
 import scala.annotation.nowarn
-import scala.collection.mutable.LinkedHashMap
 import upack.{Arr, Msg, Obj, Str}
-import upickle.core.Abort
+import upickle.core.{Abort, LinkedHashMap}
 
 /** JSON-RPC protocol support for Circe message codec plugin using JSON format. */
 private[automorph] case object UpickleOpenRpc {
@@ -40,14 +39,15 @@ private[automorph] case object UpickleOpenRpc {
         schema.title.map(Str("title") -> Str(_)),
         schema.description.map(Str("description") -> Str(_)),
         schema.properties.map(v =>
-          Str("properties") -> Obj(LinkedHashMap[Msg, Msg](v.map { case (key, value) => Str(key) -> fromSchema(value) }
-            .toSeq*))
+          Str("properties") -> Obj(LinkedHashMap[Msg, Msg](v.map { case (key, value) =>
+            Str(key) -> fromSchema(value)
+          }))
         ),
         schema.required.map(v => Str("required") -> Arr(v.map(Str.apply)*)),
         schema.default.map(Str("default") -> Str(_)),
         schema.allOf.map(v => Str("allOf") -> Arr(v.map(fromSchema)*)),
         schema.$ref.map(Str("$ref") -> Str(_)),
-      ).flatten*
+      ).flatten
     ))
 
   private def toSchema(node: Msg): Schema =
