@@ -4,7 +4,7 @@ import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
 
-private[automorph] trait DefaultRpcProtocol {
+private[automorph] trait DefaultRpcProtocol:
 
   /** Default message node type. */
   type Node = CirceJsonCodec.Node
@@ -60,4 +60,3 @@ private[automorph] trait DefaultRpcProtocol {
     messageCodec: CodecType
   ): JsonRpcProtocol[NodeType, CodecType, Context] =
     JsonRpcProtocol(messageCodec)
-}
