@@ -4,7 +4,7 @@ import java.nio.file.Paths
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
-import org.scalatestplus.scalacheck.Checkers
+import org.scalatestplus.scalacheck.{Checkers, ScalaCheckPropertyChecks}
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
   FormatBlock, FormatterInterpolator, cyan, gray, levelColoredPaddedRight, mdcMultiLine, messages, positionSimple
@@ -28,6 +28,7 @@ import scribe.{Level, LogRecord, Logger}
  */
 trait BaseTest
   extends AnyFreeSpecLike
+  with ScalaCheckPropertyChecks
   with OptionValues
   with BeforeAndAfterEach
   with BeforeAndAfterAll

@@ -23,16 +23,17 @@ trait MessageCodecTest extends BaseTest {
 
   "" - {
     "Serialize & Deserialize" in {
-      check { (node: Node) =>
+      forAll { (node: Node) =>
         val serialized = codec.serialize(node)
-        codec.deserialize(serialized).equals(node)
+        val deserialized = codec.deserialize(serialized)
+        deserialized.shouldEqual(node)
       }
     }
     "Text" in {
-      check { (node: Node) =>
-        val text = codec.text(node)
-        val serialized = codec.serialize(node)
-        text.getBytes(charset).length >= serialized.readAllBytes().length
+      forAll { (node: Node) =>
+        val textBinaryLength = codec.text(node).getBytes(charset).length
+        val serializedBinaryLengthAs = codec.serialize(node).readAllBytes().length
+        textBinaryLength.shouldBe(>=(serializedBinaryLengthAs))
       }
     }
   }

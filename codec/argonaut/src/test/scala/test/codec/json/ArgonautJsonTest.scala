@@ -7,9 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.{Enum, Record, Structure}
 
-import scala.language.postfixOps
-
-class ArgonautJsonTest extends JsonMessageCodecTest{
+class ArgonautJsonTest extends JsonMessageCodecTest {
 
   type Node = Json
   type ActualCodec = ArgonautJsonCodec
@@ -72,7 +70,7 @@ class ArgonautJsonTest extends JsonMessageCodecTest{
       forAll { (record: Record) =>
         val encoded = codec.encode(record)
         val decoded = codec.decode[Record](encoded)
-        decoded should equal(record)
+        decoded.shouldEqual(record)
       }
     }
   }

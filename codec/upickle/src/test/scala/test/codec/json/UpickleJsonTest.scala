@@ -33,7 +33,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
       forAll { (record: Record) =>
         val encoded = codec.encode(record)
         val decoded = codec.decode[Record](encoded)
-        decoded should equal(record)
+        decoded.shouldEqual(record)
       }
     }
   }

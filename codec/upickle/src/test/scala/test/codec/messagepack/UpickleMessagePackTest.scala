@@ -2,6 +2,8 @@ package test.codec.messagepack
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
+
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
 import test.codec.MessageCodecTest
@@ -32,10 +34,10 @@ class UpickleMessagePackTest extends MessageCodecTest {
 
   "" - {
     "Encode & Decode" in {
-      check { (record: Record) =>
+      forAll { (record: Record) =>
         val encoded = codec.encode(record)
         val decoded = codec.decode[Record](encoded)
-        decoded.equals(record)
+        decoded.shouldEqual(record)
       }
     }
   }

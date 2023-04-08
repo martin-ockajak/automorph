@@ -1,7 +1,6 @@
 package test.codec.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import test.codec.MessageCodecTest
 
 /**
@@ -9,24 +8,24 @@ import test.codec.MessageCodecTest
  *
  * Checks message serialization.
  */
-trait JsonMessageCodecTest extends MessageCodecTest with ScalaCheckPropertyChecks{
+trait JsonMessageCodecTest extends MessageCodecTest {
 
   private val objectMapper = new ObjectMapper()
 
   "" - {
     "JSON" - {
       "Serialize" in {
-        check { (node: Node) =>
+        forAll { (node: Node) =>
           val serialized = codec.serialize(node)
-          objectMapper.readTree(serialized)
-          true
+          val deserialized = objectMapper.readTree(serialized)
+          deserialized.shouldEqual(node)
         }
       }
       "Text" in {
-        check { (node: Node) =>
+        forAll { (node: Node) =>
           val text = codec.text(node)
-          objectMapper.readTree(text)
-          true
+          val deserialized  = objectMapper.readTree(text)
+          deserialized.shouldEqual(node)
         }
       }
     }
