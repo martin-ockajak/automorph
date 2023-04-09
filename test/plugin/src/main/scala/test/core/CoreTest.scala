@@ -9,7 +9,7 @@ import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
 import test.base.BaseTest
-import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl}
+import test.{ComplexApi, ComplexApiImpl, InvalidApi, Record, SimpleApi, SimpleApiImpl}
 
 /**
  * Main client -> server remote API function invocation test.
@@ -45,7 +45,6 @@ trait CoreTest extends BaseTest {
 
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
   val complexApi: ComplexApiType = ComplexApiImpl(system, arbitraryContext.arbitrary.sample.get)
-  val invalidApi: InvalidApiType = InvalidApiImpl(system)
 
   def system: EffectSystem[Effect]
 
