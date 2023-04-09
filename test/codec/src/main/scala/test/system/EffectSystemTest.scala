@@ -11,7 +11,7 @@ import test.base.BaseTest
  */
 trait EffectSystemTest[Effect[_]] extends BaseTest {
 
-  case class TestException(message: String) extends RuntimeException(message)
+  sealed case class TestException(message: String) extends RuntimeException(message)
 
   val text = "test"
   val number = 0
