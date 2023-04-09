@@ -22,7 +22,6 @@ import scribe.{Level, LogRecord, Logger}
  *   - result assertion matchers
  *   - additional test clues
  *   - property-based checks
- *   - managed auto-releasing fixtures
  *   - asynchronous values retrieval
  *   - free network port detection
  */
@@ -34,8 +33,7 @@ trait BaseTest
   with Matchers
   with AppendedClues
   with Checkers
-  with ScalaCheckPropertyChecks
-  with Fixtures {
+  with ScalaCheckPropertyChecks {
 
   override def beforeAll(): Unit = {
     // Necessary to override incorrect logging configuration caused by initialization of certain HTTP servers
