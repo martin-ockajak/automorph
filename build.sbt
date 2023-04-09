@@ -333,7 +333,7 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
   Compile / doc / scalacOptions := docScalac3Options,
-  Compile / doc / sources ++= allSources.value.flatten,
+  Compile / doc / sources ++= allSources.value.flatten.filter(_.getName != "MonixSystem.scala"),
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=
     allDependencyClasspath.value.flatten.filter(_.data.getName != "cats-effect_3-2.5.4.jar")
@@ -368,11 +368,14 @@ site := {
   Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
   Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
   val apiDirectory = (docs / baseDirectory).value / "build/api"
-  Path.allSubpaths((monix / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
-    IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
-  }
+  val systemDirectory = s"$projectName/system"
   Path.allSubpaths((docs / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
     IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
+  }
+  Path.allSubpaths(
+    (monix / Compile / doc / target).value / systemDirectory
+  ).filter(_._1.isFile).foreach { case (file, path) =>
+    IO.write(apiDirectory / systemDirectory / path, relativizeScaladocLinks(IO.read(file), path))
   }
   val examplesDirectory = (docs / baseDirectory).value / "build/examples/project"
   IO.copyDirectory((examples / baseDirectory).value / "project", examplesDirectory, overwrite = true)

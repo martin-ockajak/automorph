@@ -6,6 +6,6 @@ package automorph.system
  * Monix is excluded from main Scaladoc generation due to dependency conflicts with Cats Effect.
  * Monix Scaladoc is generated separately and copied over to the global Scaladoc target directory.
  */
-final case class MonixEffectSystem()
+final case class MonixSystem()
 
-case object MonixEffectSystem
+case object MonixSystem
