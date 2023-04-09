@@ -1,5 +1,5 @@
 package automorph.system
 
-final case class CatsEffectSystem()
+final case class MonixEffectSystem()
 
-case object CatsEffectSystem
+case object MonixEffectSystem
