@@ -28,5 +28,5 @@ trait EndpointTransport[Effect[_], Context, Adapter] {
    * @return
    *   server transport
    */
-  def clone(handler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
+  def withHandler(handler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
 }

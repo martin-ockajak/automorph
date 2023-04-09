@@ -88,7 +88,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       }
   }
 
-  override def clone(handler: RequestHandler[Effect, Context]): TapirWebSocketEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): TapirWebSocketEndpoint[Effect] =
     copy(handler = handler)
 
   private def createErrorResponse(

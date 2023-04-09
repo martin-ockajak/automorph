@@ -86,7 +86,7 @@ final case class JettyServer[Effect[_]](
     }
   }
 
-  override def clone(handler: RequestHandler[Effect, Context]): JettyServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): JettyServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

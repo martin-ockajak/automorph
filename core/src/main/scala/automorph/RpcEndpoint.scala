@@ -41,7 +41,7 @@ final case class RpcEndpoint[Node, Codec <: MessageCodec[Node], Effect[_], Conte
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends EndpointBind[Node, Codec, Effect, Context, Adapter] {
 
-  private val configuredTransport = transport.clone(handler)
+  private val configuredTransport = transport.withHandler(handler)
 
   /** Transport layer adapter. */
   def adapter: Adapter =

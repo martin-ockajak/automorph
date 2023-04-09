@@ -65,7 +65,7 @@ final case class UndertowServer[Effect[_]](
   private lazy val server = createServer()
   private val allowedMethods = methods.map(_.name).toSet
 
-  override def clone(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

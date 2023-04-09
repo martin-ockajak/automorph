@@ -61,7 +61,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
   override def adapter: WebSocketAdapter =
     this
 
-  override def clone(handler: RequestHandler[Effect, Context]): JettyWebSocketEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): JettyWebSocketEndpoint[Effect] =
     copy(handler = handler)
 
   override def onWebSocketText(message: String): Unit =

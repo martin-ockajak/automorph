@@ -57,7 +57,7 @@ final case class RabbitMqServer[Effect[_]](
   private val log = MessageLog(logger, RabbitMq.protocol)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
-  override def clone(handler: RequestHandler[Effect, Context]): RabbitMqServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): RabbitMqServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

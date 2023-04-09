@@ -72,7 +72,7 @@ final case class AkkaServer[Effect[_]](
   private val allowedMethods = methods.map(_.name).toSet
   private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
 
-  override def clone(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

@@ -48,7 +48,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
   override def adapter: Handler[ServerWebSocket] =
     this
 
-  override def clone(handler: RequestHandler[Effect, Context]): VertxWebSocketEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): VertxWebSocketEndpoint[Effect] =
     copy(handler = handler)
 
   override def handle(session: ServerWebSocket): Unit = {

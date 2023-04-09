@@ -14,8 +14,8 @@ final case class LocalServer[Effect[_]](
   def handler: RequestHandler[Effect, Context] =
     endpoint.handler
 
-  override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
-    endpoint = endpoint.clone(handler)
+  override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+    endpoint = endpoint.withHandler(handler)
     this
   }
 

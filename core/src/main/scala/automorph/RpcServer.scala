@@ -39,7 +39,7 @@ final case class RpcServer[Node, Codec <: MessageCodec[Node], Effect[_], Context
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends ServerBind[Node, Codec, Effect, Context] {
 
-  private val configuredTransport = transport.clone(handler)
+  private val configuredTransport = transport.withHandler(handler)
 
   /**
    * Starts this server to process incoming requests.

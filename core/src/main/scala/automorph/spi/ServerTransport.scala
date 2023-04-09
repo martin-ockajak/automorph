@@ -23,7 +23,7 @@ trait ServerTransport[Effect[_], Context] {
    * @return
    *   server transport
    */
-  def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
+  def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
 
   /**
    * Starts this server to process incoming requests.

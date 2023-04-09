@@ -68,7 +68,7 @@ final case class VertxServer[Effect[_]](
   private val messageMethodNotAllowed = "Method Not Allowed"
   private val allowedMethods = methods.map(_.name).toSet
 
-  override def clone(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

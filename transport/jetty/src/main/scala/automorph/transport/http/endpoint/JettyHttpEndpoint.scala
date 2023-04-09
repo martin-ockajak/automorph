@@ -50,7 +50,7 @@ final case class JettyHttpEndpoint[Effect[_]](
   override def adapter: HttpServlet =
     this
 
-  override def clone(handler: RequestHandler[Effect, Context]): JettyHttpEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): JettyHttpEndpoint[Effect] =
     copy(handler = handler)
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {

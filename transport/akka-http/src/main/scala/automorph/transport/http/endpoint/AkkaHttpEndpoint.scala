@@ -82,7 +82,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
       }
     }
 
-  override def clone(handler: RequestHandler[Effect, Context]): AkkaHttpEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): AkkaHttpEndpoint[Effect] =
     copy(handler = handler)
 
   private def handleRequest(request: HttpRequest, remoteAddress: RemoteAddress)(

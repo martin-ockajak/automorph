@@ -53,7 +53,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   override def adapter: Handler[HttpServerRequest] =
     this
 
-  override def clone(handler: RequestHandler[Effect, Context]): VertxHttpEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): VertxHttpEndpoint[Effect] =
     copy(handler = handler)
 
   override def handle(request: HttpServerRequest): Unit = {

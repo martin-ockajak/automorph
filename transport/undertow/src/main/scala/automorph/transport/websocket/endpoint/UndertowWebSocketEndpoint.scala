@@ -62,7 +62,7 @@ final case class UndertowWebSocketEndpoint[Effect[_]](
   override def adapter: WebSocketConnectionCallback =
     this
 
-  override def clone(handler: RequestHandler[Effect, Context]): UndertowWebSocketEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): UndertowWebSocketEndpoint[Effect] =
     copy(handler = handler)
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
