@@ -1,9 +1,9 @@
 package test.transport.local
 
+import automorph.spi.EffectSystem
+import automorph.system.CatsEffectSystem
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import automorph.system.CatsEffectSystem
-import automorph.spi.EffectSystem
 
 class LocalCatsEffectTest extends LocalTest {
 
