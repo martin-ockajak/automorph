@@ -24,9 +24,9 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @param namedArguments
  *   if true, pass arguments by name, if false pass arguments by position
  * @param mapOpenRpc
- *   transforms generated OpenRPC schema or disables the service discovery RPC function if empty
+ *   transforms generated OpenRPC schema
  * @param mapOpenApi
- *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
+ *   transforms generated OpenAPI schema
  * @param encodeMessage
  *   converts a JSON-RPC message to message format node
  * @param decodeMessage
@@ -84,9 +84,9 @@ case object JsonRpcProtocol extends ErrorMapping:
    * @param namedArguments
    *   if true, pass arguments by name, if false pass arguments by position
    * @param mapOpenRpc
-   *   transforms generated OpenRPC schema or disables the service discovery RPC function if empty
+   *   transforms generated OpenRPC schema
    * @param mapOpenApi
-   *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
+   *   transforms generated OpenAPI schema
    * @tparam Node
    *   message node type
    * @tparam Codec

@@ -233,7 +233,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi
-   *   transforms generated OpenAPI schema or removes the service discovery method if empty
+   *   transforms generated OpenAPI schema
    * @return
    *   Web-RPC protocol
    */

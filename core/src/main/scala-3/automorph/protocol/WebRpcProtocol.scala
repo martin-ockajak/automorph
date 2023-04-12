@@ -24,7 +24,7 @@ import automorph.transport.http.HttpContext
  * @param mapException
  *   maps an exception to a corresponding Web-RPC error
  * @param mapOpenApi
- *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
+ *   transforms generated OpenAPI schema
  * @param encodeRequest
  *   converts a Web-RPC request to message format node
  * @param decodeRequest
@@ -80,7 +80,7 @@ case object WebRpcProtocol extends ErrorMapping:
    * @param mapException
    *   maps an exception to a corresponding Web-RPC error
    * @param mapOpenApi
-   *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
+   *   transforms generated OpenAPI schema
    * @tparam Node
    *   message node type
    * @tparam Codec

@@ -222,7 +222,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * Creates a copy of this protocol with given OpenRPC description transformation.
    *
    * @param mapOpenRpc
-   *   transforms generated OpenRPC schema or removes the service discovery method if empty
+   *   transforms generated OpenRPC schema
    * @return
    *   JSON-RPC protocol
    */
