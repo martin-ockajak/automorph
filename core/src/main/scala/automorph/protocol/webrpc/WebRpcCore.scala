@@ -189,11 +189,11 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
 
   override def apiSchemas: Seq[ApiSchema[Node]] = {
     Seq(
-      mapOpenApi.map(transformOpenApi => ApiSchema(
+      ApiSchema(
         RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-        functions => encodeOpenApi(openApi(functions, transformOpenApi)),
-      ))
-    ).flatten
+        functions => encodeOpenApi(openApi(functions)),
+      )
+    )
   }
 
   /**
@@ -237,10 +237,10 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * @return
    *   Web-RPC protocol
    */
-  def mapOpenApi(mapOpenApi: Option[OpenApi => OpenApi]): WebRpcProtocol[Node, Codec, Context] =
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
 
-  private def openApi(functions: Iterable[RpcFunction], mapOpenApi: OpenApi => OpenApi): OpenApi = {
+  private def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }

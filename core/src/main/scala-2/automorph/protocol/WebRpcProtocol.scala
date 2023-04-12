@@ -51,7 +51,7 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = WebRpcProtocol.defaultMapException,
-  mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
+  mapOpenApi: OpenApi => OpenApi = identity,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -70,7 +70,7 @@ case object WebRpcProtocol extends ErrorMapping {
     pathPrefix: c.Expr[String],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
     mapException: c.Expr[Throwable => Option[Int]],
-    mapOpenApi: c.Expr[Option[OpenApi => OpenApi]],
+    mapOpenApi: c.Expr[OpenApi => OpenApi],
   ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
@@ -103,7 +103,7 @@ case object WebRpcProtocol extends ErrorMapping {
         $pathPrefix,
         automorph.protocol.WebRpcProtocol.defaultMapError,
         automorph.protocol.WebRpcProtocol.defaultMapException,
-        Some(identity)
+        identity
       )
     """)
   }
@@ -140,7 +140,7 @@ case object WebRpcProtocol extends ErrorMapping {
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable,
     mapException: Throwable => Option[Int],
-    mapOpenApi: Option[OpenApi => OpenApi],
+    mapOpenApi: OpenApi => OpenApi,
   ): WebRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 

@@ -147,6 +147,7 @@ case object EndpointBind {
         endpoint.transport.effectSystem,
         endpoint.rpcProtocol,
         apiBindings ++ newApiBindings,
+        endpoint.handler.discovery,
       )
       automorph.RpcEndpoint(endpoint.transport, endpoint.rpcProtocol, handler, handler.functions)
     """)

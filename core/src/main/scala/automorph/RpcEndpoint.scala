@@ -47,6 +47,15 @@ final case class RpcEndpoint[Node, Codec <: MessageCodec[Node], Effect[_], Conte
   def adapter: Adapter =
     configuredTransport.adapter
 
+  /**
+   * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
+   *
+   * @param discovery service discovery enabled
+   * @return RPC server
+   */
+  def discovery(discovery: Boolean): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
+    copy(handler = handler.discovery(discovery))
+
   override def toString: String = {
     val plugins = Map[String, Any](
       "rpcProtocol" -> rpcProtocol,
@@ -74,7 +83,9 @@ case object RpcEndpoint {
    * @tparam Adapter
    *   transport layer transport type
    */
-  final case class EndpointBuilder[Effect[_], Context, Adapter](transport: EndpointTransport[Effect, Context, Adapter]) {
+  final case class EndpointBuilder[Effect[_], Context, Adapter](
+    transport: EndpointTransport[Effect, Context, Adapter]
+  ) {
 
     /**
      * Creates a new RPC endpoint with specified RPC protocol plugin.
@@ -100,7 +111,7 @@ case object RpcEndpoint {
    * @param transport
    *   endpoint transport later transport
    * @param rpcProtocol
-   * RPC protocol plugin
+   *   RPC protocol plugin
    * @tparam Node
    *   message node type
    * @tparam Codec

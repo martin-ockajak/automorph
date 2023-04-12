@@ -178,7 +178,7 @@ class OpenApiTest extends BaseTest {
   )
 
   "" - {
-    "Description" in {
+    "Schema" in {
       val schema = OpenApi(functionSchemas)
       schema.shouldEqual(expected)
     }

@@ -162,15 +162,15 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   override def apiSchemas: Seq[ApiSchema[Node]] =
     Seq(
-      mapOpenApi.map(transformOpenApi => ApiSchema(
+      ApiSchema(
         RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-        functions => encodeOpenApi(openApi(functions, transformOpenApi)),
-      )),
-      mapOpenRpc.map(transformOpenRpc => ApiSchema(
+        functions => encodeOpenApi(openApi(functions)),
+      ),
+      ApiSchema(
         RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
-        functions => encodeOpenRpc(openRpc(functions, transformOpenRpc)),
-      ))
-    ).flatten
+        functions => encodeOpenRpc(openRpc(functions)),
+      )
+    )
 
   /**
    * Creates a copy of this protocol with specified message contex type.
@@ -226,7 +226,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * @return
    *   JSON-RPC protocol
    */
-  def mapOpenRpc(mapOpenRpc: Option[OpenRpc => OpenRpc]): JsonRpcProtocol[Node, Codec, Context] =
+  def mapOpenRpc(mapOpenRpc: OpenRpc => OpenRpc): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenRpc = mapOpenRpc)
 
   /**
@@ -237,13 +237,13 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * @return
    *   JSON-RPC protocol
    */
-  def mapOpenApi(mapOpenApi: Option[OpenApi => OpenApi]): JsonRpcProtocol[Node, Codec, Context] =
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
 
-  private def openRpc(functions: Iterable[RpcFunction], mapOpenRpc: OpenRpc => OpenRpc): OpenRpc =
+  private def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
     mapOpenRpc(OpenRpc(functions))
 
-  private def openApi(functions: Iterable[RpcFunction], mapOpenApi: OpenApi => OpenApi): OpenApi = {
+  private def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }

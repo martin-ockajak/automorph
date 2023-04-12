@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-private[examples] case object ApiSchema {
+private[examples] case object ApiDiscovery {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
@@ -22,9 +22,9 @@ private[examples] case object ApiSchema {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server with API discovery listening on port 7000 for POST requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api").bind(api).init()
+      Default.serverAsync(7000, "/api").discovery(true).bind(api).init()
     )
 
     // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'

@@ -27,6 +27,8 @@ import scala.util.{Failure, Success, Try}
  *   effect system plugin
  * @param apiBindings
  *   API method bindings
+ * @param discovery
+ *   enable automatic provision of service discovery via RPC functions returning bound API schema
  * @tparam Node
  *   message node type
  * @tparam Codec
@@ -41,9 +43,10 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
+  discovery: Boolean = false,
 ) extends RequestHandler[Effect, Context] with Logging {
 
-  private val bindings = apiSchemaBindings ++ apiBindings
+  private val bindings = Option.when(discovery)(apiSchemaBindings).getOrElse(ListMap.empty) ++ apiBindings
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   /** Bound RPC functions. */
@@ -69,6 +72,9 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
         callFunction(rpcRequest, context, requestProperties)
       },
     )
+
+  override def discovery(discovery: Boolean): RequestHandler[Effect, Context] =
+    copy(discovery = discovery)
 
   override def mediaType: String =
     rpcProtocol.messageCodec.mediaType

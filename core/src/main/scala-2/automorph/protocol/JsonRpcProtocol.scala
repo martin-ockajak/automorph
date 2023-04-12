@@ -51,8 +51,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
   mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
   namedArguments: Boolean = true,
-  mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
-  mapOpenRpc: Option[OpenRpc => OpenRpc] = Some(identity),
+  mapOpenApi: OpenApi => OpenApi = identity,
+  mapOpenRpc: OpenRpc => OpenRpc = identity,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeOpenRpc: OpenRpc => Node,
@@ -73,8 +73,8 @@ case object JsonRpcProtocol extends ErrorMapping {
     mapError: c.Expr[(String, Int) => Throwable],
     mapException: c.Expr[Throwable => ErrorType],
     namedArguments: c.Expr[Boolean],
-    mapOpenApi: c.Expr[Option[OpenApi => OpenApi]],
-    mapOpenRpc: c.Expr[Option[OpenRpc => OpenRpc]],
+    mapOpenApi: c.Expr[OpenApi => OpenApi],
+    mapOpenRpc: c.Expr[OpenRpc => OpenRpc],
   ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
@@ -106,8 +106,8 @@ case object JsonRpcProtocol extends ErrorMapping {
         automorph.protocol.JsonRpcProtocol.defaultMapError,
         automorph.protocol.JsonRpcProtocol.defaultMapException,
         true,
-        Some(identity),
-        Some(identity)
+        identity,
+        identity
       )
     """)
   }
@@ -147,8 +147,8 @@ case object JsonRpcProtocol extends ErrorMapping {
     mapError: (String, Int) => Throwable,
     mapException: Throwable => ErrorType,
     namedArguments: Boolean,
-    mapOpenApi: Option[OpenApi => OpenApi],
-    mapOpenRpc: Option[OpenRpc => OpenRpc],
+    mapOpenApi: OpenApi => OpenApi,
+    mapOpenRpc: OpenRpc => OpenRpc,
   ): JsonRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 

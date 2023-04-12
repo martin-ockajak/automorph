@@ -42,6 +42,15 @@ final case class RpcServer[Node, Codec <: MessageCodec[Node], Effect[_], Context
   private val configuredTransport = transport.withHandler(handler)
 
   /**
+   * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
+   *
+   * @param discovery service discovery enabled
+   * @return RPC server
+   */
+  def discovery(discovery: Boolean): RpcServer[Node, Codec, Effect, Context] =
+    copy(handler = handler.discovery(discovery))
+
+  /**
    * Starts this server to process incoming requests.
    *
    * @return

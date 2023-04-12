@@ -49,8 +49,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   mapError: (String, Int) => Throwable,
   mapException: Throwable => ErrorType,
   namedArguments: Boolean,
-  mapOpenApi: Option[OpenApi => OpenApi],
-  mapOpenRpc: Option[OpenRpc => OpenRpc],
+  mapOpenApi: OpenApi => OpenApi,
+  mapOpenRpc: OpenRpc => OpenRpc,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeOpenRpc: OpenRpc => Node,
@@ -101,8 +101,8 @@ case object JsonRpcProtocol extends ErrorMapping:
     mapError: (String, Int) => Throwable = defaultMapError,
     mapException: Throwable => ErrorType = defaultMapException,
     namedArguments: Boolean = true,
-    mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
-    mapOpenRpc: Option[OpenRpc => OpenRpc] =  Some(identity),
+    mapOpenApi: OpenApi => OpenApi = identity,
+    mapOpenRpc: OpenRpc => OpenRpc =  identity,
   ): JsonRpcProtocol[Node, Codec, Context] =
     val encodeMessage = (message: Message[Node]) => messageCodec.encode[Message[Node]](message)
     val decodeMessage = (messageNode: Node) => messageCodec.decode[Message[Node]](messageNode)

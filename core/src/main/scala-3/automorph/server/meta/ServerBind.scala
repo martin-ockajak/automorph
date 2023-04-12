@@ -97,5 +97,6 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
       transport.effectSystem,
       rpcProtocol,
       apiBindings ++ newApiBindings,
+      discovery = handler.discovery,
     )
     RpcServer(transport, rpcProtocol, apiHandler, apiHandler.functions)

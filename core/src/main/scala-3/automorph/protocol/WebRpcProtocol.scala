@@ -49,7 +49,7 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable,
   mapException: Throwable => Option[Int],
-  mapOpenApi: Option[OpenApi => OpenApi],
+  mapOpenApi: OpenApi => OpenApi,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -95,7 +95,7 @@ case object WebRpcProtocol extends ErrorMapping:
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable = defaultMapError,
     mapException: Throwable => Option[Int] = defaultMapException,
-    mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
+    mapOpenApi: OpenApi => OpenApi = identity,
   ): WebRpcProtocol[Node, Codec, Context] =
     val encodeRequest = (value: Message.Request[Node]) => messageCodec.encode[Message.Request[Node]](value)
     val decodeRequest = (requestNode: Node) => messageCodec.decode[Message.Request[Node]](requestNode)

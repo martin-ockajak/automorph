@@ -977,7 +977,7 @@ server.close()
 
 ## Special
 
-### [API schema](../../examples/project/src/main/scala/examples/special/ApiSchema.scala)
+### [API discovery](../../examples/project/src/main/scala/examples/special/ApiSchema.scala)
 
 **Build**
 
@@ -1012,9 +1012,9 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
+// Start JSON-RPC HTTP & WebSocket server with API discovery listening on port 7000 for POST requests to '/api'
 val server = run(
-  Default.serverAsync(7000, "/api").bind(api).init()
+  Default.serverAsync(7000, "/api").discovery(true).bind(api).init()
 )
 ```
 
