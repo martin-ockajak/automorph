@@ -11,7 +11,7 @@ import scala.reflect.macros.blackbox
  * Web-RPC protocol plugin.
  *
  * Provides the following Web-RPC functions for service discovery:
- *   - `api.discover` - API description in OpenAPI format
+ *   - `api.discover` - API schema in OpenAPI format
  *
  * @constructor
  *   Creates a Web-RPC protocol plugin.
@@ -26,7 +26,7 @@ import scala.reflect.macros.blackbox
  * @param mapException
  *   maps an exception to a corresponding Web-RPC error
  * @param mapOpenApi
- *   transforms generated OpenAPI description
+ *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
  * @param encodeRequest
  *   converts a Web-RPC request to message format node
  * @param decodeRequest
@@ -36,7 +36,7 @@ import scala.reflect.macros.blackbox
  * @param decodeResponse
  *   converts a message format node to Web-RPC response
  * @param encodeOpenApi
- *   converts an OpenAPI description to message format node
+ *   converts an OpenAPI schema to message format node
  * @param encodeString
  *   converts a string to message format node
  * @tparam Node
@@ -51,7 +51,7 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = WebRpcProtocol.defaultMapException,
-  mapOpenApi: OpenApi => OpenApi = identity,
+  mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -62,7 +62,7 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
 
 case object WebRpcProtocol extends ErrorMapping {
 
-  /** Service discovery method providing API description in OpenAPI format. */
+  /** Service discovery method providing API schema in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context <: HttpContext[?]](c: blackbox.Context)(
@@ -70,7 +70,7 @@ case object WebRpcProtocol extends ErrorMapping {
     pathPrefix: c.Expr[String],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
     mapException: c.Expr[Throwable => Option[Int]],
-    mapOpenApi: c.Expr[OpenApi => OpenApi],
+    mapOpenApi: c.Expr[Option[OpenApi => OpenApi]],
   ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
@@ -103,7 +103,7 @@ case object WebRpcProtocol extends ErrorMapping {
         $pathPrefix,
         automorph.protocol.WebRpcProtocol.defaultMapError,
         automorph.protocol.WebRpcProtocol.defaultMapException,
-        identity
+        Some(identity)
       )
     """)
   }
@@ -112,7 +112,7 @@ case object WebRpcProtocol extends ErrorMapping {
    * Creates a Web-RPC protocol plugin.
    *
    * Provides the following JSON-RPC functions for service discovery:
-   *   - `api.discover` - API description in OpenAPI format
+   *   - `api.discover` - API schema in OpenAPI format
    *
    * @see
    *   [[https://www.jsonrpc.org/specification Web-RPC protocol specification]]
@@ -125,7 +125,7 @@ case object WebRpcProtocol extends ErrorMapping {
    * @param mapException
    *   maps an exception to a corresponding Web-RPC error
    * @param mapOpenApi
-   *   transforms generated OpenAPI description
+   *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
    * @tparam Node
    *   message node type
    * @tparam Codec
@@ -140,7 +140,7 @@ case object WebRpcProtocol extends ErrorMapping {
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable,
     mapException: Throwable => Option[Int],
-    mapOpenApi: OpenApi => OpenApi,
+    mapOpenApi: Option[OpenApi => OpenApi],
   ): WebRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
@@ -148,7 +148,7 @@ case object WebRpcProtocol extends ErrorMapping {
    * Creates a Web-RPC protocol plugin.
    *
    * Provides the following Web-RPC functions for service discovery:
-   *   - `api.discover` - API description in OpenAPI format
+   *   - `api.discover` - API schema in OpenAPI format
    *
    * @see
    *   [[https://www.jsonrpc.org/specification Web-RPC protocol specification]]

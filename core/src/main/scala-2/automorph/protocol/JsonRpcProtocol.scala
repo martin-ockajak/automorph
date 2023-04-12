@@ -10,8 +10,8 @@ import scala.reflect.macros.blackbox
  * JSON-RPC protocol implementation.
  *
  * Provides the following JSON-RPC methods for service discovery:
- *   - `rpc.discover` - API description in OpenRPC format
- *   - `api.discover` - API description in OpenAPI format
+ *   - `rpc.discover` - API schema in OpenRPC format
+ *   - `api.discover` - API schema in OpenAPI format
  *
  * @constructor
  *   Creates a JSON-RPC 2.0 protocol implementation.
@@ -26,9 +26,9 @@ import scala.reflect.macros.blackbox
  * @param namedArguments
  *   if true, pass arguments by name, if false pass arguments by position
  * @param mapOpenRpc
- *   transforms generated OpenRPC specification
+ *   transforms generated OpenRPC schema or disables the service discovery RPC function if empty
  * @param mapOpenApi
- *   transforms generated OpenAPI description
+ *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
  * @param encodeMessage
  *   converts a JSON-RPC message to message format node
  * @param decodeMessage
@@ -36,7 +36,7 @@ import scala.reflect.macros.blackbox
  * @param encodeOpenRpc
  *   converts an OpenRPC description to message format node
  * @param encodeOpenApi
- *   converts an OpenAPI description to message format node
+ *   converts an OpenAPI schema to message format node
  * @param encodeStrings
  *   converts a list of strings to message format node
  * @tparam Node
@@ -51,8 +51,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
   mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
   namedArguments: Boolean = true,
-  mapOpenApi: OpenApi => OpenApi = identity,
-  mapOpenRpc: OpenRpc => OpenRpc = identity,
+  mapOpenApi: Option[OpenApi => OpenApi] = Some(identity),
+  mapOpenRpc: Option[OpenRpc => OpenRpc] = Some(identity),
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeOpenRpc: OpenRpc => Node,
@@ -62,10 +62,10 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
 
 case object JsonRpcProtocol extends ErrorMapping {
 
-  /** Service discovery method providing API description in OpenRPC format. */
+  /** Service discovery method providing API schema in OpenRPC format. */
   val openRpcFunction: String = "rpc.discover"
 
-  /** Service discovery method providing API description in OpenAPI format. */
+  /** Service discovery method providing API schema in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
@@ -73,8 +73,8 @@ case object JsonRpcProtocol extends ErrorMapping {
     mapError: c.Expr[(String, Int) => Throwable],
     mapException: c.Expr[Throwable => ErrorType],
     namedArguments: c.Expr[Boolean],
-    mapOpenApi: c.Expr[OpenApi => OpenApi],
-    mapOpenRpc: c.Expr[OpenRpc => OpenRpc],
+    mapOpenApi: c.Expr[Option[OpenApi => OpenApi]],
+    mapOpenRpc: c.Expr[Option[OpenRpc => OpenRpc]],
   ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
@@ -106,8 +106,8 @@ case object JsonRpcProtocol extends ErrorMapping {
         automorph.protocol.JsonRpcProtocol.defaultMapError,
         automorph.protocol.JsonRpcProtocol.defaultMapException,
         true,
-        identity,
-        identity
+        Some(identity),
+        Some(identity)
       )
     """)
   }
@@ -116,8 +116,8 @@ case object JsonRpcProtocol extends ErrorMapping {
    * Creates a JSON-RPC protocol plugin.
    *
    * Provides the following JSON-RPC methods for service discovery:
-   *   - `rpc.discover` - API description in OpenRPC format
-   *   - `api.discover` - API description in OpenAPI format
+   *   - `rpc.discover` - API schema in OpenRPC format
+   *   - `api.discover` - API schema in OpenAPI format
    *
    * @see
    *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
@@ -130,9 +130,9 @@ case object JsonRpcProtocol extends ErrorMapping {
    * @param namedArguments
    *   if true, pass arguments by name, if false pass arguments by position
    * @param mapOpenRpc
-   *   transforms generated OpenRPC specification
+   *   transforms generated OpenRPC schema or disables the service discovery RPC function if empty
    * @param mapOpenApi
-   *   transforms generated OpenAPI description
+   *   transforms generated OpenAPI schema or disables the service discovery RPC function if empty
    * @tparam Node
    *   message node type
    * @tparam Codec
@@ -147,8 +147,8 @@ case object JsonRpcProtocol extends ErrorMapping {
     mapError: (String, Int) => Throwable,
     mapException: Throwable => ErrorType,
     namedArguments: Boolean,
-    mapOpenApi: OpenApi => OpenApi,
-    mapOpenRpc: OpenRpc => OpenRpc,
+    mapOpenApi: Option[OpenApi => OpenApi],
+    mapOpenRpc: Option[OpenRpc => OpenRpc],
   ): JsonRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
@@ -156,8 +156,8 @@ case object JsonRpcProtocol extends ErrorMapping {
    * Creates a JSON-RPC protocol plugin.
    *
    * Provides the following JSON-RPC methods for service discovery:
-   *   - `rpc.discover` - API description in OpenRPC format
-   *   - `api.discover` - API description in OpenAPI format
+   *   - `rpc.discover` - API schema in OpenRPC format
+   *   - `api.discover` - API schema in OpenAPI format
    *
    * @see
    *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]

@@ -45,8 +45,8 @@ private[automorph] trait DefaultRpcProtocol {
       JsonRpcProtocol.defaultMapError,
       JsonRpcProtocol.defaultMapException,
       true,
-      identity,
-      identity,
+      Some(identity),
+      Some(identity),
     )
 
   /**

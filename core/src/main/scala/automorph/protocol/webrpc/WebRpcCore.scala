@@ -187,46 +187,14 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       },
     )
 
-  override def apiSchemas: Seq[ApiSchema[Node]] =
-    Seq(ApiSchema(
-      RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      functions => encodeOpenApi(openApi(functions)),
-    ))
-
-  /**
-   * Generates OpenAPI schema for given RPC functions.
-   *
-   * @see
-   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenAPI schema
-   */
-  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    mapOpenApi(OpenApi(functionSchemas))
+  override def apiSchemas: Seq[ApiSchema[Node]] = {
+    Seq(
+      mapOpenApi.map(transformOpenApi => ApiSchema(
+        RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+        functions => encodeOpenApi(openApi(functions, transformOpenApi)),
+      ))
+    ).flatten
   }
-
-  private def requestSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(function.name),
-      Some(OpenApi.argumentsDescription),
-      Option(Schema.parameters(function)).filter(_.nonEmpty),
-      Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
-    )
-
-  private def resultSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.resultTitle),
-      Some(s"$name ${OpenApi.resultTitle}"),
-      Some(Map(OpenApi.resultName -> Schema.result(function))),
-      Some(List(OpenApi.resultName)),
-    )
 
   /**
    * Creates a copy of this protocol with specified message contex type.
@@ -265,10 +233,35 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi
-   *   transforms generated OpenAPI specification
+   *   transforms generated OpenAPI schema or removes the service discovery method if empty
    * @return
    *   Web-RPC protocol
    */
-  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
+  def mapOpenApi(mapOpenApi: Option[OpenApi => OpenApi]): WebRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
+
+  private def openApi(functions: Iterable[RpcFunction], mapOpenApi: OpenApi => OpenApi): OpenApi = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    mapOpenApi(OpenApi(functionSchemas))
+  }
+
+  private def requestSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(function.name),
+      Some(OpenApi.argumentsDescription),
+      Option(Schema.parameters(function)).filter(_.nonEmpty),
+      Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
+    )
+
+  private def resultSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"$name ${OpenApi.resultTitle}"),
+      Some(Map(OpenApi.resultName -> Schema.result(function))),
+      Some(List(OpenApi.resultName)),
+    )
 }

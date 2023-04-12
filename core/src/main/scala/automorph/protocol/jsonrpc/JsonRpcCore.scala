@@ -162,45 +162,15 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   override def apiSchemas: Seq[ApiSchema[Node]] =
     Seq(
-      ApiSchema(
+      mapOpenApi.map(transformOpenApi => ApiSchema(
         RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-        functions => encodeOpenApi(openApi(functions)),
-      ),
-      ApiSchema(
+        functions => encodeOpenApi(openApi(functions, transformOpenApi)),
+      )),
+      mapOpenRpc.map(transformOpenRpc => ApiSchema(
         RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
-        functions => encodeOpenRpc(openRpc(functions)),
-      ),
-    )
-
-  /**
-   * Generates OpenRPC schema for given RPC functions.
-   *
-   * @see
-   *   [[https://spec.open-rpc.org OpenRPC specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenRPC schema
-   */
-  def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
-    mapOpenRpc(OpenRpc(functions))
-
-  /**
-   * Generates OpenAPI schema for given RPC functions.
-   *
-   * @see
-   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenAPI schema
-   */
-  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    mapOpenApi(OpenApi(functionSchemas))
-  }
+        functions => encodeOpenRpc(openRpc(functions, transformOpenRpc)),
+      ))
+    ).flatten
 
   /**
    * Creates a copy of this protocol with specified message contex type.
@@ -252,23 +222,34 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * Creates a copy of this protocol with given OpenRPC description transformation.
    *
    * @param mapOpenRpc
-   *   transforms generated OpenRPC specification
+   *   transforms generated OpenRPC schema or removes the service discovery method if empty
    * @return
    *   JSON-RPC protocol
    */
-  def mapOpenRpc(mapOpenRpc: OpenRpc => OpenRpc): JsonRpcProtocol[Node, Codec, Context] =
+  def mapOpenRpc(mapOpenRpc: Option[OpenRpc => OpenRpc]): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenRpc = mapOpenRpc)
 
   /**
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi
-   *   transforms generated OpenAPI specification
+   *   transforms generated OpenAPI schema or removes the service discovery method if the result is None
    * @return
    *   JSON-RPC protocol
    */
-  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
+  def mapOpenApi(mapOpenApi: Option[OpenApi => OpenApi]): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
+
+  private def openRpc(functions: Iterable[RpcFunction], mapOpenRpc: OpenRpc => OpenRpc): OpenRpc =
+    mapOpenRpc(OpenRpc(functions))
+
+  private def openApi(functions: Iterable[RpcFunction], mapOpenApi: OpenApi => OpenApi): OpenApi = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    mapOpenApi(OpenApi(functionSchemas))
+  }
+
 
   private def requestSchema(function: RpcFunction): Schema =
     Schema(
