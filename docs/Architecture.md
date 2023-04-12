@@ -7,7 +7,7 @@ sidebar_position: 3
 ## Components
 
 **Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate
-with existing systems by freely combining its primary componvarious plugins:
+with existing systems by freely combining its various plugins:
 
 * [RPC client](/api/automorph/RpcClient.html)
 * [RPC server](/api/automorph/RpcServer.html)
