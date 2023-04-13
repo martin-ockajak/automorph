@@ -55,7 +55,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
 ) extends Logging with EndpointTransport[Effect, Context, Route] {
 
   private lazy val contentType = ContentType.parse(handler.mediaType).swap.map { errors =>
-    new IllegalStateException(s"Invalid message content type: ${errors.map(_.toString).mkString("\n")}")
+    new IllegalStateException(s"Invalid message content type: ${errors.mkString("\n")}")
   }.swap.toTry.get
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
