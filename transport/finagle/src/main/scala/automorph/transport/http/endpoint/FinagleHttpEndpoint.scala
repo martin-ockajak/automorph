@@ -10,6 +10,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
+import Array.emptyByteArray
 import scala.collection.immutable.ListMap
 import scala.util.Try
 
@@ -66,7 +67,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
           result => {
             // Send the response
             val responseBody = Reader.fromBuf(
-              Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(Array()))
+              Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(emptyByteArray))
             )
             val status = result.flatMap(_.exception).map(mapException).map(Status.apply).getOrElse(Status.Ok)
             createResponse(responseBody, status, result.flatMap(_.context), request, requestId)

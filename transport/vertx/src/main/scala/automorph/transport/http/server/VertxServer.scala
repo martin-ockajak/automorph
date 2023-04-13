@@ -71,7 +71,8 @@ final case class VertxServer[Effect[_]](
   override def withHandler(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
     copy(handler = handler)
 
-  override def init(): Effect[Unit] =
+  override def init(): Effect[Unit] = {
+    VertxServer.foo(1)
     effectSystem.evaluate(this.synchronized {
       val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
       (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
@@ -81,12 +82,15 @@ final case class VertxServer[Effect[_]](
         ))
       }
     })
+  }
 
-  override def close(): Effect[Unit] =
+  override def close(): Effect[Unit] = {
+    VertxServer.foo(-1)
     effectSystem.evaluate(this.synchronized {
       httpServer.close().toCompletionStage.toCompletableFuture.get
       ()
     })
+  }
 
   private def createServer(): HttpServer = {
     // HTTP
@@ -124,6 +128,14 @@ final case class VertxServer[Effect[_]](
 }
 
 case object VertxServer {
+
+  var count = 0
+
+  def foo( inc:Int): Unit = {
+    println( s"Vertex: incrementing count by $inc")
+    count = count + inc
+    println( s"Vertex: count = $count")
+  }
 
   /** Request context type. */
   type Context = VertxHttpEndpoint.Context
