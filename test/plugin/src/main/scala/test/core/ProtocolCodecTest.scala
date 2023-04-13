@@ -72,8 +72,12 @@ trait ProtocolCodecTest extends CoreTest {
   }
 
   override def afterAll(): Unit = {
-    fixtures.map(_.genericClient.close()).map(run)
-    fixtures.map(_.genericServer.close()).map(run)
+    fixtures.foreach { fixture =>
+      run(fixture.genericClient.close())
+    }
+    fixtures.foreach { fixture =>
+      run(fixture.genericServer.close())
+    }
     super.afterAll()
   }
 
