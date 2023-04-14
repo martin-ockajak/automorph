@@ -204,8 +204,12 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
   ): Effect[R] =
     // Parse response
     rpcProtocol.parseResponse(responseBody, responseContext).fold(
-      error => raiseError[R](error.exception, requestProperties),
+      error => {
+        responseBody.close()
+        raiseError[R](error.exception, requestProperties)
+      },
       rpcResponse => {
+        responseBody.close()
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} response", allProperties)
@@ -223,7 +227,7 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
             ),
         )
       },
-    ).andThen(_ => responseBody.close())
+    )
 
   /**
    * Creates an error effect from an exception.

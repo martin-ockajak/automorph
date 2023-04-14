@@ -57,21 +57,24 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
   override def processRequest(requestBody: InputStream, context: Context, id: String): Effect[Option[Result[Context]]] =
     // Parse request
     rpcProtocol.parseRequest(requestBody, context, id).fold(
-      error =>
+      error => {
+        requestBody.close();
         errorResponse(
           error.exception,
           error.message,
           responseRequired = true,
           ListMap(LogProperties.requestId -> id),
-        ),
+        )
+      },
       rpcRequest => {
         // Invoke requested RPC function
+        requestBody.close();
         lazy val requestProperties = ListMap(LogProperties.requestId -> id) ++ rpcRequest.message.properties
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)
         callFunction(rpcRequest, context, requestProperties)
       },
-    ).andThen(_ => requestBody.close())
+    )
 
   override def discovery(discovery: Boolean): RequestHandler[Effect, Context] =
     copy(discovery = discovery)
