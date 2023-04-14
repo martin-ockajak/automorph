@@ -62,12 +62,12 @@ final case class VertxHttpEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.bodyHandler { buffer =>
+      // Process the request
       Try {
         val requestBody = buffer.getBytes.toInputStream
         log.receivedRequest(requestProperties)
-
-        // Process the request
-        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+        val response = handler.processRequest(requestBody, getRequestContext(request), requestId)
+        response.either.map(
           _.fold(
             error => sendErrorResponse(error, request, requestId, requestProperties),
             result => {

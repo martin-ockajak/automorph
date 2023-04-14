@@ -45,7 +45,8 @@ final case class RapidoidHttpEndpoint[Effect[_]](
 
     // Process the request
     val requestBody = request.body.toInputStream
-    genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+    val response = genericHandler.processRequest(requestBody, getRequestContext(request), requestId)
+    response.either.map(
       _.fold(
         error => sendErrorResponse(error, request, requestId, requestProperties),
         result => {

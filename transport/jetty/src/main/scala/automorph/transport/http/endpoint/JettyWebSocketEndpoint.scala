@@ -78,16 +78,19 @@ final case class JettyWebSocketEndpoint[Effect[_]](
     log.receivedRequest(requestProperties)
 
     // Process the request
-    Try(handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId).either.map(
-      _.fold(
-        error => sendErrorResponse(error, session, requestId, requestProperties),
-        result => {
-          // Send the response
-          val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
-          sendResponse(responseBody, session, requestId)
-        },
-      )
-    ).runAsync).failed.foreach { error =>
+    Try {
+      val response = handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId)
+      response.either.map(
+        _.fold(
+          error => sendErrorResponse(error, session, requestId, requestProperties),
+          result => {
+            // Send the response
+            val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+            sendResponse(responseBody, session, requestId)
+          },
+        )
+      ).runAsync
+    }.failed.foreach { error =>
       sendErrorResponse(error, session, requestId, requestProperties)
     }
   }

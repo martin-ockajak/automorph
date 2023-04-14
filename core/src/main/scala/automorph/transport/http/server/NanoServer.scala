@@ -179,7 +179,8 @@ final case class NanoServer[Effect[_]] (
 
     // Process the request
     Try {
-      handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+      val response = handler.processRequest(requestBody, getRequestContext(session), requestId)
+      response.either.map(
         _.fold(
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {

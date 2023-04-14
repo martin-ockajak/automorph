@@ -120,7 +120,8 @@ final case class SttpClient[Effect[_]] private (
     log.sendingRequest(requestProperties, protocol.name)
 
     // Send the request
-    sttpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSockets]]).either.flatMap(
+    val response = sttpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSockets]])
+    response.either.flatMap(
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)

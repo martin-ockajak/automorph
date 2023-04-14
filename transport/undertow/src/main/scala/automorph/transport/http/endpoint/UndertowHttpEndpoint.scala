@@ -69,7 +69,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
             // Process the request
             Try {
               val requestBody = message.toInputStream
-              handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+              val response = handler.processRequest(requestBody, getRequestContext(exchange), requestId)
+              response.either.map(
                 _.fold(
                   error => sendErrorResponse(error, exchange, requestId, requestProperties),
                   result => {
@@ -92,7 +93,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
         }
       }
     }
-    Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
+    Try(
+      exchange.getRequestReceiver.receiveFullBytes(receiveCallback)
+    ).recover { case error =>
       sendErrorResponse(error, exchange, requestId, requestProperties)
     }.get
   }

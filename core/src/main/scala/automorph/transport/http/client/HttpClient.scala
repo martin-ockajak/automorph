@@ -135,16 +135,18 @@ final case class HttpClient[Effect[_]](
       { case (webSocketEffect, resultEffect, requestBody) =>
         sendWebSocket(webSocketEffect, resultEffect, requestBody)
       },
-    ).either.flatMap(_.fold(
-      error => {
-        log.failedSendRequest(error, requestProperties, protocol.name)
-        effectSystem.failed(error)
-      },
-      response => {
-        log.sentRequest(requestProperties, protocol.name)
-        effectSystem.successful(response)
-      },
-    ))
+    ).either.flatMap(
+      _.fold(
+        error => {
+          log.failedSendRequest(error, requestProperties, protocol.name)
+          effectSystem.failed(error)
+        },
+        response => {
+          log.sentRequest(requestProperties, protocol.name)
+          effectSystem.successful(response)
+        },
+      )
+    )
   }
 
   private def sendHttp(httpRequest: HttpRequest): Effect[Response] =

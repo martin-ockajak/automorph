@@ -57,12 +57,12 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(session, requestId)
     log.receivingRequest(requestProperties)
     session.binaryMessageHandler { buffer =>
+      // Process the request
       Try {
         val requestBody = buffer.getBytes.toInputStream
         log.receivedRequest(requestProperties)
-
-        // Process the request
-        handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+        val response = handler.processRequest(requestBody, getRequestContext(session), requestId)
+        response.either.map(
           _.fold(
             error => sendErrorResponse(error, session, requestId, requestProperties),
             result => {

@@ -75,7 +75,8 @@ final case class TapirHttpEndpoint[Effect[_]](
           // Process the request
           Try {
             val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-            handler.processRequest(requestBody.toInputStream, requestContext, requestId).either.map(
+            val response = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
+            response.either.map(
               _.fold(
                 error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
                 result => {

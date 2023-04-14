@@ -111,7 +111,8 @@ case object UndertowWebSocketEndpoint {
 
       // Process the request
       Try {
-        handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+        val response = handler.processRequest(requestBody, getRequestContext(exchange), requestId)
+        response.either.map(
           _.fold(
             error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
             result => {

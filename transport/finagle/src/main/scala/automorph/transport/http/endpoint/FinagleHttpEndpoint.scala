@@ -61,19 +61,22 @@ final case class FinagleHttpEndpoint[Effect[_]](
     // Process the request
     Try {
       val requestBody = Buf.ByteArray.Owned.extract(request.content).toInputStream
-      runAsFuture(handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-        _.fold(
-          error => createErrorResponse(error, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = Reader.fromBuf(
-              Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(emptyByteArray))
-            )
-            val status = result.flatMap(_.exception).map(mapException).map(Status.apply).getOrElse(Status.Ok)
-            createResponse(responseBody, status, result.flatMap(_.context), request, requestId)
-          },
+      runAsFuture{
+        val response = handler.processRequest(requestBody, getRequestContext(request), requestId)
+        response.either.map(
+          _.fold(
+            error => createErrorResponse(error, request, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = Reader.fromBuf(
+                Buf.ByteArray.Owned(result.map(_.responseBody.toArray).getOrElse(emptyByteArray))
+              )
+              val status = result.flatMap(_.exception).map(mapException).map(Status.apply).getOrElse(Status.Ok)
+              createResponse(responseBody, status, result.flatMap(_.context), request, requestId)
+            },
+          )
         )
-      ))
+      }
     }.foldError { error =>
       Future(createErrorResponse(error, request, requestId, requestProperties))
     }

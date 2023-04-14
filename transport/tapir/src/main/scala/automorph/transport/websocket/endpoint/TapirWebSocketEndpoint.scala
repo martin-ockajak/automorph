@@ -74,7 +74,8 @@ final case class TapirWebSocketEndpoint[Effect[_]](
         // Process the request
         system.successful(Right { requestBody =>
           val requestContext = getRequestContext(paths, queryParams, headers, None)
-          handler.processRequest(requestBody.toInputStream, requestContext, requestId).either.map(
+          val response = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
+          response.either.map(
             _.fold(
               error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
               result => {

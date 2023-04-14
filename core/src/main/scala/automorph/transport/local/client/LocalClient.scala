@@ -36,10 +36,14 @@ final case class LocalClient[Effect[_]](
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)] =
-    handler.processRequest(requestBody, requestContext, requestId).flatMap(_.map { result =>
-      effectSystem.successful(result.responseBody -> result.context.getOrElse(context))
-    }.getOrElse(effectSystem.failed(InvalidResponse("Missing call response", None.orNull))))
+  ): Effect[(InputStream, Context)] = {
+    val response = handler.processRequest(requestBody, requestContext, requestId)
+    response.flatMap(
+      _.map { result =>
+        effectSystem.successful(result.responseBody -> result.context.getOrElse(context))
+      }.getOrElse(effectSystem.failed(InvalidResponse("Missing call response", None.orNull)))
+    )
+  }
 
   override def tell(
     requestBody: InputStream,
