@@ -16,10 +16,9 @@ import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, Stri
 import automorph.util.{Network, Random}
 import java.io.InputStream
 import java.io.InputStream.nullInputStream
-import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{FiniteDuration, DurationInt}
 import scala.util.Try
 
 /**
@@ -50,7 +49,7 @@ import scala.util.Try
 final case class AkkaHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  readTimeout: FiniteDuration = 30.seconds,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with EndpointTransport[Effect, Context, Route] {
 

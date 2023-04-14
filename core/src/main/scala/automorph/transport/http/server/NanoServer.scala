@@ -13,9 +13,9 @@ import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
 import java.io.InputStream.nullInputStream
 import java.net.URI
-import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
+import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue}
 import scala.collection.immutable.ListMap
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{FiniteDuration, DurationInt}
 import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.util.Try
 
@@ -60,7 +60,7 @@ final case class NanoServer[Effect[_]] (
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  readTimeout: FiniteDuration = 30.seconds,
   threads: Int = Runtime.getRuntime.availableProcessors * 2,
 ) extends NanoWSD(port, threads) with Logging with ServerTransport[Effect, Context] {
 

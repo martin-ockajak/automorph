@@ -13,9 +13,8 @@ import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import com.typesafe.config.{Config, ConfigFactory}
-import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.{Duration, FiniteDuration, DurationInt}
 import scala.concurrent.Await
 
 /**
@@ -61,7 +60,7 @@ final case class AkkaServer[Effect[_]](
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  readTimeout: FiniteDuration = 30.seconds,
   serverSettings: ServerSettings = ServerSettings(""),
   config: Config = ConfigFactory.empty(),
   guardianProps: Props = Props.empty,
