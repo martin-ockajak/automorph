@@ -161,12 +161,12 @@ final case class SttpClient[Effect[_]] private (
         sttpRequest.response(asWebSocketAlways(sendWebSocket(requestBody)))
       case _ =>
         // Create HTTP request
-        sttpRequest.body(requestBody.toArray).response(asByteArrayAlways)
+        sttpRequest.body(requestBody.toArrayClose).response(asByteArrayAlways)
     }
   }
 
   private def sendWebSocket(request: InputStream): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
-    webSocket => webSocket.sendBinary(request.toArray).flatMap(_ => webSocket.receiveBinary(true))
+    webSocket => webSocket.sendBinary(request.toArrayClose).flatMap(_ => webSocket.receiveBinary(true))
 
   private def getResponseContext(response: Response[Array[Byte]]): Context =
     context.statusCode(response.code.code).headers(response.headers.map { header =>

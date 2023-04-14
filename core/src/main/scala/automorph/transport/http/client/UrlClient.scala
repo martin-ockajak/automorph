@@ -94,7 +94,7 @@ final case class UrlClient[Effect[_]](
   ): Effect[HttpURLConnection] =
     effectSystem.evaluate {
       // Create the request
-      val requestBody = request.toArray
+      val requestBody = request.toArrayClose
       val connection = createConnection(requestContext)
       val httpMethod = setConnectionProperties(connection, requestBody, mediaType, requestContext)
 

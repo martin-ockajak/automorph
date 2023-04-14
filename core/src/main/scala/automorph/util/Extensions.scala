@@ -63,7 +63,7 @@ private[automorph] case object Extensions {
 
   implicit class ByteBufferOps(data: ByteBuffer) {
 
-    /** Converts this byte buffer array to byte array. */
+    /** Converts this byte buffer to byte array. */
     def toArray: Array[Byte] =
       if (data.hasArray) { data.array }
       else {
@@ -72,7 +72,7 @@ private[automorph] case object Extensions {
         array
       }
 
-    /** Converts this byte buffer array to input stream. */
+    /** Converts this byte buffer to input stream. */
     def toInputStream: InputStream =
       if (data.hasArray) { data.array.toInputStream }
       else {
@@ -87,29 +87,36 @@ private[automorph] case object Extensions {
     /** Input stream reading buffer size. */
     private val bufferSize = 4096
 
-    /** Converts this input stream array to byte array. */
+    /** Converts this input stream to byte array. */
     def asArray(length: Int): Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
         case _ => toByteArray(Some(length))
       }
 
-    /** Converts this input stream array to byte buffer. */
+    /** Converts this input stream to byte buffer. */
     def toByteBuffer: ByteBuffer =
       ByteBuffer.wrap(data.toArray)
 
-    /** Converts this input stream array to string. */
+    /** Converts this input stream to byte buffer and close it. */
+    def toByteBufferClose: ByteBuffer = {
+      val result = data.toByteBuffer
+      data.close()
+      result
+    }
+
+    /** Converts this input stream to string. */
     def asString: String =
       data.toArray.asString
 
-    /** Converts this input stream array to byte array. */
+    /** Converts this input stream to byte array. */
     def toArray: Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => arrayInputStream.data
         case _ => toByteArray(None)
       }
 
-    /** Converts this input stream array to byte array and close it. */
+    /** Converts this input stream to byte array and close it. */
     def toArrayClose: Array[Byte] = {
       val result = data.toArray
       data.close()
@@ -133,11 +140,11 @@ private[automorph] case object Extensions {
 
   implicit class StringOps(data: String) {
 
-    /** Converts this input stream array to byte array. */
+    /** Converts this string to byte array. */
     def asArray: Array[Byte] =
       data.getBytes(charset)
 
-    /** Converts this input stream array to input stream. */
+    /** Converts this string to input stream. */
     def toInputStream: InputStream =
       ArrayInputStream(data.getBytes(charset))
   }

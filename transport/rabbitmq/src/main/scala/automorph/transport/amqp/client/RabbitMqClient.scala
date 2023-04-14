@@ -124,7 +124,7 @@ final case class RabbitMqClient[Effect[_]](
     // Send the request
     effectSystem.evaluate {
       Try {
-        val message = requestBody.toArray
+        val message = requestBody.toArrayClose
         session.get.consumer.get.getChannel.basicPublish(
           exchange,
           routingKey,

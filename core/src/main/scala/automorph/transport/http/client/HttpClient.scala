@@ -164,10 +164,10 @@ final case class HttpClient[Effect[_]](
     resultEffect: Effect[(InputStream, Option[Int], Seq[(String, String)])],
     requestBody: InputStream,
   ): Effect[Response] =
-    withCompletable(completableSystem =>
-      webSocketEffect.flatMap(webSocket =>
-        effect(webSocket.sendBinary(requestBody.toByteBuffer, true), completableSystem).flatMap(_ => resultEffect)
-      )
+    withCompletable(asyncSystem =>
+      webSocketEffect.flatMap { webSocket =>
+        effect(webSocket.sendBinary(requestBody.toByteBufferClose, true), asyncSystem).flatMap(_ => resultEffect)
+      }
     )
 
   private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
@@ -248,7 +248,7 @@ final case class HttpClient[Effect[_]](
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val methodBuilder = requestBuilder.uri(requestUrl)
-      .method(requestMethod, BodyPublishers.ofByteArray(requestBody.toArray))
+      .method(requestMethod, BodyPublishers.ofByteArray(requestBody.toArrayClose))
 
     // Headers
     val headers = httpContext.headers.flatMap { case (name, value) => Seq(name, value) }

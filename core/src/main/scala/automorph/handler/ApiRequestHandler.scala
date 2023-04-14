@@ -54,9 +54,9 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     binding.function.copy(name = name)
   }.toSeq
 
-  override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[Result[Context]]] =
+  override def processRequest(requestBody: InputStream, context: Context, id: String): Effect[Option[Result[Context]]] =
     // Parse request
-    rpcProtocol.parseRequest(body, context, id).fold(
+    rpcProtocol.parseRequest(requestBody, context, id).fold(
       error =>
         errorResponse(
           error.exception,
@@ -71,7 +71,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)
         callFunction(rpcRequest, context, requestProperties)
       },
-    ).andThen(_ => body.close())
+    ).andThen(_ => requestBody.close())
 
   override def discovery(discovery: Boolean): RequestHandler[Effect, Context] =
     copy(discovery = discovery)
