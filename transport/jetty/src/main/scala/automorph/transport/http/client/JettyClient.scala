@@ -106,6 +106,8 @@ final case class JettyClient[Effect[_]](
     effectSystem.evaluate(this.synchronized {
       if (!httpClient.isStarted) {
         httpClient.start()
+      } else {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already initialized")
       }
       webSocketClient.start()
     })
