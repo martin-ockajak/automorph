@@ -204,18 +204,18 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
   ): Effect[R] =
     // Parse response
     rpcProtocol.parseResponse(responseBody, responseContext).fold(
-      error => raiseError(error.exception, requestProperties),
+      error => raiseError[R](error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} response", allProperties)
         rpcResponse.result.fold(
           // Raise error
-          error => raiseError(error, requestProperties),
+          error => raiseError[R](error, requestProperties),
           // Decode result
           result =>
             Try(decodeResult(result, responseContext)).fold(
-              error => raiseError(InvalidResponse("Malformed result", error), requestProperties),
+              error => raiseError[R](InvalidResponse("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${rpcProtocol.name} request", requestProperties)
                 system.successful(result)

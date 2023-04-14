@@ -206,6 +206,22 @@ private[automorph] case object Extensions {
       system.flatMap(effect)(function)
 
     /**
+     * Creates a new effect with the same value and apply a function to an effect's value.
+     *
+     * @param function
+     *   function applied to the specified effect's value
+     * @tparam R
+     *   function result type
+     * @return
+     *   original effectful value
+     */
+    def andThen(function: T => Unit)(implicit system: EffectSystem[Effect]): Effect[T] =
+      system.map(effect) { value =>
+        function(value)
+        value
+      }
+
+    /**
      * Executes an effect asynchronously without blocking and discard the result.
      *
      * @return
