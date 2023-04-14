@@ -64,8 +64,8 @@ final case class JettyHttpEndpoint[Effect[_]](
 
       // Process the request
       Try {
-        val processResponse = handler.processRequest(requestBody, getRequestContext(request), requestId)
-        processResponse.either.map(
+        val handlerResult = handler.processRequest(requestBody, getRequestContext(request), requestId)
+        handlerResult.either.map(
           _.fold(
             error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
             result => {
@@ -124,6 +124,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       outputStream.flush()
       asyncContext.complete()
       log.sentResponse(responseProperties)
+      responseBody.close()
     }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 

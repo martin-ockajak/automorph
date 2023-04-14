@@ -109,6 +109,13 @@ private[automorph] case object Extensions {
         case _ => toByteArray(None)
       }
 
+    /** Converts this input stream array to byte array and close it. */
+    def toArrayClose: Array[Byte] = {
+      val result = data.toArray
+      data.close()
+      result
+    }
+
     private def toByteArray(length: Option[Int]): Array[Byte] = {
       val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
       val buffer = Array.ofDim[Byte](bufferSize)

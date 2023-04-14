@@ -61,8 +61,8 @@ final case class VertxWebSocketEndpoint[Effect[_]](
       Try {
         val requestBody = buffer.getBytes.toInputStream
         log.receivedRequest(requestProperties)
-        val response = handler.processRequest(requestBody, getRequestContext(session), requestId)
-        response.either.map(
+        val handlerResult = handler.processRequest(requestBody, getRequestContext(session), requestId)
+        handlerResult.either.map(
           _.fold(
             error => sendErrorResponse(error, session, requestId, requestProperties),
             result => {
@@ -96,7 +96,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     log.sendingResponse(responseProperties)
 
     // Send the response
-    session.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
+    session.writeBinaryMessage(Buffer.buffer(responseBody.toArrayClose)).onSuccess { _ =>
       log.sentResponse(responseProperties)
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)

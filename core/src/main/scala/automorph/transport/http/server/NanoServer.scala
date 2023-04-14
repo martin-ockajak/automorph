@@ -179,17 +179,15 @@ final case class NanoServer[Effect[_]] (
 
     // Process the request
     Try {
-      val response = handler.processRequest(requestBody, getRequestContext(session), requestId)
-      response.either.map(
+      val handlerResult = handler.processRequest(requestBody, getRequestContext(session), requestId)
+      handlerResult.either.map(
         _.fold(
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
             val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
             val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
-            val response = createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
-            responseBody.close()
-            response
+            createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
           },
         )
       )
@@ -228,7 +226,7 @@ final case class NanoServer[Effect[_]] (
     log.sendingResponse(responseProperties, protocol.name)
 
     // Create the response
-    val responseData = responseBody.toArray
+    val responseData = responseBody.toArrayClose
     val response = newFixedLengthResponse(
       responseStatus,
       handler.mediaType,

@@ -66,8 +66,8 @@ final case class VertxHttpEndpoint[Effect[_]](
       Try {
         val requestBody = buffer.getBytes.toInputStream
         log.receivedRequest(requestProperties)
-        val response = handler.processRequest(requestBody, getRequestContext(request), requestId)
-        response.either.map(
+        val handlerResult = handler.processRequest(requestBody, getRequestContext(request), requestId)
+        handlerResult.either.map(
           _.fold(
             error => sendErrorResponse(error, request, requestId, requestProperties),
             result => {
@@ -115,7 +115,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     // Send the response
     setResponseContext(request.response, responseContext)
       .putHeader(HttpHeaders.CONTENT_TYPE, handler.mediaType).setStatusCode(statusCode)
-      .end(Buffer.buffer(responseBody.toArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
+      .end(Buffer.buffer(responseBody.toArrayClose)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
         error => log.failedSendResponse(error, responseProperties)
       }
     ()

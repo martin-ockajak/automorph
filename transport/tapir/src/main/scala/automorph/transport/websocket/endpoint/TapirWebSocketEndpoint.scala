@@ -2,13 +2,13 @@ package automorph.transport.websocket.endpoint
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
-import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
-}
+import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties, pathEndpointInput}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint.{Context, EffectStreams, Request}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.Random
+import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.Array.emptyByteArray
 import sttp.capabilities.{Streams, WebSockets}
@@ -74,13 +74,13 @@ final case class TapirWebSocketEndpoint[Effect[_]](
         // Process the request
         system.successful(Right { requestBody =>
           val requestContext = getRequestContext(paths, queryParams, headers, None)
-          val response = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
-          response.either.map(
+          val handlerResult = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
+          handlerResult.either.map(
             _.fold(
               error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
               result => {
                 // Create the response
-                val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
+                val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
                 createResponse(responseBody, clientIp, requestId, log)
               },
             )
@@ -100,12 +100,12 @@ final case class TapirWebSocketEndpoint[Effect[_]](
     log: MessageLog,
   ): Array[Byte] = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.asArray
+    val message = error.description.toInputStream
     createResponse(message, clientIp, requestId, log)
   }
 
   private def createResponse(
-    responseBody: Array[Byte],
+    responseBody: InputStream,
     clientIp: Option[String],
     requestId: String,
     log: MessageLog,
@@ -113,7 +113,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
     // Log the response
     lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(clientIp))
     log.sendingResponse(responseProperties)
-    responseBody
+    responseBody.toArrayClose
   }
 }
 

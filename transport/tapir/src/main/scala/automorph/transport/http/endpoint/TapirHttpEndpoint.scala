@@ -8,9 +8,10 @@ import automorph.transport.http.endpoint.TapirHttpEndpoint.{
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.Random
+import java.io.InputStream
+import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.util.Try
-import scala.Array.emptyByteArray
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{
@@ -75,13 +76,13 @@ final case class TapirHttpEndpoint[Effect[_]](
           // Process the request
           Try {
             val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-            val response = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
-            response.either.map(
+            val handlerResult = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
+            handlerResult.either.map(
               _.fold(
                 error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
                 result => {
                   // Create the response
-                  val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
+                  val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
                   val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
                     .getOrElse(StatusCode.Ok)
                   createResponse(responseBody, status, clientIp, requestId, log)
@@ -107,13 +108,13 @@ final case class TapirHttpEndpoint[Effect[_]](
     log: MessageLog,
   ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.asArray
+    val message = error.description.toInputStream
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }
 
   private def createResponse(
-    responseBody: Array[Byte],
+    responseBody: InputStream,
     status: StatusCode,
     clientIp: Option[String],
     requestId: String,
@@ -126,7 +127,7 @@ final case class TapirHttpEndpoint[Effect[_]](
       "Status" -> statusCode.toString,
     )
     log.sendingResponse(responseProperties)
-    (responseBody, status)
+    (responseBody.toArrayClose, status)
   }
 }
 

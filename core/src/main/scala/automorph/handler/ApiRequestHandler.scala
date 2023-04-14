@@ -71,7 +71,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)
         callFunction(rpcRequest, context, requestProperties)
       },
-    )
+    ).andThen(_ => body.close())
 
   override def discovery(discovery: Boolean): RequestHandler[Effect, Context] =
     copy(discovery = discovery)

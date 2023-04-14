@@ -79,8 +79,8 @@ final case class JettyWebSocketEndpoint[Effect[_]](
 
     // Process the request
     Try {
-      val response = handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId)
-      response.either.map(
+      val handlerResult = handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId)
+      handlerResult.either.map(
         _.fold(
           error => sendErrorResponse(error, session, requestId, requestProperties),
           result => {
@@ -116,6 +116,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
 
     // Send the response
     session.getRemote.sendBytes(responseBody.toByteBuffer, ResponseCallback(log, responseProperties))
+    responseBody.close()
   }
 
   private def getRequestContext(request: UpgradeRequest): Context = {
