@@ -223,7 +223,7 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
             ),
         )
       },
-    )
+    ).andThen(_ => responseBody.close())
 
   /**
    * Creates an error effect from an exception.
