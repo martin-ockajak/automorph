@@ -111,7 +111,7 @@ final case class RabbitMqServer[Effect[_]](
                   error => sendErrorResponse(error, replyTo, requestProperties, actualRequestId),
                   result => {
                     // Send the response
-                    val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+                    val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
                     sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
                   }
                 )

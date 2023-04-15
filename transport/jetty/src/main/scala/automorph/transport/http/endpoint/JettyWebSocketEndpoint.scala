@@ -84,7 +84,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
           error => sendErrorResponse(error, session, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+            val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
             sendResponse(responseBody, session, requestId)
           },
         )

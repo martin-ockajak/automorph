@@ -116,7 +116,7 @@ case object UndertowWebSocketEndpoint {
             error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
               sendResponse(responseBody, exchange, channel, requestId)
               discardMessage()
             },

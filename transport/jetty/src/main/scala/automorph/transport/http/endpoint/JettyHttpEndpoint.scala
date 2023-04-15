@@ -70,7 +70,7 @@ final case class JettyHttpEndpoint[Effect[_]](
             error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
               val status = result.flatMap(_.exception).map(mapException).getOrElse(HttpStatus.OK_200)
               sendResponse(responseBody, status, result.flatMap(_.context), response, asyncContext, request, requestId)
             },

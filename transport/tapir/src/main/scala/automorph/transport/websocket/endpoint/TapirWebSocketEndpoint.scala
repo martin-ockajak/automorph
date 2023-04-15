@@ -80,7 +80,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
               error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
               result => {
                 // Create the response
-                val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+                val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
                 createResponse(responseBody, clientIp, requestId, log)
               },
             )

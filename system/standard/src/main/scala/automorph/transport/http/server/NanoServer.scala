@@ -189,7 +189,7 @@ final case class NanoServer[Effect[_]] (
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+            val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
             val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
             createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
           },

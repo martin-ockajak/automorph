@@ -105,7 +105,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
-              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
               val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
                 .getOrElse(StatusCodes.OK)
               createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
