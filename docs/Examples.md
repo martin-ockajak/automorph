@@ -434,6 +434,13 @@ val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
 **Client**
 
 ```scala
+// Define client view of the remote API
+trait ClientApi {
+  def hello(some: String, n: Int): String
+
+  def hi(some: String, n: Int): String
+}
+
 // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
