@@ -18,7 +18,9 @@ trait Network {
   def availablePort(range: Range, excluded: Set[Int]): Int =
     range.filterNot(excluded.contains).find { port =>
       Try(new ServerSocket(port)).map(_.close()).isSuccess
-    }.getOrElse(throw new IllegalStateException("No ports available"))
+    }.getOrElse {
+      throw new IllegalStateException("No ports available")
+    }
 
   /**
    * Determine random available network port.
