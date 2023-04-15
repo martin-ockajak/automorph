@@ -5,8 +5,8 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.JettyClient.{Context, Message, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
-import java.io.InputStream
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, ByteBufferOps}
+import java.nio.ByteBuffer
 import java.net.URI
 import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
@@ -54,7 +54,7 @@ final case class JettyClient[Effect[_]](
   httpClient: HttpClient = defaultClient,
 ) extends ClientTransport[Effect, Context] with Logging {
 
-  private type Response = (InputStream, Option[Int], Seq[(String, String)])
+  private type Response = (ByteBuffer, Option[Int], Seq[(String, String)])
 
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
@@ -62,11 +62,11 @@ final case class JettyClient[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)] =
+  ): Effect[(ByteBuffer, Context)] =
     // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
@@ -89,7 +89,7 @@ final case class JettyClient[Effect[_]](
     }
 
   override def tell(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -119,7 +119,7 @@ final case class JettyClient[Effect[_]](
     })
 
   private def send(
-    request: Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)],
+    request: Either[Request, (Effect[websocket.api.Session], Effect[Response], ByteBuffer)],
     requestUrl: URI,
     requestId: String,
     protocol: Protocol,
@@ -154,7 +154,7 @@ final case class JettyClient[Effect[_]](
             completableSystem.completable[Unit].flatMap { completableRequestSent =>
               webSocketEffect.flatMap { webSocket =>
                 webSocket.getRemote.sendBytes(
-                  requestBody.toByteBuffer,
+                  requestBody,
                   new WriteCallback {
                     override def writeSuccess(): Unit =
                       completableRequestSent.succeed {}.runAsync
@@ -197,7 +197,7 @@ final case class JettyClient[Effect[_]](
 
   private def httpResponse(response: api.Response, responseBody: Array[Byte]): Response = {
     val headers = response.getHeaders.asScala.map(field => field.getName -> field.getValue).toSeq
-    (responseBody.toInputStream, Some(response.getStatus), headers)
+    (responseBody.toByteBuffer, Some(response.getStatus), headers)
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
@@ -211,10 +211,10 @@ final case class JettyClient[Effect[_]](
     }
 
   private def createRequest(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     mediaType: String,
     requestContext: Context,
-  ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)], URI)] = {
+  ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], ByteBuffer)], URI)] = {
     val requestUrl = requestContext
       .overrideUrl(requestContext.transportContext.map(transport => transport.request.getURI).getOrElse(url))
     requestUrl.getScheme.toLowerCase match {
@@ -239,7 +239,7 @@ final case class JettyClient[Effect[_]](
   }
 
   private def createHttpRequest(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestUrl: URI,
     mediaType: String,
     httpContext: Context,
@@ -282,7 +282,7 @@ final case class JettyClient[Effect[_]](
 
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
         val message = util.Arrays.copyOfRange(payload, offset, offset + length)
-        val responseBody = message.toInputStream
+        val responseBody = message.toByteBuffer
         response.succeed((responseBody, None, Seq())).runAsync
       }
 

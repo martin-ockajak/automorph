@@ -96,46 +96,46 @@ lazy val meta = source(project, "meta").settings(
     "org.slf4j" % "slf4j-api" % slf4jVersion
   )
 )
-lazy val core = source(project, "core", meta, testCodec % Test)
+lazy val core = source(project, "core", meta, testPlugin % Test)
 
 // Effect system
-lazy val standard = source(project, "system/standard", core, testBase % Test)
-lazy val zio = source(project, "system/zio", core, testPlugin % Test).settings(
+lazy val standard = source(project, "system/standard", core, testPlugin % Test, testRpc % Test)
+lazy val zio = source(project, "system/zio", core, testTransport % Test).settings(
   libraryDependencies += "dev.zio" %% "zio" % "2.0.10"
 )
-lazy val monix = source(project, "system/monix", core, testPlugin % Test).settings(
+lazy val monix = source(project, "system/monix", core, testTransport % Test).settings(
   libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1"
 )
-lazy val catsEffect = source(project, "system/cats-effect", core, testPlugin % Test).settings(
+lazy val catsEffect = source(project, "system/cats-effect", core, testTransport % Test).settings(
   libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8"
 )
-lazy val scalazEffect = source(project, "system/scalaz-effect", core, testPlugin % Test).settings(
+lazy val scalazEffect = source(project, "system/scalaz-effect", core, testTransport % Test).settings(
   libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13"
 )
 
 // Message codec
 val circeVersion = "0.14.5"
-lazy val circe = source(project, s"codec/circe", core, testCodec % Test).settings(
+lazy val circe = source(project, s"codec/circe", core, testPlugin % Test).settings(
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion
   )
 )
 val jacksonVersion = "2.14.2"
-lazy val jackson = source(project, "codec/jackson", core, testCodec % Test).settings(
+lazy val jackson = source(project, "codec/jackson", core, testPlugin % Test).settings(
   libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
-lazy val upickle = source(project, "codec/upickle", core, testCodec % Test).settings(
+lazy val upickle = source(project, "codec/upickle", core, testPlugin % Test).settings(
   libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0"
 )
-lazy val argonaut = source(project, "codec/argonaut", core, testCodec % Test).settings(
+lazy val argonaut = source(project, "codec/argonaut", core, testPlugin % Test).settings(
   libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.8"
 )
 
 // Client transport
 val sttpVersion = "3.8.13"
 val sttpHttpClientVersion = "3.5.2"
-lazy val sttp = source(project, "transport/sttp", core, testPlugin % Test).settings(
+lazy val sttp = source(project, "transport/sttp", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
@@ -143,7 +143,7 @@ lazy val sttp = source(project, "transport/sttp", core, testPlugin % Test).setti
   )
 )
 val embeddedRabbitMqVersion = "1.5.0"
-lazy val rabbitmq = source(project, "transport/rabbitmq", core, testPlugin % Test).settings(
+lazy val rabbitmq = source(project, "transport/rabbitmq", core, testTransport % Test).settings(
   Test / fork := true,
   Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
@@ -154,7 +154,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", core, testPlugin % Tes
 
 // Server transport
 val tapirVersion = "1.2.11"
-lazy val tapir = source(project, "transport/tapir", core, testPlugin % Test).settings(
+lazy val tapir = source(project, "transport/tapir", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
 //    ("com.softwaremill.sttp.tapir" %% "tapir-akka-http-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
@@ -171,14 +171,14 @@ lazy val tapir = source(project, "transport/tapir", core, testPlugin % Test).set
 //    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
-lazy val undertow = source(project, "transport/undertow", core, testPlugin % Test).settings(
+lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
   libraryDependencies += "io.undertow" % "undertow-core" % "2.3.4.Final"
 )
-lazy val vertx = source(project, "transport/vertx", core, testPlugin % Test).settings(
+lazy val vertx = source(project, "transport/vertx", core, testTransport % Test).settings(
   libraryDependencies += "io.vertx" % "vertx-core" % "4.4.0"
 )
 val jettyVersion = "11.0.14"
-lazy val jetty = source(project, "transport/jetty", core, testPlugin % Test).settings(
+lazy val jetty = source(project, "transport/jetty", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
@@ -186,7 +186,7 @@ lazy val jetty = source(project, "transport/jetty", core, testPlugin % Test).set
   )
 )
 val akkaVersion = "2.8.0"
-lazy val akkaHttp = source(project, "transport/akka-http", core, testPlugin % Test).settings(
+lazy val akkaHttp = source(project, "transport/akka-http", core, testTransport % Test).settings(
   Test / fork := true,
   Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
@@ -198,7 +198,7 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, testPlugin % Te
 )
 
 // Endpoint transport
-lazy val finagle = source(project, "transport/finagle", core, testPlugin % Test).settings(
+lazy val finagle = source(project, "transport/finagle", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "22.12.0")
       .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
@@ -209,12 +209,12 @@ lazy val finagle = source(project, "transport/finagle", core, testPlugin % Test)
 )
 
 // Miscellaneous
-lazy val default = project.dependsOn(core, circe, undertow, testPlugin % Test).settings(
+lazy val default = project.dependsOn(standard, circe, undertow, testTransport % Test).settings(
   name := s"$projectName-default",
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(
-  project, "examples", default, upickle, zio, sttp, rabbitmq, testCodec % Test
+  project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test
 ).settings(
   publish / skip := true,
   Test / fork := true,
@@ -242,10 +242,13 @@ lazy val testBase = source(project, "test/base").settings(
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
-lazy val testCodec = source(project, "test/codec", testBase, meta).settings(
+lazy val testRpc = source(project, "test/rpc", testBase, core, circe, jackson, upickle, argonaut)
+lazy val testPlugin = source(project, "test/plugin", testBase, meta).settings(
   libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
 )
-lazy val testPlugin = source(project, "test/plugin", testCodec, core, circe, jackson, upickle, argonaut)
+lazy val testTransport = source(
+  project, "test/transport", testRpc, standard,
+)
 
 
 // Compile

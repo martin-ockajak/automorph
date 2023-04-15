@@ -6,7 +6,7 @@ import automorph.transport.http.endpoint.TapirHttpEndpoint.{
   Context, Request, clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ByteBufferOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.Random
 import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
@@ -51,7 +51,7 @@ final case class TapirHttpEndpoint[Effect[_]](
 ) extends Logging with EndpointTransport[
   Effect,
   Context,
-  ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
+  ServerEndpoint.Full[Unit, Unit, Request, Unit, (ByteBuffer, StatusCode), Any, Effect]
 ] {
 
   private lazy val contentType = Header.contentType(MediaType.parse(handler.mediaType).getOrElse {
@@ -60,7 +60,7 @@ final case class TapirHttpEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
-  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (ByteBuffer, StatusCode), Any, Effect] = {
 
     // Define server endpoint
     val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
@@ -105,7 +105,7 @@ final case class TapirHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String],
     log: MessageLog,
-  ): (Array[Byte], StatusCode) = {
+  ): (ByteBuffer, StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
     val message = error.description.toByteBuffer
     val status = StatusCode.InternalServerError
@@ -118,7 +118,7 @@ final case class TapirHttpEndpoint[Effect[_]](
     clientIp: Option[String],
     requestId: String,
     log: MessageLog,
-  ): (Array[Byte], StatusCode) = {
+  ): (ByteBuffer, StatusCode) = {
     // Log the response
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
@@ -126,7 +126,7 @@ final case class TapirHttpEndpoint[Effect[_]](
       "Status" -> statusCode.toString,
     )
     log.sendingResponse(responseProperties)
-    (responseBody.toByteArray, status)
+    (responseBody, status)
   }
 }
 
@@ -136,7 +136,7 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type Request = (ByteBuffer, List[String], QueryParams, List[Header], Option[String])
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r

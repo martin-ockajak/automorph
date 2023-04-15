@@ -286,6 +286,7 @@ final case class HttpClient[Effect[_]](
             responseBody.put(buffer)
           }
           buffers.clear()
+          responseBody.flip()
           response.succeed((responseBody, None, Seq())).runAsync
         }
         super.onBinary(webSocket, data, last)

@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.{ConnectionListener, Context}
-import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
@@ -13,8 +13,7 @@ import io.undertow.websockets.core.{
 }
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
+import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Try
@@ -90,17 +89,17 @@ case object UndertowWebSocketEndpoint {
     private implicit val system: EffectSystem[Effect] = effectSystem
 
     override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit =
-      handle(exchange, message.getData.toInputStream, channel, () => ())
+      handle(exchange, message.getData.toByteBuffer, channel, () => ())
 
     override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
       val data = message.getData
-      val requestBody = WebSockets.mergeBuffers(data.getResource*).toInputStream
+      val requestBody = WebSockets.mergeBuffers(data.getResource*)
       handle(exchange, requestBody, channel, () => data.discard())
     }
 
     private def handle(
       exchange: WebSocketHttpExchange,
-      requestBody: InputStream,
+      requestBody: ByteBuffer,
       channel: WebSocketChannel,
       discardMessage: () => Unit,
     ): Unit = {
@@ -117,7 +116,7 @@ case object UndertowWebSocketEndpoint {
             error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
               sendResponse(responseBody, exchange, channel, requestId)
               discardMessage()
             },
@@ -136,12 +135,12 @@ case object UndertowWebSocketEndpoint {
       requestProperties: => Map[String, String],
     ): Unit = {
       log.failedProcessRequest(error, requestProperties)
-      val responseBody = error.description.toInputStream
+      val responseBody = error.description.toByteBuffer
       sendResponse(responseBody, exchange, channel, requestId)
     }
 
     private def sendResponse(
-      message: InputStream,
+      message: ByteBuffer,
       exchange: WebSocketHttpExchange,
       channel: WebSocketChannel,
       requestId: String,
@@ -154,7 +153,7 @@ case object UndertowWebSocketEndpoint {
       log.sendingResponse(responseProperties)
 
       // Send the response
-      WebSockets.sendBinary(message.toByteBuffer, channel, ResponseCallback(log, responseProperties), ())
+      WebSockets.sendBinary(message, channel, ResponseCallback(log, responseProperties), ())
     }
 
     private def getRequestContext(exchange: WebSocketHttpExchange): Context = {
