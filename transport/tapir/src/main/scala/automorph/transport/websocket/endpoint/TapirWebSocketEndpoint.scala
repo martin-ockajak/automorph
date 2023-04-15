@@ -10,7 +10,6 @@ import automorph.util.Random
 import java.io.InputStream
 import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
-import scala.Array.emptyByteArray
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
