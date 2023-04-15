@@ -34,7 +34,7 @@ class ServerApi {
   def hello(some: String, n: Int): String =
     s"Hello $some $n!"
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -103,7 +103,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST or PUT requests to '/api'
 val server = run(
@@ -173,7 +173,7 @@ class ServerApi {
   def hi(some: Option[String])(n: Int): String =
     s"Hi ${some.getOrElse("who" -> "all")} $n!"
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -272,7 +272,7 @@ class ServerApi {
   def hello(some: String, record: Record): Future[Record] =
     Future(record.copy(value = s"Hello $some!"))
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
@@ -336,7 +336,7 @@ class ServerApi {
   def hello(some: String, n: Int): String =
     s"Hello $some $n!"
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -417,7 +417,7 @@ class ServerApi {
   def hidden(): String =
     ""
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Customize exposed API to RPC function name mapping
 val mapName = (name: String) => name match {
@@ -502,7 +502,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future.failed(new IllegalArgumentException("SQL error"))
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
@@ -592,7 +592,7 @@ class ServerApi {
     }
 }
 
-val api = new ServerApi()
+val api = new ServerApi
 
 // Customize remote API server exception to RPC error mapping
 val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ match {
@@ -678,7 +678,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future.failed(new SQLException("Invalid request"))
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Customize remote API server exception to HTTP status code mapping
 val mapException = (error: Throwable) => error match {
@@ -757,7 +757,7 @@ class ServerApi {
       case _ => throw new IllegalAccessException("Authentication failed")
     }
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -854,7 +854,7 @@ class ServerApi {
     ).flatten.mkString(", ")
   }
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -933,7 +933,7 @@ class ServerApi {
     HttpContext().headers("X-Test" -> "value", "Cache-Control" -> "no-cache").statusCode(200)
   )
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -1010,7 +1010,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server with API discovery listening on port 7000 for POST requests to '/api'
 val server = run(
@@ -1078,7 +1078,7 @@ class ServerApi {
       Json.fromValues(Seq(some, Json.fromInt(n)))
     }
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for PUT requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -1148,7 +1148,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
@@ -1216,7 +1216,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
 val server = run(
@@ -1298,7 +1298,7 @@ class ServerApi {
     Task.succeed(s"Hello $some $n!")
 }
 
-val api = new ServerApi()
+val api = new ServerApi
 
 // Create ZIO effect system plugin
 val effectSystem = ZioSystem.default
@@ -1384,7 +1384,7 @@ class ServerApi {
     Future(Record(List("Hello", some, n.toString)))
 }
 
-val api = new ServerApi()
+val api = new ServerApi
 
 // Create a server RPC protocol plugin
 val serverRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
@@ -1470,7 +1470,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Create a server Web-RPC protocol plugin with '/api' path prefix
 val serverRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
@@ -1553,7 +1553,7 @@ class ServerApi {
   def hello(some: String, n: Int): String =
     s"Hello $some $n!"
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 80 for requests to '/api'
 val server = Default.serverSync(7000, "/api").bind(api).init()
@@ -1616,7 +1616,7 @@ class ServerApi {
   def hello(some: String, n: Int): String =
     s"Hello $some $n!"
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Create NanoHTTPD HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
 val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")
@@ -1686,7 +1686,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Create Undertow JSON-RPC endpoint transport
 val endpointTransport = UndertowHttpEndpoint(Default.effectSystemAsync)
@@ -1763,7 +1763,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
@@ -1839,7 +1839,7 @@ class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-val api = new ServerApi()
+val api = new ServerApi
 
 // Start embedded RabbitMQ broker
 val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
