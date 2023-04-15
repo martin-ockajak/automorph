@@ -100,7 +100,7 @@ private[automorph] case object Extensions {
     private val bufferSize = 4096
 
     /** Converts this input stream to byte array. */
-    def toByteArray(length: Int): Array[Byte] =
+    def asByteArray(length: Int): Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
         case _ => toByteArray(Some(length))

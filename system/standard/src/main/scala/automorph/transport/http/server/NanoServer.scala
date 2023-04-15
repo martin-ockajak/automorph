@@ -121,7 +121,7 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         log.receivingRequest(requestProperties, Protocol.Http.name)
-        val requestBody = session.getInputStream.toByteArray(session.getBodySize.toInt)
+        val requestBody = session.getInputStream.asByteArray(session.getBodySize.toInt)
 
         // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
