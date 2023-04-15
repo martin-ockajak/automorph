@@ -112,7 +112,7 @@ object Default extends DefaultRpcProtocol {
     RpcClient(clientTransport(effectSystemSync, url, method), rpcProtocol)
 
   /**
-   * Creates a standard JRE HTTP & WebSocket client message transport plugin with
+   * Creates a standard JRE HTTP & WebSocket client transport protocol plugin with
    * specified effect system plugin.
    *
    * @see
@@ -132,7 +132,7 @@ object Default extends DefaultRpcProtocol {
    * @tparam Effect
    *   effect type
    * @return
-   *   client message transport plugin
+   *   client transport protocol plugin
    */
   def clientTransport[Effect[_]](
     effectSystem: EffectSystem[Effect],
@@ -262,7 +262,7 @@ object Default extends DefaultRpcProtocol {
     RpcServer(serverTransport(effectSystemSync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
 
   /**
-   * Creates an Undertow RPC over HTTP & WebSocket server message transport plugin with
+   * Creates an Undertow RPC over HTTP & WebSocket server transport protocol plugin with
    * specified effect system plugin.
    *
    * @see
@@ -290,7 +290,7 @@ object Default extends DefaultRpcProtocol {
    * @tparam Effect
    *   effect type
    * @return
-   *   server message transport plugin
+   *   server transport protocol plugin
    */
   def serverTransport[Effect[_]](
     effectSystem: EffectSystem[Effect],

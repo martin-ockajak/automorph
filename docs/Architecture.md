@@ -65,7 +65,7 @@ Automatically derives remote API bindings for existing API instances.
 
 ## [RPC endpoint](/api/automorph/RpcEndpoint.html)
 
-Integrates with an existing transport layer to receive remote API requests using
+Integrates with an existing server to receive remote API requests using
 specific transport protocol and invoke bound API methods to process them.
 
 Automatically derives remote API bindings for existing API instances.
@@ -154,9 +154,9 @@ Actively receives requests to be processed by the RPC handler and sends response
 
 ## [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
-Existing server layer integration plugin.
+Existing transport protocol server integration plugin.
 
-Passively parses requests to be processed by the RPC handler and creates responses for specific transport protocol.
+Passively parses requests to be processed by the RPC handler and creates responses for specific server.
 
 **Depends on**
 

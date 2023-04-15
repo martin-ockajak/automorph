@@ -22,7 +22,7 @@ import scala.util.Try
  * @constructor
  *   Creates a RPC client with specified protocol and transport plugins providing corresponding message context type.
  * @param transport
- *   client message transport plugin
+ *   client transport protocol plugin
  * @param rpcProtocol
  *   RPC protocol plugin
  * @tparam Node
@@ -255,7 +255,7 @@ case object RpcClient {
    * @constructor
    *   Creates a new RPC client builder.
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -285,7 +285,7 @@ case object RpcClient {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

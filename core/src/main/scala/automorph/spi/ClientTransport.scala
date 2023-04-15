@@ -3,7 +3,7 @@ package automorph.spi
 import java.io.InputStream
 
 /**
- * Client message transport plugin.
+ * Client transport protocol plugin.
  *
  * Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
  *
