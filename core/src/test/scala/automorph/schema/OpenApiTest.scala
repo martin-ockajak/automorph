@@ -1,4 +1,4 @@
-package test.schema
+package automorph.schema
 
 import automorph.RpcFunction
 import automorph.RpcFunction.Parameter
