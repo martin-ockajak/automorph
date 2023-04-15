@@ -114,10 +114,6 @@ private[automorph] case object Extensions {
       }
 
     /** Converts this input stream to byte buffer. */
-    def toByteBuffer(length: Int): ByteBuffer =
-      ByteBuffer.wrap(data.toByteArray(length))
-
-    /** Converts this input stream to byte buffer. */
     def toByteBuffer: ByteBuffer =
       ByteBuffer.wrap(data.toByteArray)
 

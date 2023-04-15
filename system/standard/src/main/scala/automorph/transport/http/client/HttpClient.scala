@@ -5,7 +5,7 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.HttpClient.{Context, TransportContext, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps}
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps}
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder
@@ -279,7 +279,7 @@ final case class HttpClient[Effect[_]](
       private val buffers = ArrayBuffer.empty[Array[Byte]]
 
       override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
-        buffers += data
+        buffers += data.toByteArray
         if (last) {
           val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
           buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
