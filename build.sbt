@@ -99,7 +99,7 @@ lazy val meta = source(project, "meta").settings(
 lazy val core = source(project, "core", meta, testCodec % Test)
 
 // Effect system
-lazy val standard = source(project, "system/standard", core, testPlugin % Test)
+lazy val standard = source(project, "system/standard", core, testCore % Test)
 lazy val zio = source(project, "system/zio", core, testPlugin % Test).settings(
   libraryDependencies += "dev.zio" %% "zio" % "2.0.10"
 )
