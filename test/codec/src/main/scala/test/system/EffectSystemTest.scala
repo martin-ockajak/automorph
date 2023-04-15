@@ -1,7 +1,6 @@
 package test.system
 
 import automorph.spi.EffectSystem
-import scala.util.{Failure, Success, Try}
 import test.base.BaseTest
 
 /**
@@ -28,10 +27,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         run(effect).shouldEqual(Right(text))
       }
       "Failure" in {
-        Try(system.evaluate(throw error)) match {
-          case Success(effect) => run(effect).shouldEqual(Left(error))
-          case Failure(error) => error.shouldEqual(error)
-        }
+        val effect = system.evaluate(throw error)
+        run(effect).shouldEqual(Left(error))
       }
     }
     "Successful" in {
@@ -39,10 +36,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
       run(effect).shouldEqual(Right(text))
     }
     "Failed" in {
-      Try(system.failed(error)) match {
-        case Success(effect) => run(effect).shouldEqual(Left(error))
-        case Failure(error) => error.shouldEqual(error)
-      }
+      val effect = system.failed(error)
+      run(effect).shouldEqual(Left(error))
     }
     "Map" - {
       "Success" in {
@@ -50,10 +45,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         run(effect).shouldEqual(Right(s"$text$number"))
       }
       "Failure" in {
-        Try(system.map(system.failed(error))(_ => ())) match {
-          case Success(effect) => run(effect).shouldEqual(Left(error))
-          case Failure(error) => error.shouldEqual(error)
-        }
+        val effect = system.map(system.failed(error))(_ => ())
+        run(effect).shouldEqual(Left(error))
       }
     }
     "FlatMap" - {
@@ -62,10 +55,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         run(effect).shouldEqual(Right(s"$text$number"))
       }
       "Failure" in {
-        Try(system.flatMap(system.failed(error))(_ => system.successful {})) match {
-          case Success(effect) => run(effect).shouldEqual(Left(error))
-          case Failure(error) => error.shouldEqual(error)
-        }
+        val effect = system.flatMap(system.failed(error))(_ => system.successful {})
+        run(effect).shouldEqual(Left(error))
       }
     }
     "Either" - {
@@ -74,10 +65,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         run(effect).shouldEqual(Right(Right(text)))
       }
       "Failure" in {
-        Try(system.either(system.failed(error))) match {
-          case Success(effect) => run(effect).shouldEqual(Right(Left(error)))
-          case Failure(error) => error.shouldEqual(error)
-        }
+        val effect = system.either(system.failed(error))
+        run(effect).shouldEqual(Right(Left(error)))
       }
     }
     "RunAsync" in {
