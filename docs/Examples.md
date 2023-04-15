@@ -1296,7 +1296,7 @@ def run[T](effect: Task[T]): T = Unsafe.unsafe { implicit unsafe =>
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Task[String] =
-    Task.succeed(s"Hello $some $n!")
+    ZIO.succeed(s"Hello $some $n!")
 }
 
 val api = new ServerApi
