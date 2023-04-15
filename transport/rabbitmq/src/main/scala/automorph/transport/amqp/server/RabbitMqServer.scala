@@ -4,11 +4,10 @@ import automorph.log.{Logging, MessageLog}
 import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMq}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, ByteBufferOps, StringOps, ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, ConnectionFactory, DefaultConsumer, Envelope}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
+import java.nio.ByteBuffer
 import java.net.URI
 import scala.util.{Try, Using}
 import scala.jdk.CollectionConverters.MapHasAsJava
@@ -106,13 +105,13 @@ final case class RabbitMqServer[Effect[_]](
             // Process the request
             Try {
               val requestContext = RabbitMq.messageContext(amqpProperties)
-              val handlerResult = handler.processRequest(requestBody.toInputStream, requestContext, actualRequestId)
+              val handlerResult = handler.processRequest(requestBody.toByteBuffer, requestContext, actualRequestId)
               handlerResult.either.map(
                 _.fold(
                   error => sendErrorResponse(error, replyTo, requestProperties, actualRequestId),
                   result => {
                     // Send the response
-                    val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+                    val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
                     sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
                   }
                 )
@@ -135,7 +134,7 @@ final case class RabbitMqServer[Effect[_]](
   }
 
   private def sendResponse(
-    message: InputStream,
+    message: ByteBuffer,
     replyTo: String,
     responseContext: Option[Context],
     requestProperties: => Map[String, String],
@@ -166,7 +165,7 @@ final case class RabbitMqServer[Effect[_]](
         true,
         false,
         amqpProperties,
-        message.toArrayClose,
+        message.toByteArray,
       )
       log.sentResponse(responseProperties)
     }.onError { error =>
@@ -181,7 +180,7 @@ final case class RabbitMqServer[Effect[_]](
     requestId: String
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.toInputStream
+    val message = error.description.toByteBuffer
     sendResponse(message, replyTo, None, requestProperties, requestId)
   }
 }

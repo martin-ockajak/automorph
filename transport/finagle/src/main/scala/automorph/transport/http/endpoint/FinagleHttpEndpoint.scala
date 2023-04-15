@@ -4,14 +4,14 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.FinagleHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
-import java.io.InputStream
 import java.io.InputStream.nullInputStream
+import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.Try
 
@@ -61,7 +61,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
     // Process the request
     Try {
-      val requestBody = Buf.ByteArray.Owned.extract(request.content).toInputStream
+      val requestBody = Buf.ByteBuffer.Owned.extract(request.content)
       runAsFuture {
         val handlerResult = handler.processRequest(requestBody, getRequestContext(request), requestId)
         handlerResult.either.map(
@@ -69,7 +69,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
             error => createErrorResponse(error, request, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
               val status = result.flatMap(_.exception).map(mapException).map(Status.apply).getOrElse(Status.Ok)
               createResponse(responseBody, status, result.flatMap(_.context), request, requestId)
             },
@@ -88,12 +88,12 @@ final case class FinagleHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Response = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.trace.mkString("\n").toInputStream
+    val responseBody = error.trace.mkString("\n").toByteBuffer
     createResponse(responseBody, Status.InternalServerError, None, request, requestId)
   }
 
   private def createResponse(
-    responseBody: InputStream,
+    responseBody: ByteBuffer,
     status: Status,
     responseContext: Option[Context],
     request: Request,
@@ -109,7 +109,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
     // Send the response
     val response = Response(
-      request.version, responseStatus, Reader.fromBuf(Buf.ByteArray.Owned(responseBody.toArrayClose))
+      request.version, responseStatus, Reader.fromBuf(Buf.ByteBuffer.Owned(responseBody))
     )
     setResponseContext(response, responseContext)
     response.contentType = handler.mediaType

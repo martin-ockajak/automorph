@@ -1,7 +1,7 @@
 package automorph.spi
 
 import automorph.spi.protocol.{ApiSchema, ParseError, Request, Response}
-import java.io.InputStream
+import java.nio.ByteBuffer
 import scala.util.Try
 
 /**
@@ -64,7 +64,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    *   RPC request if the message is valid or RPC error if the message is invalid
    */
   def parseRequest(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
   ): Either[ParseError[Metadata], Request[Node, Metadata, Context]]
@@ -92,7 +92,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    *   RPC response if the message is valid or RPC error if the message is invalid
    */
   def parseResponse(
-    responseBody: InputStream,
+    responseBody: ByteBuffer,
     responseContext: Context,
   ): Either[ParseError[Metadata], Response[Node, Metadata]]
 

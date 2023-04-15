@@ -7,7 +7,7 @@ import automorph.spi.RequestHandler.Result
 import automorph.spi.protocol.{Message, Request}
 import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol}
 import automorph.util.Extensions.EffectOps
-import java.io.InputStream
+import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
@@ -54,21 +54,18 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     binding.function.copy(name = name)
   }.toSeq
 
-  override def processRequest(requestBody: InputStream, context: Context, id: String): Effect[Option[Result[Context]]] =
+  override def processRequest(requestBody: ByteBuffer, context: Context, id: String): Effect[Option[Result[Context]]] =
     // Parse request
     rpcProtocol.parseRequest(requestBody, context, id).fold(
-      error => {
-        requestBody.close();
+      error =>
         errorResponse(
           error.exception,
           error.message,
           responseRequired = true,
           ListMap(LogProperties.requestId -> id),
-        )
-      },
+        ),
       rpcRequest => {
         // Invoke requested RPC function
-        requestBody.close();
         lazy val requestProperties = ListMap(LogProperties.requestId -> id) ++ rpcRequest.message.properties
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)

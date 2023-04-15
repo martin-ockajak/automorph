@@ -17,7 +17,13 @@ trait JsonMessageCodecTest extends MessageCodecTest {
       "Serialize" in {
         forAll { (node: Node) =>
           val serialized = codec.serialize(node)
-          objectMapper.readTree(serialized)
+          objectMapper.readTree(if (serialized.hasArray) {
+            serialized.array
+          } else {
+            val array = Array.ofDim[Byte](serialized.remaining)
+            serialized.get(array)
+            array
+          })
         }
       }
       "Text" in {

@@ -5,7 +5,7 @@ import automorph.spi.{ClientTransport, EffectSystem, RequestHandler}
 import automorph.transport.local.LocalContext
 import automorph.transport.local.client.LocalClient.Context
 import automorph.util.Extensions.EffectOps
-import java.io.InputStream
+import java.nio.ByteBuffer
 
 /**
  * Local client transport plugin.
@@ -32,11 +32,11 @@ final case class LocalClient[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)] = {
+  ): Effect[(ByteBuffer, Context)] = {
     val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
     handlerResult.flatMap(
       _.map { result =>
@@ -46,7 +46,7 @@ final case class LocalClient[Effect[_]](
   }
 
   override def tell(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,

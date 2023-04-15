@@ -4,13 +4,12 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, ByteBufferOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpHeaders, HttpServerRequest, HttpServerResponse, ServerWebSocket}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
+import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
@@ -64,7 +63,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     request.bodyHandler { buffer =>
       // Process the request
       Try {
-        val requestBody = buffer.getBytes.toInputStream
+        val requestBody = buffer.getBytes.toByteBuffer
         log.receivedRequest(requestProperties)
         val handlerResult = handler.processRequest(requestBody, getRequestContext(request), requestId)
         handlerResult.either.map(
@@ -72,7 +71,7 @@ final case class VertxHttpEndpoint[Effect[_]](
             error => sendErrorResponse(error, request, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
               val status = result.flatMap(_.exception).map(mapException).getOrElse(statusOk)
               sendResponse(responseBody, status, result.flatMap(_.context), request, requestId)
             },
@@ -92,12 +91,12 @@ final case class VertxHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toInputStream
+    val responseBody = error.description.toByteBuffer
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
 
   private def sendResponse(
-    responseBody: InputStream,
+    responseBody: ByteBuffer,
     statusCode: Int,
     responseContext: Option[Context],
     request: HttpServerRequest,
@@ -115,7 +114,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     // Send the response
     setResponseContext(request.response, responseContext)
       .putHeader(HttpHeaders.CONTENT_TYPE, handler.mediaType).setStatusCode(statusCode)
-      .end(Buffer.buffer(responseBody.toArrayClose)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
+      .end(Buffer.buffer(responseBody.toByteArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
         error => log.failedSendResponse(error, responseProperties)
       }
     ()

@@ -6,16 +6,15 @@ import automorph.transport.http.endpoint.TapirHttpEndpoint.{
   Context, Request, clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, ByteBufferOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.Random
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
+import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.Try
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{
-  EndpointInput, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
+  EndpointInput, byteBufferBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
 }
 
 /**
@@ -65,8 +64,8 @@ final case class TapirHttpEndpoint[Effect[_]](
 
     // Define server endpoint
     val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
+    publicEndpoint.method(method).in(byteBufferBody).in(paths).in(queryParams).in(headers).in(clientIp)
+      .out(byteBufferBody).out(statusCode).out(header(contentType)).serverLogic {
         case (requestBody, paths, queryParams, headers, clientIp) =>
           // Log the request
           val requestId = Random.id
@@ -76,13 +75,13 @@ final case class TapirHttpEndpoint[Effect[_]](
           // Process the request
           Try {
             val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-            val handlerResult = handler.processRequest(requestBody.toInputStream, requestContext, requestId)
+            val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
             handlerResult.either.map(
               _.fold(
                 error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
                 result => {
                   // Create the response
-                  val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+                  val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocateDirect(0))
                   val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
                     .getOrElse(StatusCode.Ok)
                   createResponse(responseBody, status, clientIp, requestId, log)
@@ -108,13 +107,13 @@ final case class TapirHttpEndpoint[Effect[_]](
     log: MessageLog,
   ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.toInputStream
+    val message = error.description.toByteBuffer
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }
 
   private def createResponse(
-    responseBody: InputStream,
+    responseBody: ByteBuffer,
     status: StatusCode,
     clientIp: Option[String],
     requestId: String,
@@ -127,7 +126,7 @@ final case class TapirHttpEndpoint[Effect[_]](
       "Status" -> statusCode.toString,
     )
     log.sendingResponse(responseProperties)
-    (responseBody.toArrayClose, status)
+    (responseBody.toByteArray, status)
   }
 }
 

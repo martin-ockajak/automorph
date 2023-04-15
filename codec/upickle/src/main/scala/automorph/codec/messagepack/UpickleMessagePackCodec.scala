@@ -2,7 +2,7 @@ package automorph.codec.messagepack
 
 import automorph.codec.messagepack.meta.UpickleMessagePackMeta
 import automorph.util.Extensions.ByteArrayOps
-import java.io.InputStream
+import java.nio.ByteBuffer
 import upack.Msg
 
 /**
@@ -30,10 +30,10 @@ final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
   override val mediaType: String = "application/msgpack"
   private val indent = 2
 
-  override def serialize(node: Msg): InputStream =
-    custom.writeBinary(node).toInputStream
+  override def serialize(node: Msg): ByteBuffer =
+    custom.writeBinary(node).toByteBuffer
 
-  override def deserialize(data: InputStream): Msg =
+  override def deserialize(data: ByteBuffer): Msg =
     custom.readBinary[Msg](data)
 
   override def text(node: Msg): String =

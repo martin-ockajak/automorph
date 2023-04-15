@@ -249,7 +249,7 @@ final case class JettyClient[Effect[_]](
       httpContext.transportContext.map(_.request.getMethod).map(HttpMethod.valueOf)
     }.getOrElse(method).name)
     val transportRequest = httpContext.transportContext.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
-    val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody.toArray))
+    val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody.toByteArray))
 
     // Headers
     val headersRequest = bodyRequest.headers { httpFields =>

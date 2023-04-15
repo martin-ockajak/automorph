@@ -5,10 +5,10 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMq}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, ConnectionFactory, DefaultConsumer, Envelope}
-import java.io.InputStream
+import java.nio.ByteBuffer
 import java.net.URI
 import scala.collection.concurrent.TrieMap
 import scala.util.Try
@@ -58,7 +58,7 @@ final case class RabbitMqClient[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -68,7 +68,7 @@ final case class RabbitMqClient[Effect[_]](
     }
 
   override def tell(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -99,7 +99,7 @@ final case class RabbitMqClient[Effect[_]](
     })
 
   private def send(
-    requestBody: InputStream,
+    requestBody: ByteBuffer,
     defaultRequestId: String,
     mediaType: String,
     requestContext: Context,
@@ -124,7 +124,7 @@ final case class RabbitMqClient[Effect[_]](
     // Send the request
     effectSystem.evaluate {
       Try {
-        val message = requestBody.toArrayClose
+        val message = requestBody.toByteArray
         session.get.consumer.get.getChannel.basicPublish(
           exchange,
           routingKey,
@@ -134,7 +134,9 @@ final case class RabbitMqClient[Effect[_]](
           message
         )
         log.sentRequest(requestProperties)
-      }.onError(error => log.failedSendRequest(error, requestProperties)).get
+      }.onError { error =>
+        log.failedSendRequest(error, requestProperties)
+      }.get
     }
   }
 
@@ -155,7 +157,7 @@ final case class RabbitMqClient[Effect[_]](
         // Complete the registered deferred response effect
         val responseContext = RabbitMq.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          response.succeed(responseBody.toInputStream -> responseContext).runAsync
+          response.succeed(responseBody.toByteBuffer -> responseContext).runAsync
         }
       }
     }
@@ -172,5 +174,5 @@ case object RabbitMqClient {
   /** Message properties. */
   type Message = RabbitMq.Message
 
-  private type Response = (InputStream, Context)
+  private type Response = (ByteBuffer, Context)
 }
