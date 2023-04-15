@@ -1,6 +1,5 @@
 package automorph.codec.json
 
-import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps}
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser, TreeNode}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
@@ -11,7 +10,6 @@ import com.fasterxml.jackson.databind.{
   DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider,
 }
 import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
-import java.nio.ByteBuffer
 import scala.runtime.BoxedUnit
 import scala.util.{Failure, Try}
 
@@ -33,11 +31,11 @@ final case class JacksonJsonCodec(objectMapper: ObjectMapper = JacksonJsonCodec.
 
   override val mediaType: String = "application/json"
 
-  def serialize(node: JsonNode): ByteBuffer =
-    objectMapper.writeValueAsBytes(node).toByteBuffer
+  def serialize(node: JsonNode): Array[Byte] =
+    objectMapper.writeValueAsBytes(node)
 
-  def deserialize(data: ByteBuffer): JsonNode =
-    objectMapper.readTree(data.toByteArray)
+  def deserialize(data: Array[Byte]): JsonNode =
+    objectMapper.readTree(data)
 
   override def text(node: JsonNode): String =
     objectMapper.writerWithDefaultPrettyPrinter.writeValueAsString(node)

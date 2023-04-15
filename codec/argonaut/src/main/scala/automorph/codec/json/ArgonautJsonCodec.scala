@@ -4,8 +4,7 @@ import argonaut.Argonaut.{jNull, StringToParseWrap}
 import argonaut.{CodecJson, DecodeResult, Json}
 import automorph.codec.json.meta.ArgonautJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}
-import automorph.util.Extensions.{ByteBufferOps, StringOps}
-import java.nio.ByteBuffer
+import automorph.util.Extensions.{ByteArrayOps, StringOps}
 
 /**
  * Argonaut JSON message codec plugin.
@@ -23,10 +22,10 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
   override val mediaType: String = "application/json"
 
-  override def serialize(node: Json): ByteBuffer =
-    node.nospaces.toByteBuffer
+  override def serialize(node: Json): Array[Byte] =
+    node.nospaces.toByteArray
 
-  override def deserialize(data: ByteBuffer): Json =
+  override def deserialize(data: Array[Byte]): Json =
     data.asString.decodeEither[Json].fold(errorMessage => throw new IllegalArgumentException(errorMessage), identity)
 
   override def text(node: Json): String =
