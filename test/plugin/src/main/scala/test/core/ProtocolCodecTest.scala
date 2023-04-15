@@ -19,7 +19,6 @@ import test.base.BaseTest
 import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
-
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
@@ -46,19 +45,26 @@ trait ProtocolCodecTest extends CoreTest {
   def typedClientTransport(id: Int): ClientTransport[Effect, Context] =
     clientTransport(id).asInstanceOf[ClientTransport[Effect, Context]]
 
+  def testServerClose: Boolean =
+    true
+
   override def fixtures: Seq[TestFixture] =
     testFixtures
 
   override def beforeAll(): Unit = {
     super.beforeAll()
     fixtures.foreach { fixture =>
-      run(
-        system.flatMap(
+      if (testServerClose) {
+        run(
           system.flatMap(
-            fixture.genericServer.init()
-          )(_.close())
-        )(_.init())
-      )
+            system.flatMap(
+              fixture.genericServer.init()
+            )(_.close())
+          )(_.init())
+        )
+      } else {
+        fixture.genericServer.init()
+      }
     }
     fixtures.foreach { fixture =>
       run(

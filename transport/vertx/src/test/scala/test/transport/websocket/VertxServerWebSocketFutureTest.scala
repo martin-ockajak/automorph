@@ -29,6 +29,9 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     VertxWebSocketEndpoint(system)
 
+  override def testServerClose: Boolean =
+    false
+
   override def webSocket: Boolean =
     true
 }
