@@ -60,6 +60,9 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     )
   }
 
+  override def portRange: Range =
+    Range(10000, 20000)
+
   override def afterAll(): Unit = {
     try {
       super.afterAll()
