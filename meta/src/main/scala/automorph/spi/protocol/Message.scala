@@ -1,7 +1,5 @@
 package automorph.spi.protocol
 
-import java.nio.ByteBuffer
-
 /**
  * RPC message.
  *
@@ -18,7 +16,7 @@ import java.nio.ByteBuffer
  */
 final case class Message[Metadata](
   metadata: Metadata,
-  body: ByteBuffer,
+  body: Array[Byte],
   properties: Map[String, String] = Map.empty,
   private val messageText: () => Option[String] = () => None,
 ) {

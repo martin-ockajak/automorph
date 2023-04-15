@@ -4,9 +4,8 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.transport.http.client.UrlClient.{Context, TransportContext}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, TryOps}
+import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
 import java.net.{HttpURLConnection, URI}
-import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
@@ -47,11 +46,11 @@ final case class UrlClient[Effect[_]](
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(ByteBuffer, Context)] =
+  ): Effect[(Array[Byte], Context)] =
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
       effectSystem.evaluate {
@@ -63,14 +62,14 @@ final case class UrlClient[Effect[_]](
         // Process the response
         log.receivingResponse(responseProperties)
         connection.getResponseCode
-        val responseBody = Option(connection.getErrorStream).getOrElse(connection.getInputStream).toByteBuffer
+        val responseBody = Option(connection.getErrorStream).getOrElse(connection.getInputStream).toByteArray
         log.receivedResponse(responseProperties + ("Status" -> connection.getResponseCode.toString))
         responseBody -> getResponseContext(connection)
       }
     }
 
   override def tell(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -87,7 +86,7 @@ final case class UrlClient[Effect[_]](
     effectSystem.successful {}
 
   private def send(
-    request: ByteBuffer,
+    request: Array[Byte],
     requestId: String,
     mediaType: String,
     requestContext: Context,
@@ -109,7 +108,7 @@ final case class UrlClient[Effect[_]](
       connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
-        stream.write(request.toByteArray)
+        stream.write(request)
         stream.flush()
       }
       write.onError(error => log.failedSendRequest(error, requestProperties)).get
@@ -126,7 +125,7 @@ final case class UrlClient[Effect[_]](
 
   private def setConnectionProperties(
     connection: HttpURLConnection,
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     mediaType: String,
     requestContext: Context,
   ): String = {
@@ -145,7 +144,7 @@ final case class UrlClient[Effect[_]](
     (transportHeaders ++ requestContext.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
-    connection.setRequestProperty(contentLengthHeader, requestBody.position().toString)
+    connection.setRequestProperty(contentLengthHeader, requestBody.length.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
 

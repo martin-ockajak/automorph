@@ -1,7 +1,5 @@
 package automorph.spi
 
-import java.nio.ByteBuffer
-
 /**
  * Client message transport plugin.
  *
@@ -34,11 +32,11 @@ trait ClientTransport[Effect[_], Context] {
    *   response message and context
    */
   def call(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(ByteBuffer, Context)]
+  ): Effect[(Array[Byte], Context)]
 
   /**
    * Sends a request to a remote endpoint without waiting for a response.
@@ -56,7 +54,7 @@ trait ClientTransport[Effect[_], Context] {
    * @return
    *   nothing
    */
-  def tell(requestBody: ByteBuffer, requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
+  def tell(requestBody: Array[Byte], requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
 
   /**
    * Creates default request context based on the configuration of this client transport.

@@ -8,13 +8,12 @@ import automorph.transport.http.endpoint.TapirHttpEndpoint.{
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.Random
-import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.Try
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{
-  EndpointInput, byteBufferBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
+  EndpointInput, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
 }
 
 /**
@@ -51,7 +50,7 @@ final case class TapirHttpEndpoint[Effect[_]](
 ) extends Logging with EndpointTransport[
   Effect,
   Context,
-  ServerEndpoint.Full[Unit, Unit, Request, Unit, (ByteBuffer, StatusCode), Any, Effect]
+  ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
 ] {
 
   private lazy val contentType = Header.contentType(MediaType.parse(handler.mediaType).getOrElse {
@@ -60,12 +59,12 @@ final case class TapirHttpEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
-  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (ByteBuffer, StatusCode), Any, Effect] = {
+  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 
     // Define server endpoint
     val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    publicEndpoint.method(method).in(byteBufferBody).in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(byteBufferBody).out(statusCode).out(header(contentType)).serverLogic {
+    publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
+      .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
         case (requestBody, paths, queryParams, headers, clientIp) =>
           // Log the request
           val requestId = Random.id
@@ -81,7 +80,7 @@ final case class TapirHttpEndpoint[Effect[_]](
                 error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
                 result => {
                   // Create the response
-                  val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
+                  val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
                   val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
                     .getOrElse(StatusCode.Ok)
                   createResponse(responseBody, status, clientIp, requestId, log)
@@ -105,20 +104,20 @@ final case class TapirHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String],
     log: MessageLog,
-  ): (ByteBuffer, StatusCode) = {
+  ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.toByteBuffer
+    val message = error.description.toByteArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }
 
   private def createResponse(
-    responseBody: ByteBuffer,
+    responseBody: Array[Byte],
     status: StatusCode,
     clientIp: Option[String],
     requestId: String,
     log: MessageLog,
-  ): (ByteBuffer, StatusCode) = {
+  ): (Array[Byte], StatusCode) = {
     // Log the response
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
@@ -136,7 +135,7 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-  type Request = (ByteBuffer, List[String], QueryParams, List[Header], Option[String])
+  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r

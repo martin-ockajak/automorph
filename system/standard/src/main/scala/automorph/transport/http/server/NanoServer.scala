@@ -9,12 +9,11 @@ import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{
-  ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps
+  ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps
 }
 import automorph.util.{Network, Random}
 import java.io.IOException
 import java.net.URI
-import java.nio.ByteBuffer
 import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue}
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
@@ -122,7 +121,7 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         log.receivingRequest(requestProperties, Protocol.Http.name)
-        val requestBody = session.getInputStream.toByteBuffer(session.getBodySize.toInt)
+        val requestBody = session.getInputStream.toByteArray(session.getBodySize.toInt)
 
         // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
@@ -157,7 +156,7 @@ final case class NanoServer[Effect[_]] (
         val protocol = Protocol.WebSocket
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-        val request = frame.getBinaryPayload.toByteBuffer
+        val request = frame.getBinaryPayload.toArray[Byte]
 
         // Handle the request
         handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
@@ -173,7 +172,7 @@ final case class NanoServer[Effect[_]] (
     }
 
   private def handleRequest(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     session: IHTTPSession,
     protocol: Protocol,
     requestProperties: => Map[String, String],
@@ -189,7 +188,7 @@ final case class NanoServer[Effect[_]] (
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
+            val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
             val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
             createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
           },
@@ -208,12 +207,12 @@ final case class NanoServer[Effect[_]] (
     requestProperties: => Map[String, String],
   ): Response = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
-    val message = error.description.toByteBuffer
+    val message = error.description.toByteArray
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
 
   private def createResponse(
-    responseBody: ByteBuffer,
+    responseBody: Array[Byte],
     status: Status,
     responseContext: Option[Context],
     session: IHTTPSession,
@@ -230,12 +229,11 @@ final case class NanoServer[Effect[_]] (
     log.sendingResponse(responseProperties, protocol.name)
 
     // Create the response
-    val size = responseBody.position()
     val response = newFixedLengthResponse(
       responseStatus,
       handler.mediaType,
       responseBody.toInputStream,
-      size.toLong,
+      responseBody.length,
     )
     setResponseContext(response, responseContext)
     log.sentResponse(responseProperties, protocol.name)

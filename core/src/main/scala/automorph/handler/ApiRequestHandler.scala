@@ -7,7 +7,6 @@ import automorph.spi.RequestHandler.Result
 import automorph.spi.protocol.{Message, Request}
 import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol}
 import automorph.util.Extensions.EffectOps
-import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
@@ -54,7 +53,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     binding.function.copy(name = name)
   }.toSeq
 
-  override def processRequest(requestBody: ByteBuffer, context: Context, id: String): Effect[Option[Result[Context]]] =
+  override def processRequest(requestBody: Array[Byte], context: Context, id: String): Effect[Option[Result[Context]]] =
     // Parse request
     rpcProtocol.parseRequest(requestBody, context, id).fold(
       error =>

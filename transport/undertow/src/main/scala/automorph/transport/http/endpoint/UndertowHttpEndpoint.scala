@@ -11,7 +11,6 @@ import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.IOException
-import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
@@ -68,14 +67,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
           override def run(): Unit =
             // Process the request
             Try {
-              val requestBody = message.toByteBuffer
+              val requestBody = message.toArray[Byte]
               val response = handler.processRequest(requestBody, getRequestContext(exchange), requestId)
               response.either.map(
                 _.fold(
                   error => sendErrorResponse(error, exchange, requestId, requestProperties),
                   result => {
                     // Send the response
-                    val responseBody = result.map(_.responseBody).getOrElse(ByteBuffer.allocate(0))
+                    val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
                     val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
                     sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
                   },
@@ -107,13 +106,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toByteBuffer
+    val responseBody = error.description.toByteArray
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(responseBody, statusCode, None, exchange, requestId)
   }
 
   private def sendResponse(
-    responseBody: ByteBuffer,
+    responseBody: Array[Byte],
     statusCode: Int,
     responseContext: Option[Context],
     exchange: HttpServerExchange,
@@ -135,7 +134,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       }
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.mediaType)
-      exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody)
+      exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
     }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }

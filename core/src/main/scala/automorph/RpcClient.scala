@@ -7,7 +7,6 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.EffectOps
 import automorph.util.Random
-import java.nio.ByteBuffer
 import scala.collection.immutable.ListMap
 import scala.util.Try
 
@@ -197,7 +196,7 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
    *   result value
    */
   private def processResponse[R](
-    responseBody: ByteBuffer,
+    responseBody: Array[Byte],
     responseContext: Context,
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R,

@@ -4,8 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient.{Context, TransportContext}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps}
-import java.nio.ByteBuffer
+import automorph.util.Extensions.EffectOps
 import java.net.URI
 import scala.collection.immutable.ListMap
 import sttp.capabilities.WebSockets
@@ -56,11 +55,11 @@ final case class SttpClient[Effect[_]] private (
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(ByteBuffer, Context)] = {
+  ): Effect[(Array[Byte], Context)] = {
     // Send the request
     val sttpRequest = createRequest(requestBody, mediaType, requestContext)
     transportProtocol(sttpRequest).flatMap { protocol =>
@@ -78,7 +77,7 @@ final case class SttpClient[Effect[_]] private (
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
-            effectSystem.successful(response.body.toByteBuffer -> getResponseContext(response))
+            effectSystem.successful(response.body.toArray[Byte] -> getResponseContext(response))
           },
         )
       }
@@ -86,7 +85,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   override def tell(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -136,7 +135,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   private def createRequest(
-    requestBody: ByteBuffer,
+    requestBody: Array[Byte],
     mediaType: String,
     requestContext: Context,
   ): Request[Array[Byte], WebSocket] = {
@@ -165,8 +164,8 @@ final case class SttpClient[Effect[_]] private (
     }
   }
 
-  private def sendWebSocket(request: ByteBuffer): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
-    webSocket => webSocket.sendBinary(request.toByteArray).flatMap(_ => webSocket.receiveBinary(true))
+  private def sendWebSocket(request: Array[Byte]): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
+    webSocket => webSocket.sendBinary(request).flatMap(_ => webSocket.receiveBinary(true))
 
   private def getResponseContext(response: Response[Array[Byte]]): Context =
     context.statusCode(response.code.code).headers(response.headers.map { header =>
