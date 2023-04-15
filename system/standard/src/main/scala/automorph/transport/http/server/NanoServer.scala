@@ -156,7 +156,7 @@ final case class NanoServer[Effect[_]] (
         val protocol = Protocol.WebSocket
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-        val request = frame.getBinaryPayload.toArray[Byte]
+        val request = frame.getBinaryPayload
 
         // Handle the request
         handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
