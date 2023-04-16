@@ -6,7 +6,6 @@ import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.HttpClient.{Context, TransportContext, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps}
-import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
@@ -172,7 +171,7 @@ final case class HttpClient[Effect[_]](
 
   private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) => values.asScala.map(name -> _) }
-    (response.body.toArray[Byte], Some(response.statusCode), headers)
+    (response.body, Some(response.statusCode), headers)
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
@@ -273,18 +272,22 @@ final case class HttpClient[Effect[_]](
       effect(builder.buildAsync(requestUrl, webSocketListener(response)), completableSystem)
     )
 
-  private def webSocketListener(response: Completable[Effect, Response]): Listener =
+  private def webSocketListener(response: Completable[Effect, Response]) =
     new Listener {
 
-      private val buffers = ArrayBuffer.empty[Array[Byte]]
+      private val buffers = ArrayBuffer.empty[ByteBuffer]
 
       override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
-        buffers += data.toByteArray
+        buffers += data
         if (last) {
-          val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
-          buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
+          val responseBody = buffers match {
+            case ArrayBuffer(buffer) => buffer.toByteArray
+            case _ =>
+              val result = ByteBuffer.allocate(buffers.map(_.capacity).sum)
+              buffers.foreach(result.put)
+              result.toByteArray
+          }
           buffers.clear()
-          val responseBody = outputStream.toByteArray
           response.succeed((responseBody, None, Seq())).runAsync
         }
         super.onBinary(webSocket, data, last)
