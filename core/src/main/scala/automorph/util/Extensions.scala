@@ -72,7 +72,6 @@ private[automorph] case object Extensions {
       if (data.hasArray) {
         data.array
       } else {
-        data.flip()
         val array = Array.ofDim[Byte](data.remaining)
         data.get(array)
         array
@@ -83,7 +82,6 @@ private[automorph] case object Extensions {
       if (data.hasArray) {
         data.array.toInputStream
       } else {
-        data.flip()
         val array = Array.ofDim[Byte](data.remaining)
         data.get(array)
         array.toInputStream
