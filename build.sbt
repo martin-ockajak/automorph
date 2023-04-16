@@ -242,10 +242,10 @@ lazy val testBase = source(project, "test/base").settings(
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
-lazy val testCodec = source(project, "test/plugin", testBase, meta).settings(
+lazy val testCodec = source(project, "test/codec", testBase, meta).settings(
   libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
 )
-lazy val testSystem = source(project, "test/rpc", testCodec, core, circe, jackson, upickle, argonaut)
+lazy val testSystem = source(project, "test/system", testCodec, core, circe, jackson, upickle, argonaut)
 lazy val testTransport = source(
   project, "test/transport", testSystem, standard,
 )
