@@ -2,20 +2,19 @@ package automorph.transport.http.server
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
-import automorph.transport.http.server.NanoHTTPD.Response.Status
+import automorph.transport.http.server.NanoHTTPD.Response.{IStatus, Status}
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.Context
+import automorph.transport.http.server.NanoServer.{Context, HttpResponse}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
-import java.io.{IOException, InputStream}
-import java.io.InputStream.nullInputStream
+import java.io.IOException
 import java.net.URI
 import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue}
 import scala.collection.immutable.ListMap
-import scala.concurrent.duration.{FiniteDuration, DurationInt}
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.util.Try
 
@@ -120,11 +119,20 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         log.receivingRequest(requestProperties, Protocol.Http.name)
-        val requestBody = session.getInputStream.asArray(session.getBodySize.toInt).toInputStream
+        val requestBody = session.getInputStream.asByteArray(session.getBodySize.toInt)
 
         // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
-          queue.add(response)
+          // Create the response
+          val httpResponse = newFixedLengthResponse(
+            response.status,
+            handler.mediaType,
+            response.body.toInputStream,
+            response.body.length.toLong,
+          )
+          setResponseContext(httpResponse, response.context)
+          log.sentResponse(response.properties, protocol.name)
+          queue.add(httpResponse)
         }.runAsync
       }
     }
@@ -143,7 +151,9 @@ final case class NanoServer[Effect[_]] (
     new WebSocket(session) {
 
       override protected def onOpen(): Unit =
-        if (!webSocket) { this.close(CloseCode.PolicyViolation, "WebSocket support disabled", true) }
+        if (!webSocket) {
+          this.close(CloseCode.PolicyViolation, "WebSocket support disabled", true)
+        }
 
       override protected def onClose(code: WebSocketFrame.CloseCode, reason: String, initiatedByRemote: Boolean): Unit =
         ()
@@ -153,11 +163,12 @@ final case class NanoServer[Effect[_]] (
         val protocol = Protocol.WebSocket
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-        val request = frame.getBinaryPayload.toInputStream
+        val requestBody = frame.getBinaryPayload
 
         // Handle the request
-        handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
-          send(response.getData.toArray)
+        handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
+          send(response.body)
+          log.sentResponse(response.properties, protocol.name)
         }.runAsync
       }
 
@@ -169,12 +180,12 @@ final case class NanoServer[Effect[_]] (
     }
 
   private def handleRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     session: IHTTPSession,
     protocol: Protocol,
     requestProperties: => Map[String, String],
     requestId: String,
-  ): Effect[Response] = {
+  ): Effect[HttpResponse] = {
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
@@ -185,7 +196,7 @@ final case class NanoServer[Effect[_]] (
           error => createErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+            val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
             val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
             createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
           },
@@ -202,20 +213,20 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestId: String,
     requestProperties: => Map[String, String],
-  ): Response = {
+  ): HttpResponse = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
-    val message = error.description.toInputStream
+    val message = error.description.toByteArray
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
 
   private def createResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     status: Status,
     responseContext: Option[Context],
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
-  ): Response = {
+  ): HttpResponse = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
     lazy val responseProperties = Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(session)) ++
@@ -224,18 +235,7 @@ final case class NanoServer[Effect[_]] (
         case _ => None
       })
     log.sendingResponse(responseProperties, protocol.name)
-
-    // Create the response
-    val responseData = responseBody.toArrayClose
-    val response = newFixedLengthResponse(
-      responseStatus,
-      handler.mediaType,
-      responseData.toInputStream,
-      responseData.length.toLong
-    )
-    setResponseContext(response, responseContext)
-    log.sentResponse(responseProperties, protocol.name)
-    response
+    HttpResponse(responseBody, responseStatus, responseContext, responseProperties)
   }
 
   private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
@@ -282,6 +282,10 @@ case object NanoServer {
   /** Request context type. */
   type Context = HttpContext[IHTTPSession]
 
-  /** Response type. */
-  type Response = NanoHTTPD.Response
+  private final case class HttpResponse(
+    body: Array[Byte],
+    status: IStatus,
+    context: Option[Context],
+    properties: Map[String, String]
+  )
 }

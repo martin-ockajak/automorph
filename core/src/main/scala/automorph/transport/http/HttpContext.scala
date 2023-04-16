@@ -471,7 +471,7 @@ final case class HttpContext[TransportContext](
    *   HTTP message context
    */
   def authorizationBasic(user: String, password: String): HttpContext[TransportContext] = {
-    val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
+    val value = Base64.getEncoder.encode(s"$user:$password".toByteArray).asString
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
@@ -556,7 +556,7 @@ final case class HttpContext[TransportContext](
    *   HTTP message context
    */
   def proxyAuthBasic(user: String, password: String): HttpContext[TransportContext] = {
-    val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
+    val value = Base64.getEncoder.encode(s"$user:$password".toByteArray).asString
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
 

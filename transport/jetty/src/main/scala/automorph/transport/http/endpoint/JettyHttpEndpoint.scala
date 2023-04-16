@@ -4,12 +4,10 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
@@ -60,7 +58,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(request, requestId)
       log.receivedRequest(requestProperties)
-      val requestBody = request.getInputStream
+      val requestBody = request.getInputStream.toByteArray
 
       // Process the request
       Try {
@@ -70,7 +68,7 @@ final case class JettyHttpEndpoint[Effect[_]](
             error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
               val status = result.flatMap(_.exception).map(mapException).getOrElse(HttpStatus.OK_200)
               sendResponse(responseBody, status, result.flatMap(_.context), response, asyncContext, request, requestId)
             },
@@ -91,13 +89,13 @@ final case class JettyHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toInputStream
+    val responseBody = error.description.toByteArray
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
   }
 
   private def sendResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     status: Int,
     responseContext: Option[Context],
     response: HttpServletResponse,
@@ -120,11 +118,11 @@ final case class JettyHttpEndpoint[Effect[_]](
       response.setContentType(handler.mediaType)
       response.setStatus(responseStatus)
       val outputStream = response.getOutputStream
-      responseBody.transferTo(outputStream)
+      outputStream.write(responseBody)
       outputStream.flush()
+      outputStream.close()
       asyncContext.complete()
       log.sentResponse(responseProperties)
-      responseBody.close()
     }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 
@@ -135,8 +133,9 @@ final case class JettyHttpEndpoint[Effect[_]](
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
-    HttpContext(transportContext = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers)
-      .url(request.getRequestURI)
+    HttpContext(
+      transportContext = Some(request), method = Some(HttpMethod.valueOf(request.getMethod)), headers = headers
+    ).url(request.getRequestURI)
   }
 
   private def getRequestProperties(request: HttpServletRequest, requestId: String): Map[String, String] = {

@@ -12,10 +12,8 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.AkkaHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.{FiniteDuration, DurationInt}
@@ -99,14 +97,14 @@ final case class AkkaHttpEndpoint[Effect[_]](
     val handleRequestResult = Promise[(HttpResponse, ListMap[String, String])]()
     request.entity.toStrict(readTimeout).flatMap { requestEntity =>
       Try {
-        val requestBody = requestEntity.data.asByteBuffer.toInputStream
+        val requestBody = requestEntity.data.toArray[Byte]
         val response = handler.processRequest(requestBody, getRequestContext(request), requestId)
         response.either.map { processRequestResult =>
           val response = processRequestResult.fold(
             error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
             result => {
               // Create the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
               val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
                 .getOrElse(StatusCodes.OK)
               createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
@@ -131,12 +129,12 @@ final case class AkkaHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): (HttpResponse, ListMap[String, String]) = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toInputStream
+    val responseBody = error.description.toByteArray
     createResponse(responseBody, StatusCodes.InternalServerError, contentType, None, remoteAddress, requestId)
   }
 
   private def createResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     statusCode: StatusCode,
     contentType: ContentType,
     responseContext: Option[Context],
@@ -155,7 +153,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
     // Send the response
     val baseResponse = setResponseContext(HttpResponse(), responseContext)
     val response = baseResponse.withStatus(responseStatusCode).withHeaders(baseResponse.headers)
-      .withEntity(contentType, responseBody.toArrayClose)
+      .withEntity(contentType, responseBody)
     response -> responseProperties
   }
 

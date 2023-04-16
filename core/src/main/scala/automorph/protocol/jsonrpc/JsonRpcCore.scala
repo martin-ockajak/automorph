@@ -9,7 +9,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.protocol
 import automorph.spi.protocol.{ApiSchema, ParseError}
 import automorph.util.Extensions.ThrowableOps
-import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -74,7 +73,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   }
 
   override def parseRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
   ): Either[ParseError[Metadata], protocol.Request[Node, Metadata, Context]] =
@@ -93,7 +92,9 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
           request => {
             val requestArguments = request.params
               .fold(_.map(Left.apply[Node, (String, Node)]), _.map(Right.apply[Node, (String, Node)]).toSeq)
-            Right(protocol.Request(message, request.method, requestArguments, request.id.isDefined, requestId, requestContext))
+            Right(protocol.Request(
+              message, request.method, requestArguments, request.id.isDefined, requestId, requestContext
+            ))
           },
         )
       },
@@ -131,7 +132,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
   ): Either[ParseError[Metadata], protocol.Response[Node, Metadata]] =
     // Deserialize response

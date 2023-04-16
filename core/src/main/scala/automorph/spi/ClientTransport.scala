@@ -1,7 +1,5 @@
 package automorph.spi
 
-import java.io.InputStream
-
 /**
  * Client transport protocol plugin.
  *
@@ -34,11 +32,11 @@ trait ClientTransport[Effect[_], Context] {
    *   response message and context
    */
   def call(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)]
+  ): Effect[(Array[Byte], Context)]
 
   /**
    * Sends a request to a remote endpoint without waiting for a response.
@@ -56,7 +54,7 @@ trait ClientTransport[Effect[_], Context] {
    * @return
    *   nothing
    */
-  def tell(requestBody: InputStream, requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
+  def tell(requestBody: Array[Byte], requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
 
   /**
    * Creates default request context based on the configuration of this client transport.

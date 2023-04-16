@@ -7,7 +7,6 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.EffectOps
 import automorph.util.Random
-import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.util.Try
 
@@ -197,19 +196,15 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
    *   result value
    */
   private def processResponse[R](
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R,
   ): Effect[R] =
     // Parse response
     rpcProtocol.parseResponse(responseBody, responseContext).fold(
-      error => {
-        responseBody.close()
-        raiseError[R](error.exception, requestProperties)
-      },
+      error => raiseError[R](error.exception, requestProperties),
       rpcResponse => {
-        responseBody.close()
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} response", allProperties)

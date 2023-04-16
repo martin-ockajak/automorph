@@ -1,7 +1,6 @@
 package automorph.spi
 
 import automorph.spi.RequestHandler.Result
-import java.io.InputStream
 
 /**
  * RPC request handler.
@@ -28,7 +27,7 @@ trait RequestHandler[Effect[_], Context] {
    * @return
    *   request processing result
    */
-  def processRequest(requestBody: InputStream, context: Context, id: String): Effect[Option[Result[Context]]]
+  def processRequest(requestBody: Array[Byte], context: Context, id: String): Effect[Option[Result[Context]]]
 
   /**
    * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
@@ -60,7 +59,7 @@ case object RequestHandler {
    *   response context type
    */
   final case class Result[Context](
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     exception: Option[Throwable],
     context: Option[Context],
   )
@@ -77,11 +76,7 @@ case object RequestHandler {
    */
   private[automorph] def dummy[Effect[_], Context]: RequestHandler[Effect, Context] =
     new RequestHandler[Effect, Context] {
-      def processRequest(
-        requestBody: InputStream,
-        context: Context,
-        id: String,
-      ): Effect[Option[Result[Context]]] =
+      def processRequest(requestBody: Array[Byte], context: Context, id: String): Effect[Option[Result[Context]]] =
         throw new IllegalStateException("RPC request handler not initialized")
 
       override def discovery(enabled: Boolean): RequestHandler[Effect, Context] =
