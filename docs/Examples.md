@@ -145,7 +145,7 @@ run(client.close())
 run(server.close())
 ```
 
-### [Parameters as Options](../../examples/project/src/main/scala/examples/basic/ParametersAsOptions.scala)
+### [Optional parameters](../../examples/project/src/main/scala/examples/basic/OptionalParameters.scala)
 
 **Build**
 
