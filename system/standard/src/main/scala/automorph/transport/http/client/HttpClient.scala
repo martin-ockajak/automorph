@@ -274,6 +274,7 @@ final case class HttpClient[Effect[_]](
       private val buffers = ArrayBuffer.empty[ByteBuffer]
 
       override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
+        buffers += data
         if (last) {
           val responseBody = buffers match {
             case ArrayBuffer(buffer) => buffer.toByteArray
