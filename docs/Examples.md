@@ -145,7 +145,7 @@ run(client.close())
 run(server.close())
 ```
 
-### [Optional parameters](../../examples/project/src/main/scala/examples/basic/ParametersAsOptions.scala)
+### [Parameters as Options](../../examples/project/src/main/scala/examples/basic/ParametersAsOptions.scala)
 
 **Build**
 
@@ -205,8 +205,10 @@ println(
 **Cleanup**
 
 ```scala
+// Close the RPC client
 client.close()
 
+// Close the RPC server
 server.close()
 ```
 
@@ -662,7 +664,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-**Imports**
+**Imports & Helpers**
 
 ```scala
 import automorph.Default
@@ -673,6 +675,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.Try
+
+// Helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 ```
 
 **Server**
@@ -1673,7 +1678,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-**Imports**
+**Imports & Helpers**
 
 ```scala
 import automorph.{Default, Endpoint}
@@ -1683,14 +1688,14 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+
+// Helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 ```
 
 **Server**
 
 ```scala
-// Helper function to evaluate Futures
-def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
-
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
@@ -1821,7 +1826,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-**Imports**
+**Imports & Helpers**
 
 ```scala
 import automorph.{Default, RpcClient, RpcServer}
@@ -1836,14 +1841,14 @@ import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.sys.process.Process
 import scala.util.Try
+
+// Helper function to evaluate Futures
+def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 ```
 
 **Server**
 
 ```scala
-// Helper function to evaluate Futures
-def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
-
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
