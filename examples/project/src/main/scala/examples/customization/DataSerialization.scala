@@ -69,7 +69,7 @@ private[examples] case object DataSerialization {
     // Close the RPC client
     run(client.close())
 
-    // Stop the RPC server
+    // Close the RPC server
     run(server.close())
   }
 }

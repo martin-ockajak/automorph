@@ -64,7 +64,7 @@ val server = run(
   Default.rpcServerAsync(7000, "/api").bind(api).init()
 )
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 

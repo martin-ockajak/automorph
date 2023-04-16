@@ -38,7 +38,7 @@ case object ServerTransport {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }

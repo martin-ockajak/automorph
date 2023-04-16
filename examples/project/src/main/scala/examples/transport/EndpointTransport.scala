@@ -54,7 +54,7 @@ private[examples] case object EndpointTransport {
     // Close the RPC client
     run(client.close())
 
-    // Stop the RPC server
+    // Close the RPC server
     server.stop()
   }
 }

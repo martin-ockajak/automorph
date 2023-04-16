@@ -68,7 +68,7 @@ private[examples] case object ServerFunctionNames {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }

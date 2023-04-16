@@ -68,7 +68,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -141,7 +141,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -305,7 +305,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -377,7 +377,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -468,7 +468,7 @@ println(Try(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -556,7 +556,7 @@ println(Try(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -648,7 +648,7 @@ println(Try(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -723,7 +723,7 @@ println(Try(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -821,7 +821,7 @@ val remoteApi = client.bind[ClientApi]
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -903,7 +903,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -975,7 +975,7 @@ println(dynamic.context.header("X-Test"))
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -1048,7 +1048,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1118,7 +1118,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -1186,7 +1186,7 @@ run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1261,7 +1261,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1343,7 +1343,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1444,7 +1444,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1530,7 +1530,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1596,7 +1596,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -1659,7 +1659,7 @@ println(
 // Close the RPC client
 client.close()
 
-// Stop the RPC server
+// Close the RPC server
 server.close()
 ```
 
@@ -1738,7 +1738,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 server.stop()
 ```
 
@@ -1805,7 +1805,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 ```
 
@@ -1895,7 +1895,7 @@ println(run(
 // Close the RPC client
 run(client.close())
 
-// Stop the RPC server
+// Close the RPC server
 run(server.close())
 
 // Stop embedded RabbitMQ broker

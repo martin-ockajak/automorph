@@ -39,7 +39,7 @@ private[examples] case object SynchronousCall {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }
