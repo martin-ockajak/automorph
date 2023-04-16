@@ -96,39 +96,39 @@ lazy val meta = source(project, "meta").settings(
     "org.slf4j" % "slf4j-api" % slf4jVersion
   )
 )
-lazy val core = source(project, "core", meta, testPlugin % Test)
+lazy val core = source(project, "core", meta, testBase % Test)
 
 // Effect system
-lazy val standard = source(project, "system/standard", core, testPlugin % Test, testRpc % Test)
-lazy val zio = source(project, "system/zio", core, testPlugin % Test).settings(
+lazy val standard = source(project, "system/standard", core, testSystem % Test)
+lazy val zio = source(project, "system/zio", core, testSystem % Test).settings(
   libraryDependencies += "dev.zio" %% "zio" % "2.0.10"
 )
-lazy val monix = source(project, "system/monix", core, testPlugin % Test).settings(
+lazy val monix = source(project, "system/monix", core, testSystem % Test).settings(
   libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1"
 )
-lazy val catsEffect = source(project, "system/cats-effect", core, testPlugin % Test).settings(
+lazy val catsEffect = source(project, "system/cats-effect", core, testSystem % Test).settings(
   libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8"
 )
-lazy val scalazEffect = source(project, "system/scalaz-effect", core, testPlugin % Test).settings(
+lazy val scalazEffect = source(project, "system/scalaz-effect", core, testSystem % Test).settings(
   libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13"
 )
 
 // Message codec
 val circeVersion = "0.14.5"
-lazy val circe = source(project, s"codec/circe", core, testPlugin % Test).settings(
+lazy val circe = source(project, s"codec/circe", core, testCodec % Test).settings(
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion
   )
 )
 val jacksonVersion = "2.14.2"
-lazy val jackson = source(project, "codec/jackson", core, testPlugin % Test).settings(
+lazy val jackson = source(project, "codec/jackson", core, testCodec % Test).settings(
   libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
-lazy val upickle = source(project, "codec/upickle", core, testPlugin % Test).settings(
+lazy val upickle = source(project, "codec/upickle", core, testCodec % Test).settings(
   libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0"
 )
-lazy val argonaut = source(project, "codec/argonaut", core, testPlugin % Test).settings(
+lazy val argonaut = source(project, "codec/argonaut", core, testCodec % Test).settings(
   libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.8"
 )
 
@@ -214,7 +214,7 @@ lazy val default = project.dependsOn(standard, circe, undertow, testTransport % 
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(
-  project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test
+  project, "examples", default, upickle, zio, sttp, rabbitmq, testBase % Test
 ).settings(
   publish / skip := true,
   Test / fork := true,
@@ -242,12 +242,12 @@ lazy val testBase = source(project, "test/base").settings(
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
-lazy val testRpc = source(project, "test/rpc", testBase, core, circe, jackson, upickle, argonaut)
-lazy val testPlugin = source(project, "test/plugin", testBase, meta).settings(
+lazy val testCodec = source(project, "test/plugin", testBase, meta).settings(
   libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
 )
+lazy val testSystem = source(project, "test/rpc", testCodec, core, circe, jackson, upickle, argonaut)
 lazy val testTransport = source(
-  project, "test/transport", testRpc, standard,
+  project, "test/transport", testSystem, standard,
 )
 
 
