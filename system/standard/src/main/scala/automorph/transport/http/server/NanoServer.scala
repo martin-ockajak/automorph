@@ -128,7 +128,7 @@ final case class NanoServer[Effect[_]] (
             response.status,
             handler.mediaType,
             response.body.toInputStream,
-            response.body.length,
+            response.body.length.toLong,
           )
           setResponseContext(httpResponse, response.context)
           log.sentResponse(response.properties, protocol.name)
