@@ -100,16 +100,16 @@ lazy val core = source(project, "core", meta, testPlugin % Test)
 
 // Effect system
 lazy val standard = source(project, "system/standard", core, testPlugin % Test, testRpc % Test)
-lazy val zio = source(project, "system/zio", core, testTransport % Test).settings(
+lazy val zio = source(project, "system/zio", core, testPlugin % Test).settings(
   libraryDependencies += "dev.zio" %% "zio" % "2.0.10"
 )
-lazy val monix = source(project, "system/monix", core, testTransport % Test).settings(
+lazy val monix = source(project, "system/monix", core, testPlugin % Test).settings(
   libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1"
 )
-lazy val catsEffect = source(project, "system/cats-effect", core, testTransport % Test).settings(
+lazy val catsEffect = source(project, "system/cats-effect", core, testPlugin % Test).settings(
   libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8"
 )
-lazy val scalazEffect = source(project, "system/scalaz-effect", core, testTransport % Test).settings(
+lazy val scalazEffect = source(project, "system/scalaz-effect", core, testPlugin % Test).settings(
   libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13"
 )
 
