@@ -283,9 +283,11 @@ final case class HttpClient[Effect[_]](
           val responseBody = buffers match {
             case ArrayBuffer(buffer) => buffer.toByteArray
             case _ =>
-              val result = ByteBuffer.allocate(buffers.map(_.capacity).sum)
-              buffers.foreach(result.put)
-              result.toByteArray
+              val response = ByteBuffer.allocate(buffers.map(_.capacity).sum)
+              buffers.foreach(response.put)
+              println(response.capacity)
+              println(response.asString)
+              response.toByteArray
           }
           buffers.clear()
           response.succeed((responseBody, None, Seq())).runAsync
