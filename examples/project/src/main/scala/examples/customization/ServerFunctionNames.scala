@@ -1,8 +1,6 @@
 package examples.customization
 
 import automorph.Default
-import automorph.Default.SyncEffect
-
 import java.net.URI
 import scala.util.Try
 
