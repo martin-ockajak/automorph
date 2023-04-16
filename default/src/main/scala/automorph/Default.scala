@@ -83,7 +83,7 @@ object Default extends DefaultRpcProtocol {
    *   asynchronous RPC client
    */
   def rpcClientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
-                                                                     executionContext: ExecutionContext
+    executionContext: ExecutionContext
   ): RpcClient[Node, Codec, AsyncEffect, ClientContext] =
     RpcClient(clientTransport(effectSystemAsync, url, method), rpcProtocol)
 
