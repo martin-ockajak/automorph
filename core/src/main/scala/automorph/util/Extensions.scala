@@ -76,20 +76,6 @@ private[automorph] case object Extensions {
         data.get(array)
         array
       }
-
-    /** Converts this byte buffer to input stream. */
-    def toInputStream: InputStream =
-      if (data.hasArray) {
-        data.array.toInputStream
-      } else {
-        val array = Array.ofDim[Byte](data.remaining)
-        data.get(array)
-        array.toInputStream
-      }
-
-    /** Converts this byte buffer using UTF-8 character encoding. */
-    def asString: String =
-      data.toByteArray.asString
   }
 
   implicit class InputStreamOps(data: InputStream) {
@@ -111,14 +97,6 @@ private[automorph] case object Extensions {
         case _ => toByteArray(None)
       }
 
-    /** Converts this input stream to byte buffer. */
-    def toByteBuffer: ByteBuffer =
-      ByteBuffer.wrap(data.toByteArray)
-
-    /** Converts this input stream using UTF-8 character encoding. */
-    def asString: String =
-      data.toByteArray.asString
-
     private def toByteArray(length: Option[Int]): Array[Byte] = {
       val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
       val buffer = Array.ofDim[Byte](bufferSize)
@@ -139,14 +117,6 @@ private[automorph] case object Extensions {
     /** Converts this string to byte array using UTF-8 character encoding. */
     def toByteArray: Array[Byte] =
       data.getBytes(charset)
-
-    /** Converts this string to input stream using UTF-8 character encoding. */
-    def toInputStream: InputStream =
-      ArrayInputStream(data.getBytes(charset))
-
-    /** Converts this input stream to byte buffer using UTF-8 character encoding. */
-    def toByteBuffer: ByteBuffer =
-      ByteBuffer.wrap(data.toByteArray)
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {
