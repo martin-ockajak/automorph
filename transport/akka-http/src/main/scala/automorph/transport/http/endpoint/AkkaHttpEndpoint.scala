@@ -129,7 +129,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): (HttpResponse, ListMap[String, String]) = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toArray[Byte]
+    val responseBody = error.description.toByteArray
     createResponse(responseBody, StatusCodes.InternalServerError, contentType, None, remoteAddress, requestId)
   }
 
