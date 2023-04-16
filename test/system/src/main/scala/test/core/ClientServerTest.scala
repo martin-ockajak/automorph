@@ -29,12 +29,8 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
   private def acquirePort: Int =
     ClientServerTest.usedPorts.synchronized {
       val port = availablePort(portRange, ClientServerTest.usedPorts.toSet)
-      if (ClientServerTest.usedPorts.contains(port)) {
-        acquirePort
-      } else {
-        ClientServerTest.usedPorts.add(port)
-        port
-      }
+      ClientServerTest.usedPorts.add(port)
+      port
     }
 
   private def releasePort(port: Int): Unit =
