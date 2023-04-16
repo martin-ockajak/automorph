@@ -10,7 +10,6 @@ import automorph.spi.{MessageCodec, protocol}
 import automorph.spi.protocol.{ApiSchema, ParseError}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.ThrowableOps
-import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -78,7 +77,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   }
 
   override def parseRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
   ): Either[ParseError[Metadata], protocol.Request[Node, Metadata, Context]] =
@@ -105,7 +104,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     }
 
   private def retrieveRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
   ): Either[ParseError[Metadata], Request[Node]] =
     requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
@@ -159,7 +158,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
   ): Either[ParseError[Metadata], protocol.Response[Node, Metadata]] =
     // Deserialize response

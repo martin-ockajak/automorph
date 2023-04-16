@@ -29,7 +29,7 @@ with existing systems by freely combining its various plugins:
 ![RPC client & endpoint](images/architecture-endpoint.jpg)
 
 
-## RPC client
+## [RPC client](/api/automorph/RpcClient.html)
 
 Used to perform type-safe remote API calls or send one-way messages.
 
@@ -38,7 +38,7 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 
 **Depends on**
 
-* [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
+* [Client transport](/api/automorph/spi/ClientTransport.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 **Used by**
@@ -46,16 +46,16 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 * Applications
 
 
-## RPC server
+## [RPC server](/api/automorph/RpcServer.html)
 
-Used to serve remote API requests using specific message transport protocol and invoke bound API
+Used to serve remote API requests using specific transport protocol and invoke bound API
 methods to process them.
 
 Automatically derives remote API bindings for existing API instances.
 
 **Depends on**
 
-* [Server message transport](/api/automorph/spi/ServerMessageTransport.html)
+* [Server transport](/api/automorph/spi/ServerTransport.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 **Used by**
@@ -63,16 +63,16 @@ Automatically derives remote API bindings for existing API instances.
 * Applications
 
 
-## RPC endpoint
+## [RPC endpoint](/api/automorph/RpcEndpoint.html)
 
-Integrates with an existing message transport layer to receive remote API requests using
-specific message transport protocol and invoke bound API methods to process them.
+Integrates with an existing server to receive remote API requests using
+specific transport protocol and invoke bound API methods to process them.
 
 Automatically derives remote API bindings for existing API instances.
 
 **Depends on**
 
-* [Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html)
+* [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 * [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 **Used by**
@@ -109,7 +109,7 @@ The underlying runtime must support monadic composition of effectful values.
 * [Server transport](/api/automorph/spi/ServerTransport.html)
 * [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
-### [Message codec](/api/automorph/spi/MessageCodec.html)
+## [Message codec](/api/automorph/spi/MessageCodec.html)
 
 Structured message format codec plugin.
 
@@ -122,9 +122,9 @@ The underlying data format must support storing arbitrarily nested structures of
 The underlying transport protocol must support request/response messaging pattern.
 
 
-## [Client transport](/api/automorph/spi/transport/ClientTransport.html)
+## [Client transport](/api/automorph/spi/ClientTransport.html)
 
-Client message transport protocol plugin.
+Client transport protocol plugin.
 
 Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
 
@@ -134,12 +134,12 @@ Passively sends requests and receives responses to and from a remote endpoint us
 
 **Used by**
 
-* [Client](/api/automorph/RpcClientMessageTransport.html)
+* [Client](/api/automorph/RpcClientTransport.html)
 
 
-## [Server transport](/api/automorph/spi/transport/ServerTransport.html)
+## [Server transport](/api/automorph/spi/ServerTransport.html)
 
-Server message transport protocol plugin.
+Server transport protocol plugin.
 
 Actively receives requests to be processed by the RPC handler and sends responses using specific transport protocol.
 
@@ -152,11 +152,11 @@ Actively receives requests to be processed by the RPC handler and sends response
 * Applications
 
 
-## [Endpoint transport](/api/automorph/spi/transport/EndpointTransport.html)
+## [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
-Existing server layer integration plugin.
+Existing transport protocol server integration plugin.
 
-Passively parses requests to be processed by the RPC handler and creates responses for specific transport protocol.
+Passively parses requests to be processed by the RPC handler and creates responses for specific server.
 
 **Depends on**
 

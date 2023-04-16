@@ -1,7 +1,6 @@
 package automorph.spi
 
 import automorph.spi.codec.MessageCodecMeta
-import java.io.InputStream
 
 /**
  * Structured message format codec plugin.
@@ -24,7 +23,7 @@ trait MessageCodec[Node] extends MessageCodecMeta[Node] {
    * @return
    *   binary data in the specific codec
    */
-  def serialize(node: Node): InputStream
+  def serialize(node: Node): Array[Byte]
 
   /**
    * Deserializes a node from binary data.
@@ -34,7 +33,7 @@ trait MessageCodec[Node] extends MessageCodecMeta[Node] {
    * @return
    *   node
    */
-  def deserialize(data: InputStream): Node
+  def deserialize(data: Array[Byte]): Node
 
   /**
    * Formats a node as human-readable text.

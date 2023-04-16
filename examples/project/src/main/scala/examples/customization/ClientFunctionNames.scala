@@ -15,8 +15,8 @@ private[examples] case object ClientFunctionNames {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
-    val server = Default.serverSync(7000, "/api").bind(api).init()
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    val server = Default.rpcServerSync(7000, "/api").bind(api).init()
 
     // Define client view of the remote API
     trait ClientApi {
@@ -26,8 +26,8 @@ private[examples] case object ClientFunctionNames {
       def hi(some: String, n: Int): String
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    val client = Default.rpcClientSync(new URI("http://localhost:7000/api")).init()
 
     // Customize invoked API to RPC function name mapping
     val mapName = (name: String) => name match {
@@ -47,7 +47,7 @@ private[examples] case object ClientFunctionNames {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }

@@ -8,8 +8,8 @@ import scala.collection.immutable.ListMap
 /**
  * RPC endpoint.
  *
- * Integrates with an existing message transport layer to receive remote API requests using
- * specific message transport protocol and invoke bound API methods to process them.
+ * Integrates with an existing server to receive remote API requests using
+ * specific transport protocol and invoke bound API methods to process them.
  *
  * Automatically derives remote API bindings for existing API instances.
  *
@@ -75,7 +75,7 @@ case object RpcEndpoint {
    * @constructor
    *   Creates a new RPC endpoint builder.
    * @param transport
-   *   message transport plugin
+   *   server integration plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -136,7 +136,7 @@ case object RpcEndpoint {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   transport layer transport plugin
+   *   transport protocol server plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

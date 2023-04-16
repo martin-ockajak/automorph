@@ -9,7 +9,7 @@ private[examples] case object EffectSystem {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate ZIO tasks
+    // Helper function to evaluate ZIO tasks
     def run[T](effect: Task[T]): T = Unsafe.unsafe { implicit unsafe =>
       ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
     }
@@ -24,20 +24,20 @@ private[examples] case object EffectSystem {
     // Create ZIO effect system plugin
     val effectSystem = ZioSystem.default
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
-    val server = run(Default.server(effectSystem, 7000, "/api").bind(api).init())
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    val server = run(Default.rpcServer(effectSystem, 7000, "/api").bind(api).init())
 
     // Define client view of the remote API
     trait ClientApi {
       def hello(some: String, n: Int): Task[String]
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = run(
-      Default.client(effectSystem, new URI("http://localhost:7000/api")).init()
+      Default.rpcClient(effectSystem, new URI("http://localhost:7000/api")).init()
     )
 
-    // Call the remote APi function via proxy
+    // Call the remote API function statically
     val remoteApi = client.bind[ClientApi]
     println(run(
       remoteApi.hello("world", 1)
@@ -46,7 +46,7 @@ private[examples] case object EffectSystem {
     // Close the RPC client
     run(client.close())
 
-    // Stop the RPC server
+    // Close the RPC server
     run(server.close())
   }
 }

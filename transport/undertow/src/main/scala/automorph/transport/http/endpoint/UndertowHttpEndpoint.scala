@@ -4,14 +4,13 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
-import java.io.{IOException, InputStream}
-import java.io.InputStream.nullInputStream
+import java.io.IOException
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
@@ -68,14 +67,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
           override def run(): Unit =
             // Process the request
             Try {
-              val requestBody = message.toInputStream
+              val requestBody = message.toArray[Byte]
               val response = handler.processRequest(requestBody, getRequestContext(exchange), requestId)
               response.either.map(
                 _.fold(
                   error => sendErrorResponse(error, exchange, requestId, requestProperties),
                   result => {
                     // Send the response
-                    val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+                    val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
                     val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
                     sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
                   },
@@ -107,13 +106,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toInputStream
+    val responseBody = error.description.toByteArray
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(responseBody, statusCode, None, exchange, requestId)
   }
 
   private def sendResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     statusCode: Int,
     responseContext: Option[Context],
     exchange: HttpServerExchange,

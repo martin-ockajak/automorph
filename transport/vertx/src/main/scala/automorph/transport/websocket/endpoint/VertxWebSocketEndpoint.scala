@@ -4,13 +4,11 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
-import java.io.InputStream
-import java.io.InputStream.nullInputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
@@ -59,7 +57,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     session.binaryMessageHandler { buffer =>
       // Process the request
       Try {
-        val requestBody = buffer.getBytes.toInputStream
+        val requestBody = buffer.getBytes.toArray[Byte]
         log.receivedRequest(requestProperties)
         val handlerResult = handler.processRequest(requestBody, getRequestContext(session), requestId)
         handlerResult.either.map(
@@ -67,7 +65,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
             error => sendErrorResponse(error, session, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(nullInputStream())
+              val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
               sendResponse(responseBody, session, requestId)
             },
           )
@@ -86,17 +84,17 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toInputStream
+    val responseBody = error.description.toByteArray
     sendResponse(responseBody, session, requestId)
   }
 
-  private def sendResponse(responseBody: InputStream, session: ServerWebSocket, requestId: String): Unit = {
+  private def sendResponse(responseBody: Array[Byte], session: ServerWebSocket, requestId: String): Unit = {
     // Log the response
     lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(session))
     log.sendingResponse(responseProperties)
 
     // Send the response
-    session.writeBinaryMessage(Buffer.buffer(responseBody.toArrayClose)).onSuccess { _ =>
+    session.writeBinaryMessage(Buffer.buffer(responseBody)).onSuccess { _ =>
       log.sentResponse(responseProperties)
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)

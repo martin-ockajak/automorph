@@ -8,7 +8,7 @@ import scala.collection.immutable.ListMap
 /**
  * RPC server.
  *
- * Used to serve remote API requests using specific message transport protocol and invoke bound API
+ * Used to serve remote API requests using specific transport protocol protocol and invoke bound API
  * methods to process them.
  *
  * Automatically derives remote API bindings for existing API instances.
@@ -18,7 +18,7 @@ import scala.collection.immutable.ListMap
  * @param rpcProtocol
  *   RPC protocol plugin
  * @param transport
- *   server message transport plugin
+ *   server transport protocol plugin
  * @param handler
  *   RPC request handler
  * @param functions
@@ -87,7 +87,7 @@ case object RpcServer {
    * @constructor
    *   Creates a new RPC server builder.
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -117,7 +117,7 @@ case object RpcServer {
    * Creates a RPC server with specified protocol and transport plugins supporting corresponding message context type.
    *
    * @param transport
-   *   server message transport plugin
+   *   server transport protocol plugin
    * @param protocol
    *   RPC protocol plugin
    * @tparam Node
@@ -142,7 +142,7 @@ case object RpcServer {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

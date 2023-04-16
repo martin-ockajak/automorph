@@ -2,9 +2,8 @@ package automorph.codec.json
 
 import automorph.codec.json.meta.CirceJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}
-import automorph.util.Extensions.{InputStreamOps, StringOps}
-import io.circe.{parser, Decoder, Encoder, Json}
-import java.io.InputStream
+import automorph.util.Extensions.{ByteArrayOps, StringOps}
+import io.circe.{Decoder, Encoder, Json, parser}
 
 /**
  * Circe JSON message codec plugin.
@@ -22,10 +21,10 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
 
   override val mediaType: String = "application/json"
 
-  override def serialize(node: Json): InputStream =
-    node.dropNullValues.noSpaces.toInputStream
+  override def serialize(node: Json): Array[Byte] =
+    node.dropNullValues.noSpaces.toByteArray
 
-  override def deserialize(data: InputStream): Json =
+  override def deserialize(data: Array[Byte]): Json =
     parser.decode[Json](data.asString).toTry.get
 
   override def text(node: Json): String =
