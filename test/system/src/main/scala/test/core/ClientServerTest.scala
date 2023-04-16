@@ -16,27 +16,16 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
   }
 
   def portRange: Range =
-    Range(30000, 64000)
+    Range(10000, 20000)
 
   def webSocket: Boolean =
     false
-
-  override def afterAll(): Unit = {
-    super.afterAll()
-    ports.values.foreach(releasePort)
-  }
 
   private def acquirePort: Int =
     ClientServerTest.usedPorts.synchronized {
       val port = availablePort(portRange, ClientServerTest.usedPorts.toSet)
       ClientServerTest.usedPorts.add(port)
       port
-    }
-
-  private def releasePort(port: Int): Unit =
-    ClientServerTest.usedPorts.synchronized {
-      ClientServerTest.usedPorts.remove(port)
-      ()
     }
 }
 

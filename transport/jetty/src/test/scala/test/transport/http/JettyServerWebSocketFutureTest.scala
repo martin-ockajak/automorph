@@ -32,4 +32,7 @@ class JettyServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def webSocket: Boolean =
     true
+
+  override def portRange: Range =
+    Range(40000, 45000)
 }

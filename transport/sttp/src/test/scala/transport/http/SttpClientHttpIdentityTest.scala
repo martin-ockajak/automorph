@@ -25,4 +25,7 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, HttpURLConnectionBackend(), url(id), HttpMethod.Post)
+
+  override def portRange: Range =
+    Range(20000, 25000)
 }

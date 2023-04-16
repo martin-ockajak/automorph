@@ -29,4 +29,7 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override def webSocket: Boolean =
     true
+
+  override def portRange: Range =
+    Range(20000, 25000)
 }

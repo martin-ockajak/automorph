@@ -30,4 +30,7 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
 
   override def testServerClose: Boolean =
     false
+
+  override def portRange: Range =
+    Range(35000, 40000)
 }

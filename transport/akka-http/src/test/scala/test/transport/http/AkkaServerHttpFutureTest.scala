@@ -30,5 +30,5 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
     AkkaHttpEndpoint(system)
 
   override def portRange: Range =
-    Range(20000, 30000)
+    Range(45000, 50000)
 }

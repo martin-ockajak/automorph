@@ -34,4 +34,7 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def webSocket: Boolean =
     true
+
+  override def portRange: Range =
+    Range(35000, 40000)
 }

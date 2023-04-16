@@ -29,6 +29,9 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     FinagleHttpEndpoint(system)
+
+  override def portRange: Range =
+    Range(45000, 50000)
 }
 
 case object FinagleEndpointHttpFutureTest {

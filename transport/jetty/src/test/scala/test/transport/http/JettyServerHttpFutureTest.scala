@@ -29,4 +29,7 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     JettyHttpEndpoint(system)
+
+  override def portRange: Range =
+    Range(40000, 45000)
 }
