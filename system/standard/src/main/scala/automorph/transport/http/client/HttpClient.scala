@@ -285,8 +285,6 @@ final case class HttpClient[Effect[_]](
             case _ =>
               val response = ByteBuffer.allocate(buffers.map(_.capacity).sum)
               buffers.foreach(response.put)
-              println(response.capacity)
-              println(response.asString)
               response.toByteArray
           }
           buffers.clear()
