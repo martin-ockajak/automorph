@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.server.NanoHTTPD.Response.{IStatus, Status}
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.{Context, ServerResponse}
+import automorph.transport.http.server.NanoServer.{Context, HttpResponse}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -185,7 +185,7 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestProperties: => Map[String, String],
     requestId: String,
-  ): Effect[ServerResponse] = {
+  ): Effect[HttpResponse] = {
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
@@ -213,7 +213,7 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestId: String,
     requestProperties: => Map[String, String],
-  ): ServerResponse = {
+  ): HttpResponse = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
     val message = error.description.toByteArray
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
@@ -226,7 +226,7 @@ final case class NanoServer[Effect[_]] (
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
-  ): ServerResponse = {
+  ): HttpResponse = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
     lazy val responseProperties = Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(session)) ++
@@ -235,7 +235,7 @@ final case class NanoServer[Effect[_]] (
         case _ => None
       })
     log.sendingResponse(responseProperties, protocol.name)
-    ServerResponse(responseBody, responseStatus, responseContext, responseProperties)
+    HttpResponse(responseBody, responseStatus, responseContext, responseProperties)
   }
 
   private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
@@ -282,7 +282,7 @@ case object NanoServer {
   /** Request context type. */
   type Context = HttpContext[IHTTPSession]
 
-  private final case class ServerResponse(
+  private final case class HttpResponse(
     body: Array[Byte],
     status: IStatus,
     context: Option[Context],
