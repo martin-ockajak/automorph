@@ -15,7 +15,7 @@ private[examples] case object MessageCodec {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create uPickle message codec for JSON format
@@ -41,7 +41,7 @@ private[examples] case object MessageCodec {
     // Create HTTP & WebSocket server transport listening on port 7000 for requests to '/api'
     val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-    // Start JSON-RPC HTTP & WebSocket server
+    // Initialize JSON-RPC HTTP & WebSocket server
     val server = run(
       RpcServer.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
     )
@@ -56,10 +56,10 @@ private[examples] case object MessageCodec {
       messageCodec
     )
 
-    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup JSON-RPC HTTP & WebSocket client
+    // Initialize JSON-RPC HTTP client
     val client = run(
       RpcClient.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
     )

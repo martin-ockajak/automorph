@@ -11,7 +11,7 @@ private[examples] case object AsynchronousCall {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
@@ -21,9 +21,9 @@ private[examples] case object AsynchronousCall {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST or PUT requests to '/api'
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for POST or PUT requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put)).bind(api).init()
+      Default.rpcServerAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put)).bind(api).init()
     )
 
     // Define client view of the remote API
@@ -31,9 +31,9 @@ private[examples] case object AsynchronousCall {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending PUT requests to 'http://localhost:7000/api'
+    // Initialize JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
     val client = run(
-      Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put).init()
+      Default.rpcClientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put).init()
     )
 
     // Call the remote API function statically

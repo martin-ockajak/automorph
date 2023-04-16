@@ -10,7 +10,7 @@ private[examples] case object PositionalArguments {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
@@ -20,9 +20,9 @@ private[examples] case object PositionalArguments {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for POST requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api").bind(api).init(),
+      Default.rpcServerAsync(7000, "/api").bind(api).init(),
     )
 
     // Define client view of the remote API
@@ -33,10 +33,10 @@ private[examples] case object PositionalArguments {
     // Configure JSON-RPC to pass arguments by position instead of by name
     val rpcProtocol = Default.rpcProtocol[Default.ClientContext].namedArguments(false)
 
-    // Create HTTP & WebSocket client transport sending POST requests to 'http://localhost:7000/api'
+    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
 
-    // Setup JSON-RPC HTTP & WebSocket client
+    // Initialize JSON-RPC HTTP client
     val client = run(
       RpcClient.transport(clientTransport).rpcProtocol(rpcProtocol).init()
     )

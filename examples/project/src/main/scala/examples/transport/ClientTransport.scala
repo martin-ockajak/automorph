@@ -15,8 +15,8 @@ private[examples] case object ClientTransport {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 80 for requests to '/api'
-    val server = Default.serverSync(7000, "/api").bind(api).init()
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 80 for requests to '/api'
+    val server = Default.rpcServerSync(7000, "/api").bind(api).init()
 
     // Define client view of the remote API
     trait ClientApi {

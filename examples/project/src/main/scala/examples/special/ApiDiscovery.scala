@@ -12,7 +12,7 @@ private[examples] case object ApiDiscovery {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
@@ -22,14 +22,14 @@ private[examples] case object ApiDiscovery {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server with API discovery listening on port 7000 for POST requests to '/api'
+    // Initialize JSON-RPC HTTP & WebSocket server with API discovery listening on port 7000 for POST requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api").discovery(true).bind(api).init()
+      Default.rpcServerAsync(7000, "/api").discovery(true).bind(api).init()
     )
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = run(
-      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+      Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
     )
 
     // Retrieve the remote API schema in OpenRPC format

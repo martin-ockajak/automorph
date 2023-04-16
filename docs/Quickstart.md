@@ -44,13 +44,12 @@ Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
 ```scala
 import automorph.Default
-import io.circe.generic.auto.*
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// Define a helper function to evaluate Futures
+// Helper function to evaluate Futures
 def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
 // Create server API instance
@@ -60,9 +59,9 @@ class ServerApi {
 }
 val api = new ServerApi
 
-// Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+// Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
 val server = run(
-  Default.serverAsync(7000, "/api").bind(api).init()
+  Default.rpcServerAsync(7000, "/api").bind(api).init()
 )
 
 // Stop the RPC server
@@ -75,13 +74,12 @@ Call the remote API instance via proxy created from API type using JSON-RPC over
 
 ```scala
 import automorph.Default
-import io.circe.generic.auto.*
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// Define a helper function to evaluate Futures
+// Helper function to evaluate Futures
 def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
 // Define client view of the remote API
@@ -89,9 +87,9 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
+// Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = run(
-  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+  Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
 )
 
 // Call the remote API function statically
@@ -115,12 +113,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// Define a helper function to evaluate Futures
+// Helper function to evaluate Futures
 def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
-// Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
+// Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = run(
-  Default.clientAsync(new URI("http://localhost:7000/api")).init()
+  Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
 )
 
 // Call the remote API function dynamically

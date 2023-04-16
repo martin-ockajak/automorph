@@ -18,7 +18,7 @@ private[examples] case object AmqpTransport {
   def main(arguments: Array[String]): Unit = {
     if (Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
 
-      // Define a helper function to evaluate Futures
+      // Helper function to evaluate Futures
       def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
       // Create server API instance
