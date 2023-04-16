@@ -153,7 +153,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
     // Send the response
     val baseResponse = setResponseContext(HttpResponse(), responseContext)
     val response = baseResponse.withStatus(responseStatusCode).withHeaders(baseResponse.headers)
-      .withEntity(contentType, responseBody.toByteArray)
+      .withEntity(contentType, responseBody)
     response -> responseProperties
   }
 
