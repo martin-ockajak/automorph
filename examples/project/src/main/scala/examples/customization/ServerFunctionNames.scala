@@ -1,6 +1,8 @@
 package examples.customization
 
 import automorph.Default
+import automorph.Default.SyncEffect
+
 import java.net.URI
 import scala.util.Try
 
@@ -31,8 +33,8 @@ private[examples] case object ServerFunctionNames {
       case other => Seq(s"test.$other")
     }
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
-    val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    val server = Default.rpcServerSync(7000, "/api").bind(api, mapName).init()
 
     // Define client view of the remote API
     trait ClientApi {
@@ -41,8 +43,8 @@ private[examples] case object ServerFunctionNames {
       def hi(some: String, n: Int): String
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    val client = Default.rpcClientSync(new URI("http://localhost:7000/api")).init()
 
     // Call the remote API function statically
     val remoteApi = client.bind[ClientApi]
@@ -66,7 +68,7 @@ private[examples] case object ServerFunctionNames {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }

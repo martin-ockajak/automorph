@@ -21,8 +21,8 @@ private[examples] case object HttpRequest {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
-    val server = Default.serverSync(7000, "/api").bind(api).init()
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    val server = Default.rpcServerSync(7000, "/api").bind(api).init()
 
     // Define client view of the remote API
     trait ClientApi {
@@ -31,8 +31,8 @@ private[examples] case object HttpRequest {
       def hello(message: String)(implicit http: ClientContext): String
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    val client = Default.rpcClientSync(new URI("http://localhost:7000/api")).init()
 
     // Create client request context specifying HTTP request metadata
     implicit val httpRequest: ClientContext = client.context
@@ -55,7 +55,7 @@ private[examples] case object HttpRequest {
     // Close the RPC client
     client.close()
 
-    // Stop the RPC server
+    // Close the RPC server
     server.close()
   }
 }

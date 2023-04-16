@@ -52,7 +52,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   RPC client
    */
-  def client[Effect[_]](
+  def rpcClient[Effect[_]](
     effectSystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
@@ -82,7 +82,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   asynchronous RPC client
    */
-  def clientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
+  def rpcClientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
   ): RpcClient[Node, Codec, AsyncEffect, ClientContext] =
     RpcClient(clientTransport(effectSystemAsync, url, method), rpcProtocol)
@@ -108,7 +108,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   synchronous RPC client
    */
-  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): RpcClient[Node, Codec, SyncEffect, ClientContext] =
+  def rpcClientSync(url: URI, method: HttpMethod = HttpMethod.Post): RpcClient[Node, Codec, SyncEffect, ClientContext] =
     RpcClient(clientTransport(effectSystemSync, url, method), rpcProtocol)
 
   /**
@@ -174,7 +174,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   RPC server
    */
-  def server[Effect[_]](
+  def rpcServer[Effect[_]](
     effectSystem: EffectSystem[Effect],
     port: Int,
     path: String = "/",
@@ -214,7 +214,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   asynchronous RPC server
    */
-  def serverAsync(
+  def rpcServerAsync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -251,7 +251,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   synchronous RPC server
    */
-  def serverSync(
+  def rpcServerSync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,

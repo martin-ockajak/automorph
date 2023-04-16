@@ -10,7 +10,7 @@ private[examples] case object WebSocketTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
@@ -20,9 +20,9 @@ private[examples] case object WebSocketTransport {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api").bind(api).init()
+      Default.rpcServerAsync(7000, "/api").bind(api).init()
     )
 
     // Define client view of the remote API
@@ -30,8 +30,8 @@ private[examples] case object WebSocketTransport {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'ws://localhost:7000/api'
-    val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
+    // Initialize JSON-RPC WebSocket client sending requests to 'ws://localhost:7000/api'
+    val client = Default.rpcClientAsync(new URI("ws://localhost:7000/api"))
 
     // Call the remote API function via proxy
     val remoteApi = client.bind[ClientApi]
@@ -42,7 +42,7 @@ private[examples] case object WebSocketTransport {
     // Close the RPC client
     run(client.close())
 
-    // Stop the RPC server
+    // Close the RPC server
     run(server.close())
   }
 }
