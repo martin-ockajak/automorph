@@ -240,7 +240,7 @@ import scala.concurrent.{Await, Future}
 def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 ```
 
-** Custom Data types**
+**Custom data types**
 ```scala
 sealed abstract class State
 

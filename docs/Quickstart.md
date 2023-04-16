@@ -44,6 +44,7 @@ Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
 ```scala
 import automorph.Default
+import io.circe.generic.auto.*
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -74,6 +75,7 @@ Call the remote API instance via proxy created from API type using JSON-RPC over
 
 ```scala
 import automorph.Default
+import io.circe.generic.auto.*
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
