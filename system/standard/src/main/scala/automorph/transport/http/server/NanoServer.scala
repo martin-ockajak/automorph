@@ -2,15 +2,13 @@ package automorph.transport.http.server
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
-import automorph.transport.http.server.NanoHTTPD.Response.Status
+import automorph.transport.http.server.NanoHTTPD.Response.{IStatus, Status}
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.Context
+import automorph.transport.http.server.NanoServer.{Context, HandlerResponse}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{
-  ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps
-}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import java.io.IOException
 import java.net.URI
@@ -125,7 +123,16 @@ final case class NanoServer[Effect[_]] (
 
         // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
-          queue.add(response)
+          // Create the response
+          val httpResponse = newFixedLengthResponse(
+            response.status,
+            handler.mediaType,
+            response.body.toInputStream,
+            response.body.length,
+          )
+          setResponseContext(httpResponse, response.context)
+          log.sentResponse(response.properties, protocol.name)
+          queue.add(httpResponse)
         }.runAsync
       }
     }
@@ -156,11 +163,12 @@ final case class NanoServer[Effect[_]] (
         val protocol = Protocol.WebSocket
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-        val request = frame.getBinaryPayload
+        val requestBody = frame.getBinaryPayload
 
         // Handle the request
-        handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
-          send(response.getData.toByteArray)
+        handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
+          send(response.body)
+          log.sentResponse(response.properties, protocol.name)
         }.runAsync
       }
 
@@ -177,7 +185,7 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestProperties: => Map[String, String],
     requestId: String,
-  ): Effect[Response] = {
+  ): Effect[HandlerResponse] = {
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
@@ -205,7 +213,7 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestId: String,
     requestProperties: => Map[String, String],
-  ): Response = {
+  ): HandlerResponse = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
     val message = error.description.toByteArray
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
@@ -218,7 +226,7 @@ final case class NanoServer[Effect[_]] (
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
-  ): Response = {
+  ): HandlerResponse = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
     lazy val responseProperties = Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(session)) ++
@@ -227,17 +235,7 @@ final case class NanoServer[Effect[_]] (
         case _ => None
       })
     log.sendingResponse(responseProperties, protocol.name)
-
-    // Create the response
-    val response = newFixedLengthResponse(
-      responseStatus,
-      handler.mediaType,
-      responseBody.toInputStream,
-      responseBody.length,
-    )
-    setResponseContext(response, responseContext)
-    log.sentResponse(responseProperties, protocol.name)
-    response
+    HandlerResponse(responseBody, responseStatus, responseContext, responseProperties)
   }
 
   private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
@@ -284,6 +282,10 @@ case object NanoServer {
   /** Request context type. */
   type Context = HttpContext[IHTTPSession]
 
-  /** Response type. */
-  type Response = NanoHTTPD.Response
+  private final case class HandlerResponse(
+    body: Array[Byte],
+    status: IStatus,
+    context: Option[Context],
+    properties: Map[String, String]
+  )
 }

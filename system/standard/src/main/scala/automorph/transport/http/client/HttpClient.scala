@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
-import automorph.transport.http.client.HttpClient.{Context, TransportContext, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, Response, TransportContext, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps}
 import java.net.URI
@@ -53,8 +53,6 @@ final case class HttpClient[Effect[_]](
   builder: Builder = defaultBuilder,
 ) extends ClientTransport[Effect, Context] with Logging {
 
-  private type Response = (Array[Byte], Option[Int], Seq[(String, String)])
-
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
@@ -83,9 +81,8 @@ final case class HttpClient[Effect[_]](
             effectSystem.failed(error)
           },
           response => {
-            val (responseBody, statusCode, _) = response
-            log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
-            effectSystem.successful(responseBody -> getResponseContext(response))
+            log.receivedResponse(responseProperties ++ response.statusCode.map("Status" -> _.toString), protocol.name)
+            effectSystem.successful(response.body -> getResponseContext(response))
           },
         )
       }
@@ -112,8 +109,7 @@ final case class HttpClient[Effect[_]](
     effectSystem.successful{}
 
   private def getResponseContext(response: Response): Context = {
-    val (_, statusCode, headers) = response
-    statusCode.map(context.statusCode).getOrElse(context).headers(headers*)
+    response.statusCode.map(context.statusCode).getOrElse(context).headers(response.headers*)
   }
 
   private def send(
@@ -160,7 +156,7 @@ final case class HttpClient[Effect[_]](
 
   private def sendWebSocket(
     webSocketEffect: Effect[WebSocket],
-    resultEffect: Effect[(Array[Byte], Option[Int], Seq[(String, String)])],
+    resultEffect: Effect[Response],
     requestBody: Array[Byte],
   ): Effect[Response] =
     withCompletable(asyncSystem =>
@@ -171,7 +167,7 @@ final case class HttpClient[Effect[_]](
 
   private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) => values.asScala.map(name -> _) }
-    (response.body, Some(response.statusCode), headers)
+    Response(response.body, Some(response.statusCode), headers)
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
@@ -278,7 +274,6 @@ final case class HttpClient[Effect[_]](
       private val buffers = ArrayBuffer.empty[ByteBuffer]
 
       override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
-        buffers += data
         if (last) {
           val responseBody = buffers match {
             case ArrayBuffer(buffer) => buffer.toByteArray
@@ -288,7 +283,7 @@ final case class HttpClient[Effect[_]](
               response.toByteArray
           }
           buffers.clear()
-          response.succeed((responseBody, None, Seq())).runAsync
+          response.succeed(Response(responseBody, None, Seq.empty)).runAsync
         }
         super.onBinary(webSocket, data, last)
       }
@@ -334,4 +329,10 @@ object HttpClient {
     /** Implicit default context value. */
     implicit val defaultContext: HttpContext[TransportContext] = HttpContext()
   }
+
+  private final case class Response(
+    body: Array[Byte],
+    statusCode: Option[Int],
+    headers: Seq[(String, String)]
+  )
 }
