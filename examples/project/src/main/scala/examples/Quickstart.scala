@@ -30,7 +30,7 @@ private[examples] case object Quickstart {
       def hello(some: String, n: Int): Future[String]
     }
 
-    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    // Initialize JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
     val client = run(
       Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
     )

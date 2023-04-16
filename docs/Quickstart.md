@@ -87,7 +87,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Initialize JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
 )
@@ -116,7 +116,7 @@ import scala.concurrent.{Await, Future}
 // Helper function to evaluate Futures
 def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
-// Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Initialize JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
 val client = run(
   Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
 )
