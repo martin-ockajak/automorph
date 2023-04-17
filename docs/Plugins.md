@@ -64,7 +64,7 @@ object which provides a convenient way to create default plugin instances or com
 ## [Client transport](/api/automorph/spi/ClientTransport.html)
 
 | Class | Artifact | Library | Protocol |
-| --- | --- | --- |-------------------------------------------------------------------------------------------------------------------------|
+| --- | --- | --- | --- |
 | [HttpClient](/api/automorph/transport/http/client/HttpClient.html) (*Default*) | [automorph-core](https://mvnrepository.com/artifact/org.automorph/automorph-core) | [Standard](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) | [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [SttpClient](/api/automorph/transport/http/client/SttpClient.html)| [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) | |
 | -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [AsyncHttpClient](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
@@ -81,7 +81,7 @@ object which provides a convenient way to create default plugin instances or com
 ## [Server transport](/api/automorph/spi/ServerTransport.html)
 
 | Class | Artifact | Library | Protocol |
-| --- |---------------------------------------------------------------------------------------------|-------------------------------------------------------| --- |
+| --- | --- | --- |
 | [UndertowServer](/api/automorph/transport/http/server/UndertowServer.html) (*Default*) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [VertxServer](/api/automorph/transport/http/server/VertxServer.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [JettyServer](/api/automorph/transport/http/server/JettyServer.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
@@ -92,17 +92,17 @@ object which provides a convenient way to create default plugin instances or com
 
 ## [Endpoint transport](/api/automorph/spi/EndpointTransport.html)
 
-| Class                                                                                                    | Artifact                                                                                    | Library | Protocol |
-|----------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------| --- | --- |
-| [UndertowHttpEndpoint](/api/automorph/transport/http/endpoint/UndertowHttpEndpoint.html)                 | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| Class | Artifact | Library | Protocol |
+| --- | --- | --- |
+| [UndertowHttpEndpoint](/api/automorph/transport/http/endpoint/UndertowHttpEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [UndertowWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [TapirHttpEndpoint](/api/automorph/transport/http/endpoint/TapirHttpEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Finatra](https://tapir.softwaremill.com/en/latest/server/finatra.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
-| [VertxHttpEndpoint](/api/automorph/transport/http/endpoint/VertxHttpEndpoint.html)                       | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
-| [VertxWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/VertxWebSocketEndpoint.html)       | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [JettyHttpEndpoint](/api/automorph/transport/http/endpoint/JettyHttpEndpoint.html)                       | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
-| [JettyWebSocketEndpoint](/api/automorph/transport/http/endpoint/JettyWebSocketEndpoint.html)             | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/WebSocket) |
-| [AkkaHttpEndpoint](/api/automorph/transport/http/endpoint/AkkaHttpEndpoint.html)                         | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
-| [FinagleEndpoint](/api/automorph/transport/http/endpoint/FinagleHttpEndpoint.html)                       | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Netty](https://tapir.softwaremill.com/en/latest/server/netty.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| [VertxHttpEndpoint](/api/automorph/transport/http/endpoint/VertxHttpEndpoint.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| [VertxWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/VertxWebSocketEndpoint.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [JettyHttpEndpoint](/api/automorph/transport/http/endpoint/JettyHttpEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| [JettyWebSocketEndpoint](/api/automorph/transport/http/endpoint/JettyWebSocketEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/WebSocket) |
+| [AkkaHttpEndpoint](/api/automorph/transport/http/endpoint/AkkaHttpEndpoint.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| [FinagleEndpoint](/api/automorph/transport/http/endpoint/FinagleHttpEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [LocalEndpoint](/api/automorph/transport/local/endpoint/LocalEndpoint.html) | [automorph-core](https://mvnrepository.com/artifact/org.automorph/automorph-core) |  |  |
 
