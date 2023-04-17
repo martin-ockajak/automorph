@@ -10,7 +10,7 @@
 //import scala.concurrent.Future
 //import sttp.tapir.server.finatra.{FinatraRoute, FinatraServerInterpreter, TapirController}
 //import test.standard.StandardHttpServerTest
-//import test.transport.http.TapirFinatraHttpFutureTest.FinatraServer
+//import test.transport.http.TapirFinatraHttpFutureTest.TapirServer
 //
 //class TapirVertxHttpFutureTest extends StandardHttpServerTest {
 //
@@ -56,8 +56,7 @@
 //
 //    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.withHandler(handler)
-//      val tapirEndpoint = TapirHttpEndpoint[Future](effectSystem)
-//      val route = FinatraServerInterpreter().toRoute(tapirEndpoint.adapter)
+//      val route = FinatraServerInterpreter().toRoute(endpoint.adapter)
 //      server = FinatraHttpServer()
 //      this
 //    }
