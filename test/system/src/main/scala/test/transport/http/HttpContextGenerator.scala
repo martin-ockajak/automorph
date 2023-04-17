@@ -2,11 +2,12 @@ package test.transport.http
 
 import automorph.transport.http.{HttpContext, HttpMethod}
 import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import org.scalacheck.{Arbitrary, Gen}
 
 case object HttpContextGenerator {
 
-  private val charset = "UTF-8"
+  private val charset = StandardCharsets.UTF_8
   private val methods = Seq(HttpMethod.Post, HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete)
   private val maxItems = 16
   private val maxNameSize = 16
