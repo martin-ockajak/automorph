@@ -46,14 +46,7 @@
 //      endpoint = endpoint.withHandler(handler)
 //      val vertx = Vertx.vertx()
 //      val router = Router.router(vertx)
-////      router.route(HttpMethod.POST, "/").handler { context =>
-////        println(context.request().path())
-////        context.response().write("TEST")
-////        context.response().end()
-////      }
 //      VertxFutureServerInterpreter().route(endpoint.adapter)(router)
-//      println(router.getRoutes.get(0).getPath)
-//      println(router.getRoutes.get(0).methods())
 //      server = Some(vertx.createHttpServer().requestHandler(router))
 //      this
 //    }
