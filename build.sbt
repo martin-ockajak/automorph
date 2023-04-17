@@ -167,8 +167,8 @@ lazy val tapir = source(project, "transport/tapir", core, testTransport % Test).
     ("com.softwaremill.sttp.tapir" %% "tapir-finatra-server" % tapirVersion % Test).cross(CrossVersion.for3Use2_13)
       .exclude("com.softwaremill.sttp.tapir", "tapir-server_2.13")
       .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
-      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13")
-//    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
+      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13"),
+    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
@@ -231,14 +231,12 @@ lazy val examples = source(
 
 // Test
 ThisBuild / Test / testOptions += Tests.Argument("-oDF")
-val scribeVersion = "3.11.1"
 lazy val testBase = source(project, "test/base").settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.15",
     "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0",
-    "com.outr" %% "scribe-file" % scribeVersion,
-    "com.outr" %% "scribe-slf4j" % scribeVersion,
     "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
+    "ch.qos.logback" % "logback-classic" % "1.4.6",
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
