@@ -4,7 +4,6 @@ import automorph.spi.EffectSystem
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
-import java.util
 import scala.util.{Failure, Success, Try}
 
 /** Extension methods for utility types. */
@@ -54,7 +53,7 @@ private[automorph] case object Extensions {
 
     /** Converts this byte array to input stream. */
     def toInputStream: InputStream =
-      ArrayInputStream(data)
+      new ByteArrayInputStream(data)
 
     /** Converts this input stream to byte buffer. */
     def toByteBuffer: ByteBuffer =
@@ -84,19 +83,14 @@ private[automorph] case object Extensions {
     private val bufferSize = 4096
 
     /** Converts this input stream to byte array. */
-    def asByteArray(length: Int): Array[Byte] =
-      data match {
-        case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
-        case _ => toByteArray(Some(length))
-      }
+    def toByteArray: Array[Byte] =
+      toByteArray(None)
 
     /** Converts this input stream to byte array. */
-    def toByteArray: Array[Byte] =
-      data match {
-        case arrayInputStream: ArrayInputStream => arrayInputStream.data
-        case _ => toByteArray(None)
-      }
+    def asByteArray(length: Int): Array[Byte] =
+      toByteArray(Some(length))
 
+    /** Converts this input stream to byte array. */
     private def toByteArray(length: Option[Int]): Array[Byte] = {
       val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
       val buffer = Array.ofDim[Byte](bufferSize)
@@ -198,6 +192,4 @@ private[automorph] case object Extensions {
     def runAsync(implicit system: EffectSystem[Effect]): Unit =
       system.runAsync(effect)
   }
-
-  private final case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
 }
