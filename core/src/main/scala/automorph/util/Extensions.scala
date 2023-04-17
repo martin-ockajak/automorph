@@ -80,14 +80,13 @@ private[automorph] case object Extensions {
   implicit class InputStreamOps(data: InputStream) {
 
     /** Converts this input stream to byte array. */
-    def toByteArray: Array[Byte] = {
+    def toByteArray: Array[Byte] =
       try {
         data.readAllBytes()
       } finally {
         data.close()
       }
     }
-  }
 
   implicit class StringOps(data: String) {
 
