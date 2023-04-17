@@ -3,7 +3,7 @@ package automorph.transport.websocket.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
+  clientAddress, getRequestContext, getRequestProperties, pathComponents, pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint.{Context, EffectStreams, Request}
@@ -50,6 +50,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
   ServerEndpoint.Full[Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect]
 ] {
 
+  private val prefixPaths = pathComponents(pathPrefix)
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
@@ -62,7 +63,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
-    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
+    val pathEndpoint = pathEndpointInput(prefixPaths).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
     val inputEnpoint = pathEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
     val outputEndpoint = inputEnpoint.out(webSocketBody[Array[Byte], OctetStream, Array[Byte], OctetStream](streams))
     outputEndpoint.serverLogic { case (paths, queryParams, headers, clientIp) =>
@@ -73,8 +74,8 @@ final case class TapirWebSocketEndpoint[Effect[_]](
 
       // Process the request
       system.successful(Right { requestBody =>
-        val requestContext = getRequestContext(paths, queryParams, headers, None)
-        val handlerResult = handler.processRequest(requestBody.toArray[Byte], requestContext, requestId)
+        val requestContext = getRequestContext(prefixPaths ++ paths, queryParams, headers, None)
+        val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
         handlerResult.either.map(
           _.fold(
             error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
