@@ -1,6 +1,6 @@
 //package test.transport.websocket
 //
-//import automorph.spi.{EndpointTransport, ServerTransport}
+//import automorph.spi.{EffectSystem, EndpointTransport, ServerTransport}
 //import automorph.system.FutureSystem
 //import automorph.transport.http.server.VertxServer
 //import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
@@ -15,7 +15,7 @@
 //  type Effect[T] = Future[T]
 //  type Context = VertxServer.Context
 //
-//  override lazy val system: FutureSystem = FutureSystem()
+//  override lazy val system: EffectSystem[Effect] = FutureSystem()
 //
 //  override def run[T](effect: Effect[T]): T =
 //    await(effect)

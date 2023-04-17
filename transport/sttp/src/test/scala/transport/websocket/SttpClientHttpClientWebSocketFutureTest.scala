@@ -1,6 +1,6 @@
 package transport.websocket
 
-import automorph.spi.ClientTransport
+import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
@@ -16,7 +16,7 @@ class SttpClientHttpClientWebSocketFutureTest extends StandardHttpClientTest {
   type Effect[T] = Future[T]
   type Context = SttpClient.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
     await(effect)

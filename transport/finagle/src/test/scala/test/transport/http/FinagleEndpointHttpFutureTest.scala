@@ -16,7 +16,7 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   type Effect[T] = Future[T]
   type Context = FinagleHttpEndpoint.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
     await(effect)

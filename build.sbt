@@ -135,12 +135,14 @@ lazy val argonaut = source(project, "codec/argonaut", core, testCodec % Test).se
 // Client transport
 val sttpVersion = "3.8.15"
 val sttpHttpClientVersion = "3.5.2"
-lazy val sttp = source(project, "transport/sttp", core, testTransport % Test).settings(
+lazy val sttp = source(project, "transport/sttp", core, zio % Test, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "armeria-backend" % sttpVersion % Test,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test,
+    "com.softwaremill.sttp.client3" %% "httpclient-backend-zio" % sttpHttpClientVersion % Test
   )
 )
 val embeddedRabbitMqVersion = "1.5.0"
