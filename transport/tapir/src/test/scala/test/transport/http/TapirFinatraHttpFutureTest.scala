@@ -54,8 +54,8 @@
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
 //    private var server = Option.empty[HttpServer]
 //
-//    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
-//      endpoint = endpoint.clone(handler)
+//    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+//      endpoint = endpoint.withHandler(handler)
 //      val tapirEndpoint = TapirHttpEndpoint[Future](effectSystem)
 //      val route = FinatraServerInterpreter().toRoute(tapirEndpoint.adapter)
 //      server = FinatraHttpServer()

@@ -42,8 +42,8 @@
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
 //    private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
 //
-//    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
-//      endpoint = endpoint.clone(handler)
+//    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+//      endpoint = endpoint.withHandler(handler)
 //      this
 //    }
 //
