@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.transport.http.client.UrlClient.{Context, TransportContext}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
+import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
@@ -62,7 +62,7 @@ final case class UrlClient[Effect[_]](
         // Process the response
         log.receivingResponse(responseProperties)
         connection.getResponseCode
-        val responseBody = Option(connection.getErrorStream).getOrElse(connection.getInputStream).toByteArray
+        val responseBody = Option(connection.getErrorStream).getOrElse(connection.getInputStream).readAllBytes()
         log.receivedResponse(responseProperties + ("Status" -> connection.getResponseCode.toString))
         responseBody -> getResponseContext(connection)
       }

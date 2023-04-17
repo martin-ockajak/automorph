@@ -8,7 +8,7 @@ import automorph.transport.http.server.NanoServer.{Context, HttpResponse}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import java.io.IOException
 import java.net.URI
@@ -119,7 +119,7 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         log.receivingRequest(requestProperties, Protocol.Http.name)
-        val requestBody = session.getInputStream.asByteArray(session.getBodySize.toInt)
+        val requestBody = session.getInputStream.readNBytes(session.getBodySize.toInt)
 
         // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>

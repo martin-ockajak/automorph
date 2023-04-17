@@ -60,40 +60,45 @@ final case class TapirHttpEndpoint[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
-
-    // Define server endpoint inputs & outputs
-    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    val inputEndpoint = pathEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
-    val outputEnpoint = inputEndpoint.out(byteArrayBody).out(statusCode).out(header(contentType))
-    outputEnpoint.serverLogic {
-      case (requestBody, paths, queryParams, headers, clientIp) =>
-        // Log the request
-        val requestId = Random.id
-        lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
-        log.receivedRequest(requestProperties)
-
-        // Process the request
-        Try {
-          val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-          val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
-          handlerResult.either.map(
-            _.fold(
-              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
-              result => {
-                // Create the response
-                val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
-                val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
-                  .getOrElse(StatusCode.Ok)
-                createResponse(responseBody, status, clientIp, requestId, log)
-              },
-            )
-          )
-        }.foldError { error =>
-          effectSystem.evaluate(
-            createErrorResponse(error, clientIp, requestId, requestProperties, log)
-          )
-        }.map(Right.apply)
+    endpoint.method(Method.POST).in("/").in(paths).out(byteArrayBody).out(statusCode).serverLogic { paths =>
+      println("TEST")
+      println(paths)
+      system.successful(Right[Unit, (Array[Byte], StatusCode)]((Array.emptyByteArray, StatusCode.Ok)))
     }
+//
+//    // Define server endpoint inputs & outputs
+//    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
+//    val inputEndpoint = pathEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
+//    val outputEnpoint = inputEndpoint.out(byteArrayBody).out(statusCode).out(header(contentType))
+//    outputEnpoint.serverLogic {
+//      case (requestBody, paths, queryParams, headers, clientIp) =>
+//        // Log the request
+//        val requestId = Random.id
+//        lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
+//        log.receivedRequest(requestProperties)
+//
+//        // Process the request
+//        Try {
+//          val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
+//          val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
+//          handlerResult.either.map(
+//            _.fold(
+//              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
+//              result => {
+//                // Create the response
+//                val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
+//                val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
+//                  .getOrElse(StatusCode.Ok)
+//                createResponse(responseBody, status, clientIp, requestId, log)
+//              },
+//            )
+//          )
+//        }.foldError { error =>
+//          effectSystem.evaluate(
+//            createErrorResponse(error, clientIp, requestId, requestProperties, log)
+//          )
+//        }.map(Right.apply)
+//    }
   }
 
   override def withHandler(handler: RequestHandler[Effect, Context]): TapirHttpEndpoint[Effect] =
@@ -136,7 +141,8 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+//  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type Request = (List[String])
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r

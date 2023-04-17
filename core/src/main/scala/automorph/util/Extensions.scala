@@ -1,7 +1,7 @@
 package automorph.util
 
 import automorph.spi.EffectSystem
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
 import scala.util.{Failure, Success, Try}
@@ -75,35 +75,6 @@ private[automorph] case object Extensions {
         data.get(array)
         array
       }
-  }
-
-  implicit class InputStreamOps(data: InputStream) {
-
-    /** Input stream reading buffer size. */
-    private val bufferSize = 4096
-
-    /** Converts this input stream to byte array. */
-    def toByteArray: Array[Byte] =
-      toByteArray(None)
-
-    /** Converts this input stream to byte array. */
-    def asByteArray(length: Int): Array[Byte] =
-      toByteArray(Some(length))
-
-    /** Converts this input stream to byte array. */
-    private def toByteArray(length: Option[Int]): Array[Byte] = {
-      val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
-      val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(length.getOrElse(Int.MaxValue)) { remaining =>
-        data.read(buffer, 0, Math.min(remaining, buffer.length)) match {
-          case length if length >= 0 =>
-            outputStream.write(buffer, 0, length)
-            remaining - length
-          case _ => 0
-        }
-      }.takeWhile(_ > 0).lastOption
-      outputStream.toByteArray
-    }
   }
 
   implicit class StringOps(data: String) {
