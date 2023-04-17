@@ -14,14 +14,14 @@ case object HttpContextGenerator {
 
   private val header = for {
     name <- stringGenerator(1, maxNameSize, Gen.alphaNumChar)
-    value <- stringGenerator(0, maxValueSize, Gen.asciiPrintableChar)
+    value <- stringGenerator(0, maxValueSize, Gen.alphaNumChar)
   } yield (name, value)
 
   private val parameter = for {
-    name <- stringGenerator(1, maxNameSize, Gen.asciiPrintableChar).map { value =>
+    name <- stringGenerator(1, maxNameSize, Gen.alphaNumChar).map { value =>
       URLEncoder.encode(value, charset)
     }
-    value <- stringGenerator(0, maxValueSize, Gen.asciiPrintableChar).map { value =>
+    value <- stringGenerator(0, maxValueSize, Gen.alphaNumChar).map { value =>
       URLEncoder.encode(value, charset)
     }
   } yield (name, value)

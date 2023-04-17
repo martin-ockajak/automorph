@@ -7,11 +7,11 @@ import automorph.transport.http.client.SttpClient
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
+import sttp.client3.armeria.future.ArmeriaFutureBackend
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
 
-class SttpClientHttpFutureTest extends StandardHttpClientTest {
+class SttpClientArmeriaHttpFutureTest extends StandardHttpClientTest {
 
   type Effect[T] = Future[T]
   type Context = SttpClient.Context
@@ -25,7 +25,7 @@ class SttpClientHttpFutureTest extends StandardHttpClientTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    SttpClient.http(system, AsyncHttpClientFutureBackend(), url(id), HttpMethod.Post)
+    SttpClient.http(system, ArmeriaFutureBackend(), url(id), HttpMethod.Post)
 
   override def portRange: Range =
     Range(20000, 25000)

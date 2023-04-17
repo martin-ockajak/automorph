@@ -139,7 +139,7 @@ lazy val sttp = source(project, "transport/sttp", core, testTransport % Test).se
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
-    "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "armeria-backend" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
 )

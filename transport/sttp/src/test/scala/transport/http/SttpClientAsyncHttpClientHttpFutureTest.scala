@@ -1,30 +1,31 @@
 package transport.http
 
 import automorph.spi.ClientTransport
-import automorph.system.IdentitySystem
-import automorph.system.IdentitySystem.Identity
+import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
 import org.scalacheck.Arbitrary
-import sttp.client3.HttpURLConnectionBackend
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
 
-class SttpClientHttpIdentityTest extends StandardHttpClientTest {
+class SttpClientAsyncHttpClientHttpFutureTest extends StandardHttpClientTest {
 
-  type Effect[T] = Identity[T]
+  type Effect[T] = Future[T]
   type Context = SttpClient.Context
 
-  override lazy val system: IdentitySystem = IdentitySystem()
+  override lazy val system: FutureSystem = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
-    effect
+    await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    SttpClient.http(system, HttpURLConnectionBackend(), url(id), HttpMethod.Post)
+    SttpClient.http(system, AsyncHttpClientFutureBackend(), url(id), HttpMethod.Post)
 
   override def portRange: Range =
     Range(20000, 25000)
