@@ -48,7 +48,6 @@
 //    override def init(): Effect[Unit] = {
 //      NettyFutureServer().port(port).addEndpoint(endpoint.adapter).start().map { activeServer =>
 //        server = Some(activeServer)
-//        ()
 //      }
 //    }
 //
