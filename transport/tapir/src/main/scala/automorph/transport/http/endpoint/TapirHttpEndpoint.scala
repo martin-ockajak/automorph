@@ -61,38 +61,39 @@ final case class TapirHttpEndpoint[Effect[_]](
 
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 
-    // Define server endpoint
-    val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
-        case (requestBody, paths, queryParams, headers, clientIp) =>
-          // Log the request
-          val requestId = Random.id
-          lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
-          log.receivedRequest(requestProperties)
+    // Define server endpoint inputs & outputs
+    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
+    val inputEndpoint = pathEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
+    val outputEnpoint = inputEndpoint.out(byteArrayBody).out(statusCode).out(header(contentType))
+    outputEnpoint.serverLogic {
+      case (requestBody, paths, queryParams, headers, clientIp) =>
+        // Log the request
+        val requestId = Random.id
+        lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
+        log.receivedRequest(requestProperties)
 
-          // Process the request
-          Try {
-            val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-            val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
-            handlerResult.either.map(
-              _.fold(
-                error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
-                result => {
-                  // Create the response
-                  val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
-                  val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
-                    .getOrElse(StatusCode.Ok)
-                  createResponse(responseBody, status, clientIp, requestId, log)
-                },
-              )
+        // Process the request
+        Try {
+          val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
+          val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
+          handlerResult.either.map(
+            _.fold(
+              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
+              result => {
+                // Create the response
+                val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
+                val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
+                  .getOrElse(StatusCode.Ok)
+                createResponse(responseBody, status, clientIp, requestId, log)
+              },
             )
-          }.foldError { error =>
-            effectSystem.evaluate(
-              createErrorResponse(error, clientIp, requestId, requestProperties, log)
-            )
-          }.map(Right.apply)
-      }
+          )
+        }.foldError { error =>
+          effectSystem.evaluate(
+            createErrorResponse(error, clientIp, requestId, requestProperties, log)
+          )
+        }.map(Right.apply)
+    }
   }
 
   override def withHandler(handler: RequestHandler[Effect, Context]): TapirHttpEndpoint[Effect] =

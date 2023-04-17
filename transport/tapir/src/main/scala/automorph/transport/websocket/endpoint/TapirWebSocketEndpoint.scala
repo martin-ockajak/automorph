@@ -12,8 +12,9 @@ import automorph.util.Random
 import scala.collection.immutable.ListMap
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
+import sttp.tapir.CodecFormat.OctetStream
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams, webSocketBody}
+import sttp.tapir.{clientIp, endpoint, headers, paths, queryParams, webSocketBody}
 
 /**
  * Tapir WebSocket endpoint message transport plugin.
@@ -56,36 +57,36 @@ final case class TapirWebSocketEndpoint[Effect[_]](
     Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect
   ] = {
 
-    // Define server endpoint
+    // Define server endpoint inputs & outputs
     val streams = new EffectStreams[Effect] {
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
-    val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    publicEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](streams))
-      .serverLogic { case (paths, queryParams, headers, clientIp) =>
-        // Log the request
-        val requestId = Random.id
-        lazy val requestProperties = getRequestProperties(clientIp, None, requestId)
-        logger.debug("Received WebSocket request", requestProperties)
+    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
+    val inputEnpoint = pathEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
+    val outputEndpoint = inputEnpoint.out(webSocketBody[Array[Byte], OctetStream, Array[Byte], OctetStream](streams))
+    outputEndpoint.serverLogic { case (paths, queryParams, headers, clientIp) =>
+      // Log the request
+      val requestId = Random.id
+      lazy val requestProperties = getRequestProperties(clientIp, None, requestId)
+      logger.debug("Received WebSocket request", requestProperties)
 
-        // Process the request
-        system.successful(Right { requestBody =>
-          val requestContext = getRequestContext(paths, queryParams, headers, None)
-          val handlerResult = handler.processRequest(requestBody.toArray[Byte], requestContext, requestId)
-          handlerResult.either.map(
-            _.fold(
-              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
-              result => {
-                // Create the response
-                val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
-                createResponse(responseBody, clientIp, requestId, log)
-              },
-            )
+      // Process the request
+      system.successful(Right { requestBody =>
+        val requestContext = getRequestContext(paths, queryParams, headers, None)
+        val handlerResult = handler.processRequest(requestBody.toArray[Byte], requestContext, requestId)
+        handlerResult.either.map(
+          _.fold(
+            error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
+            result => {
+              // Create the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
+              createResponse(responseBody, clientIp, requestId, log)
+            },
           )
-        })
-      }
+        )
+      })
+    }
   }
 
   override def withHandler(handler: RequestHandler[Effect, Context]): TapirWebSocketEndpoint[Effect] =
