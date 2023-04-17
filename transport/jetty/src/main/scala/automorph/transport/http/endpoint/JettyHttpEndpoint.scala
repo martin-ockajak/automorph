@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, StringOps, InputStreamOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -58,7 +58,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(request, requestId)
       log.receivedRequest(requestProperties)
-      val requestBody = request.getInputStream.readAllBytes()
+      val requestBody = request.getInputStream.toByteArray
 
       // Process the request
       Try {
