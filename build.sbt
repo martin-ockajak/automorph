@@ -133,12 +133,13 @@ lazy val argonaut = source(project, "codec/argonaut", core, testCodec % Test).se
 )
 
 // Client transport
-val sttpVersion = "3.8.13"
+val sttpVersion = "3.8.15"
 val sttpHttpClientVersion = "3.5.2"
 lazy val sttp = source(project, "transport/sttp", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
 )
@@ -153,7 +154,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", core, testTransport % 
 )
 
 // Server transport
-val tapirVersion = "1.2.11"
+val tapirVersion = "1.2.12"
 lazy val tapir = source(project, "transport/tapir", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
@@ -164,12 +165,12 @@ lazy val tapir = source(project, "transport/tapir", core, testTransport % Test).
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.4.Final"
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.5.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, testTransport % Test).settings(
-  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.0"
+  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.1"
 )
-val jettyVersion = "11.0.14"
+val jettyVersion = "11.0.15"
 lazy val jetty = source(project, "transport/jetty", core, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,

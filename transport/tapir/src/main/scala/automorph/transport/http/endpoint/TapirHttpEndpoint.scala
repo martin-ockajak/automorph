@@ -163,10 +163,10 @@ case object TapirHttpEndpoint {
     }
   }
 
-  private[automorph] def pathEndpointInput(pathComponents: Seq[String]): Option[EndpointInput[Unit]] =
+  private[automorph] def pathEndpointInput(pathComponents: List[String]): Option[EndpointInput[Unit]] =
     pathComponents match {
-      case Seq() => None
-      case Seq(head, tail*) =>
+      case Nil => None
+      case head :: tail =>
         Some(tail.foldLeft[EndpointInput[Unit]](stringToPath(head)) { case (current, next) =>
           current.and(stringToPath(next))
         })
