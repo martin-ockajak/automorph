@@ -27,6 +27,9 @@
 //
 //  def serverTransport(id: Int): ServerTransport[Effect, Context] =
 //    FinatraServer(system, port(id))
+//
+//  override def portRange: Range =
+//    Range(25000, 30000)
 //}
 //
 //case object TapirFinatraHttpFutureTest {
