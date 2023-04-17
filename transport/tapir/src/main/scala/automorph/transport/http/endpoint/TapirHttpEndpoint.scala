@@ -50,7 +50,8 @@ final case class TapirHttpEndpoint[Effect[_]](
 ) extends Logging with EndpointTransport[
   Effect,
   Context,
-  ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
+//  ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
+  ServerEndpoint.Full[Unit, Unit, Array[Byte], Unit, (Array[Byte], StatusCode), Any, Effect]
 ] {
 
   private lazy val contentType = Header.contentType(MediaType.parse(handler.mediaType).getOrElse {
@@ -59,12 +60,13 @@ final case class TapirHttpEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
-  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  def adapter: ServerEndpoint.Full[Unit, Unit, Array[Byte], Unit, (Array[Byte], StatusCode), Any, Effect] = {
     endpoint.method(Method.POST).in(byteArrayBody).out(byteArrayBody).out(statusCode).serverLogic { requestBody =>
       println("TEST")
       system.successful(Right[Unit, (Array[Byte], StatusCode)]((Array.emptyByteArray, StatusCode.Ok)))
     }
-//
+
+// def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
 //    // Define server endpoint inputs & outputs
 //    val pathEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
 //    val inputEndpoint = pathEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
@@ -140,8 +142,7 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-//  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
-  type Request = (Array[Byte])
+  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r
