@@ -7,7 +7,7 @@
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import sttp.tapir.server.netty.{NettyFutureServer, NettyFutureServerBinding, NettyFutureServerInterpreter}
+//import sttp.tapir.server.netty.{NettyFutureServer, NettyFutureServerBinding}
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.TapirNettyHttpFutureTest.TapirServer
 //
@@ -46,7 +46,6 @@
 //    }
 //
 //    override def init(): Effect[Unit] = {
-//      val route = NettyFutureServerInterpreter().toRoute(List(endpoint.adapter))
 //      NettyFutureServer().port(port).addEndpoint(endpoint.adapter).start().map { activeServer =>
 //        server = Some(activeServer)
 //      }

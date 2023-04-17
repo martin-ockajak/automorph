@@ -60,9 +60,8 @@ final case class TapirHttpEndpoint[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
-    endpoint.method(Method.POST).in("/").in(paths).out(byteArrayBody).out(statusCode).serverLogic { paths =>
+    endpoint.method(Method.POST).in(byteArrayBody).out(byteArrayBody).out(statusCode).serverLogic { requestBody =>
       println("TEST")
-      println(paths)
       system.successful(Right[Unit, (Array[Byte], StatusCode)]((Array.emptyByteArray, StatusCode.Ok)))
     }
 //
@@ -142,7 +141,7 @@ case object TapirHttpEndpoint {
 
   /** Endpoint request type. */
 //  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
-  type Request = (List[String])
+  type Request = (Array[Byte])
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r
