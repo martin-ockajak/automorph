@@ -81,8 +81,11 @@ private[automorph] case object Extensions {
 
     /** Converts this input stream to byte array. */
     def toByteArray: Array[Byte] = {
-      try data.readAllBytes()
-      finally data.close
+      try {
+        data.readAllBytes()
+      } finally {
+        data.close()
+      }
     }
   }
 
