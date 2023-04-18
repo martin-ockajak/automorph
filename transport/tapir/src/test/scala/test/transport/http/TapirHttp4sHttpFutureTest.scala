@@ -5,10 +5,14 @@
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
 //import cats.effect.IO
 //import cats.effect.unsafe.implicits.global
-//import java.net.InetSocketAddress
+//import com.comcast.ip4s.Port
+//import org.http4s.ember.server.EmberServerBuilder
 //import org.scalacheck.Arbitrary
+//import scala.concurrent.duration.Duration
+//import scala.concurrent.{Await, Future}
 //import sttp.tapir.server.http4s.Http4sServerInterpreter
 //import test.standard.StandardHttpServerTest
+//import test.transport.http.TapirHttp4sHttpFutureTest.TapirServer
 //
 //class TapirHttp4sHttpFutureTest extends StandardHttpServerTest {
 //
@@ -37,25 +41,25 @@
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
-//    private var server = Option.empty[Http4sFutureServerBinding[InetSocketAddress]]
+//    private var server = Option.empty[() => Future[Unit]]
 //
 //    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.withHandler(handler)
 //      this
 //    }
 //
-//    override def init(): Effect[Unit] = {
-//      val routes = Http4sServerInterpreter[IO]().toRoutes(endpoint.adapter)
-//      val service = routes.orNotFound.run(routes)
-////        .map { activeServer =>
-////        server = Some(activeServer)
-////      }
-//    }
+//    override def init(): Effect[Unit] =
+//      effectSystem.evaluate {
+//        val service = Http4sServerInterpreter[IO]().toRoutes(endpoint.adapter).orNotFound
+//        val builder = EmberServerBuilder.default[IO].withPort(Port.fromInt(port).get).withHttpApp(service)
+//        server = Some(builder.build.useForever.unsafeRunCancelable())
+//      }
 //
-//    override def close(): Effect[Unit] = {
+//    override def close(): Effect[Unit] =
 //      server.map { activeServer =>
-//        activeServer.stop()
+//        effectSystem.evaluate {
+//          Await.result(activeServer(), Duration.Inf)
+//        }
 //      }.getOrElse(effectSystem.successful {})
 //    }
-//  }
 //}
