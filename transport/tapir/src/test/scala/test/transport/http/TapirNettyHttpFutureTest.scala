@@ -49,6 +49,7 @@ case object TapirNettyHttpFutureTest {
       NettyFutureServer().port(port).addEndpoint(endpoint.adapter).start().map { activeServer =>
         server = Some(activeServer)
       }
+      //.map(_ => Thread.sleep(30000))
     }
 
     override def close(): Effect[Unit] = {

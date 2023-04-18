@@ -63,10 +63,10 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
-    val pathEndpoint = pathEndpointInput(prefixPaths).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    val inputEnpoint = pathEndpoint.in(paths).in(queryParams).in(headers).in(clientIp)
-    val outputEndpoint = inputEnpoint.out(webSocketBody[Array[Byte], OctetStream, Array[Byte], OctetStream](streams))
-    outputEndpoint.serverLogic { case (paths, queryParams, headers, clientIp) =>
+    val endpointPath = pathEndpointInput(prefixPaths).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
+    val endpointInput = endpointPath.in(paths).in(queryParams).in(headers).in(clientIp)
+    val endpointOutput = endpointInput.out(webSocketBody[Array[Byte], OctetStream, Array[Byte], OctetStream](streams))
+    endpointOutput.serverLogic { case (paths, queryParams, headers, clientIp) =>
       // Log the request
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(clientIp, None, requestId)
