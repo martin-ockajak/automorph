@@ -72,7 +72,7 @@ final case class TapirHttpEndpoint[Effect[_]](
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     // Define server endpoint inputs & outputs
     val endpointMethod = allowedMethod.map(endpoint.method).getOrElse(endpoint)
-    val endpointPath = pathEndpointInput(prefixPaths).map(endpointMethod.in).getOrElse(endpointMethod)
+    val endpointPath = pathEndpointInput(prefixPaths).map(path => endpointMethod.in(path)).getOrElse(endpointMethod)
     val endpointInput = endpointPath.in(body).in(paths).in(queryParams).in(headers).in(clientIp)
     val endpointOutput = endpointInput.out(body).out(statusCode)
     endpointOutput.serverLogic {
