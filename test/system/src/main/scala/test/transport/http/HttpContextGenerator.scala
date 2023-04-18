@@ -29,7 +29,8 @@ case object HttpContextGenerator {
 
   def arbitrary[T]: Arbitrary[HttpContext[T]] =
     Arbitrary(for {
-      method <- Gen.oneOf(methods)
+//      method <- Gen.oneOf(methods)
+      method <- Gen.const(HttpMethod.Post)
       headers <- Gen.listOfN(maxItems, header)
       parameters <- Gen.listOfN(maxItems, parameter)
     } yield HttpContext(

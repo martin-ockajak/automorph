@@ -15,8 +15,8 @@ import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.Codec.id
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{
-  CodecFormat, EndpointIO, EndpointInput, RawBodyType, Schema, clientIp, endpoint, headers, paths, queryParams,
-  statusCode, stringToPath
+  CodecFormat, EndpointIO, EndpointInput, RawBodyType, Schema, endpoint, headers, paths, queryParams, statusCode,
+  stringToPath
 }
 
 /**
@@ -73,12 +73,13 @@ final case class TapirHttpEndpoint[Effect[_]](
     // Define server endpoint inputs & outputs
     val endpointMethod = allowedMethod.map(endpoint.method).getOrElse(endpoint)
     val endpointPath = pathEndpointInput(prefixPaths).map(path => endpointMethod.in(path)).getOrElse(endpointMethod)
-    val endpointInput = endpointPath.in(body).in(paths).in(queryParams).in(headers).in(clientIp)
+    val endpointInput = endpointPath.in(body).in(paths).in(queryParams).in(headers)
     val endpointOutput = endpointInput.out(body).out(statusCode)
     endpointOutput.serverLogic {
-      case (requestBody, paths, queryParams, headers, clientIp) =>
+      case (requestBody, paths, queryParams, headers) =>
         // Log the request
         val requestId = Random.id
+        val clientIp = None
         lazy val requestProperties = getRequestProperties(clientIp, allowedMethod, requestId)
         log.receivedRequest(requestProperties)
 
@@ -146,7 +147,7 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type Request = (Array[Byte], List[String], QueryParams, List[Header])
 
   private[automorph] final case class MessageFormat(mediaType: MediaType) extends CodecFormat
 
