@@ -1,24 +1,24 @@
 //package test.transport.http
 //
 //import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
-//import automorph.system.FutureSystem
+//import automorph.system.CatsEffectSystem
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
+//import cats.effect.IO
+//import cats.effect.unsafe.implicits.global
 //import java.net.InetSocketAddress
 //import org.scalacheck.Arbitrary
-//import scala.concurrent.ExecutionContext.Implicits.global
-//import scala.concurrent.Future
+//import sttp.tapir.server.http4s.Http4sServerInterpreter
 //import test.standard.StandardHttpServerTest
-//import test.transport.http.TapirHttp4sHttpFutureTest.TapirServer
 //
 //class TapirHttp4sHttpFutureTest extends StandardHttpServerTest {
 //
-//  type Effect[T] = Future[T]
+//  type Effect[T] = IO[T]
 //  type Context = TapirHttpEndpoint.Context
 //
-//  override lazy val system: EffectSystem[Effect] = FutureSystem()
+//  override lazy val system: EffectSystem[Effect] = CatsEffectSystem()
 //
 //  override def run[T](effect: Effect[T]): T =
-//    await(effect)
+//    effect.unsafeRunSync()
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] =
 //    HttpContextGenerator.arbitrary
@@ -32,7 +32,7 @@
 //
 //case object TapirHttp4sHttpFutureTest {
 //
-//  type Effect[T] = Future[T]
+//  type Effect[T] = IO[T]
 //  type Context = TapirHttpEndpoint.Context
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
@@ -45,9 +45,11 @@
 //    }
 //
 //    override def init(): Effect[Unit] = {
-//      Http4sFutureServer().port(port).addEndpoint(endpoint.adapter).start().map { activeServer =>
-//        server = Some(activeServer)
-//      }
+//      val routes = Http4sServerInterpreter[IO]().toRoutes(endpoint.adapter)
+//      val service = routes.orNotFound.run(routes)
+////        .map { activeServer =>
+////        server = Some(activeServer)
+////      }
 //    }
 //
 //    override def close(): Effect[Unit] = {
