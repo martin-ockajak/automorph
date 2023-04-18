@@ -164,6 +164,7 @@ lazy val tapir = source(project, "transport/tapir", core, catsEffect % Test, tes
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion % Test,
 //    ("org.http4s" %% "http4s-ember-server" % "1.0-232-85dadc2" % Test).cross(CrossVersion.for3Use2_13),
     "com.softwaremill.sttp.tapir" %% "tapir-netty-server" % tapirVersion % Test,
+    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
