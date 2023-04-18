@@ -63,7 +63,7 @@ trait ProtocolCodecTest extends CoreTest {
           )(_.init())
         )
       } else {
-        fixture.genericServer.init()
+        run(fixture.genericServer.init())
       }
     }
     fixtures.foreach { fixture =>
