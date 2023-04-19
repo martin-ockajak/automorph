@@ -26,9 +26,6 @@ class TapirArmeriaHttpFutureTest extends StandardHttpServerTest {
 
   def serverTransport(id: Int): ServerTransport[Effect, Context] =
     TapirServer(system, port(id))
-
-  override def portRange: Range =
-    Range(25000, 30000)
 }
 
 case object TapirArmeriaHttpFutureTest {

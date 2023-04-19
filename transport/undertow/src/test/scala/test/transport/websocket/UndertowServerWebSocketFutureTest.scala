@@ -31,7 +31,4 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def webSocket: Boolean =
     true
-
-  override def portRange: Range =
-    Range(30000, 35000)
 }

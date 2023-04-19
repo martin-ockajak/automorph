@@ -26,7 +26,4 @@ class SttpClientAsyncHttpClientHttpFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, AsyncHttpClientFutureBackend(), url(id), HttpMethod.Post)
-
-  override def portRange: Range =
-    Range(20000, 25000)
 }

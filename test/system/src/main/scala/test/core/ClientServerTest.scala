@@ -3,6 +3,9 @@ package test.core
 import java.net.URI
 import scala.collection.mutable
 import test.base.{Await, Network}
+import test.core.ClientServerTest.usedPorts
+
+import scala.collection.immutable.{SortedMap, SortedSet}
 
 trait ClientServerTest extends ProtocolCodecTest with Await with Network {
   private lazy val ports: mutable.Map[Int, Int] = mutable.HashMap()
@@ -15,20 +18,17 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
     new URI(s"$scheme://localhost:${port(id)}")
   }
 
-  def portRange: Range =
-    Range(10000, 20000)
-
   def webSocket: Boolean =
     false
 
   private def acquirePort: Int =
     ClientServerTest.usedPorts.synchronized {
-      val port = availablePort(portRange, ClientServerTest.usedPorts.toSet)
+      val port = availablePort(SortedSet.empty[Int] ++ usedPorts)
       ClientServerTest.usedPorts.add(port)
       port
     }
 }
 
 case object ClientServerTest {
-  private val usedPorts = mutable.HashSet[Int]()
+  private val usedPorts = mutable.SortedSet.empty[Int]
 }

@@ -26,7 +26,4 @@ class JettyClientHttpFutureTest extends StandardHttpClientTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyClient(system, url(id), HttpMethod.Post)
   }
-
-  override def portRange: Range =
-    Range(40000, 45000)
 }
