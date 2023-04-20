@@ -23,12 +23,12 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   private def acquirePort: Int =
     ClientServerTest.usedPorts.synchronized {
-      val port = availablePort(SortedSet.empty[Int] ++ usedPorts)
+      val port = availablePort(usedPorts.toSet)
       ClientServerTest.usedPorts.add(port)
       port
     }
 }
 
 case object ClientServerTest {
-  private val usedPorts = mutable.SortedSet.empty[Int]
+  private val usedPorts = mutable.Set.empty[Int]
 }
