@@ -3,65 +3,32 @@ package test.base
 import java.io.File
 import java.net.ServerSocket
 import java.nio.file.{Files, Path, Paths}
-import scala.util.{Random, Try}
+import scala.util.Try
 
 trait Network {
-  private lazy val MinPort = 2000
-  private lazy val MaxPortIncluded = 65535
-
-  private lazy val random = new Random( seed = System.nanoTime)
+  private lazy val minPort = 10000
+  private lazy val maxPort = 65535
 
   def availablePort(excluded: Set[Int]): Int =
-    LazyList
-      .continually(randomPort)
-      .filterNot(excluded.contains)
-      .filter(lockfileCreatedAtomically)
-      .filter {
-        case port if portAvailable(port) =>
-          lockfileDeleteOnJvmExit(port)
-          true
-        case port =>
-          lockfileDelete(port)
-          false
-      }
-      .take(100_000)
-      .headOption
-      .getOrElse(throw new RuntimeException(s"$Network: no available ports found"))
-
-  private def randomPort: Int =
-    random.between(MinPort, MaxPortIncluded + 1)
-
-  private def lockfileCreatedAtomically(port: Int): Boolean =
-    lockFileFor(port).createNewFile()
+    LazyList.from(minPort).takeWhile(_ <= maxPort).filterNot(excluded.contains).find { port =>
+      val lockFile = Network.portLockDirectory.resolve(f"port-$port%05d.lock").toFile
+      lockFile.deleteOnExit()
+      lockFile.createNewFile() && portAvailable(port)
+    }.getOrElse(throw new IllegalStateException("No available ports found"))
 
   private def portAvailable(port: Int): Boolean =
     Try(new ServerSocket(port)).map(_.close()).isSuccess
-
-  private def lockfileDeleteOnJvmExit(port: Int): Unit =
-    lockFileFor(port).deleteOnExit()
-
-  private def lockfileDelete(port: Int): Unit =
-    if (!lockFileFor(port).delete()) {
-      throw new RuntimeException(s"$Network: could not delete lockfile ${lockFileFor(port)}")
-    }
-
-  private def lockFileFor(port: Int): File = {
-    val lockFileName = f"port-$port%05d.lock"
-    Network.portLockDirectory.resolve(lockFileName).toFile
-  }
 }
 
 case object Network {
 
   private lazy val portLockDirectory: Path = {
-    val currentWorkingDir: Path = Paths.get(new File(".").getCanonicalPath)
-    val target: Path = currentWorkingDir.resolve("target")
-    if (!Files.exists(target)) {
-      throw new RuntimeException(
-        s"Current working directory is possibly not the project directory (does not contain a target directory): $currentWorkingDir"
-      )
+    val projectDir = Paths.get("")
+    val targetDir = projectDir.resolve("target")
+    if (!Files.exists(targetDir)) {
+      throw new IllegalStateException(s"Project directory does not contain a target directory: $projectDir")
     }
-    val portLockDir = target.resolve("port.lock")
+    val portLockDir = targetDir.resolve("port.lock")
     Files.createDirectories(portLockDir)
     portLockDir
   }
