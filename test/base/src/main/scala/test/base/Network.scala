@@ -10,6 +10,7 @@ trait Network {
 
   def availablePort(excluded: Set[Int]): Int =
     LazyList.from(minPort).takeWhile(_ <= maxPort).filterNot(excluded.contains).find { port =>
+      // Consider the port to be exclusively acquired if a lock file was newly created using an atomic operation
       val lockFile = Network.portLockDirectory.resolve(f"port-$port%05d.lock").toFile
       lockFile.createNewFile() && {
         lockFile.deleteOnExit()
