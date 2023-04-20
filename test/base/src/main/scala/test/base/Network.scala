@@ -6,8 +6,8 @@ import java.nio.file.{Files, Path, Paths}
 import scala.util.{Random, Try}
 
 trait Network {
-  private val MinPort = 2000
-  private val MaxPortExcluded = 65536
+  private lazy val MinPort = 2000
+  private lazy val MaxPortIncluded = 65535
 
   private lazy val random = new Random( seed = System.nanoTime)
 
@@ -29,7 +29,7 @@ trait Network {
       .getOrElse(throw new RuntimeException(s"$Network: no available ports found"))
 
   private def randomPort: Int =
-    random.between(MinPort, MaxPortExcluded)
+    random.between(MinPort, MaxPortIncluded + 1)
 
   private def lockfileCreatedAtomically(port: Int): Boolean =
     lockFileFor(port).createNewFile()
