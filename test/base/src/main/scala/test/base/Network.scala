@@ -1,6 +1,5 @@
 package test.base
 
-import java.io.File
 import java.net.ServerSocket
 import java.nio.file.{Files, Path, Paths}
 import scala.util.Try
