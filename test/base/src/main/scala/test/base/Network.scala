@@ -11,29 +11,29 @@ trait Network {
     LazyList
       .continually(Network.randomPort)
       .filterNot(excluded.contains)
-      .take(100_000)
-      .filter(lockFileWasCreatedAtomically)
+      .filter(lockfileCreatedAtomically)
       .filter {
-        case port if portIsAvailable(port) =>
-          deleteLockfileOnJvmExit(port)
+        case port if portAvailable(port) =>
+          lockfileDeleteOnJvmExit(port)
           true
         case port =>
-          deleteLockfile(port)
+          lockfileDelete(port)
           false
       }
+      .take(100_000)
       .headOption
       .getOrElse(throw new RuntimeException(s"$Network: no available ports found"))
 
-  private def lockFileWasCreatedAtomically(port: Int): Boolean =
+  private def lockfileCreatedAtomically(port: Int): Boolean =
     lockFileFor(port).createNewFile()
 
-  private def portIsAvailable(port: Int): Boolean =
+  private def portAvailable(port: Int): Boolean =
     Try(new ServerSocket(port)).map(_.close()).isSuccess
 
-  private def deleteLockfileOnJvmExit(port: Int): Unit =
+  private def lockfileDeleteOnJvmExit(port: Int): Unit =
     lockFileFor(port).deleteOnExit()
 
-  private def deleteLockfile(port: Int): Unit =
+  private def lockfileDelete(port: Int): Unit =
     if (!lockFileFor(port).delete()) {
       throw new RuntimeException(s"$Network: could not delete lockfile ${lockFileFor(port)}")
     }
