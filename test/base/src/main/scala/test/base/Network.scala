@@ -12,11 +12,9 @@ trait Network {
   def availablePort(excluded: Set[Int]): Int =
     LazyList.from(minPort).takeWhile(_ <= maxPort).filterNot(excluded.contains).find { port =>
       val lockFile = Network.portLockDirectory.resolve(f"port-$port%05d.lock").toFile
-      if (lockFile.createNewFile()) {
+      lockFile.createNewFile() && {
         lockFile.deleteOnExit()
         portAvailable(port)
-      } else {
-        false
       }
     }.getOrElse(throw new IllegalStateException("No available ports found"))
 
