@@ -6,10 +6,10 @@ import scala.util.Try
 
 trait Network {
   private lazy val minPort = 10000
-  private lazy val maxPort = 65535
+  private lazy val maxPort = 65536
 
   def availablePort(excluded: Set[Int]): Int =
-    LazyList.from(minPort).takeWhile(_ <= maxPort).filterNot(excluded.contains).find { port =>
+    LazyList.range(minPort, maxPort).filterNot(excluded.contains).find { port =>
       // Consider an available port to be exclusively acquired if a lock file was newly atomically created
       val lockFile = Network.portLockDirectory.resolve(f"port-$port%05d.lock").toFile
       lockFile.createNewFile() && {
