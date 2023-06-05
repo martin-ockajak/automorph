@@ -254,7 +254,6 @@ val commonScalacOptions = Seq(
   "-feature",
   "-deprecation",
   "-unchecked",
-  "-Wvalue-discard",
   "-release",
   "11",
   "-encoding",
@@ -264,6 +263,7 @@ val compileScalac3Options = commonScalacOptions ++ Seq(
   "-source",
   "3.3",
 //  "-Wunused",
+  "-Wvalue-discard",
   "-language:adhocExtensions",
   "-pagewidth",
   "120"
