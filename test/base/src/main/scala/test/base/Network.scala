@@ -5,7 +5,7 @@ import java.nio.file.{Files, Path, Paths}
 import scala.util.Try
 
 trait Network {
-  private lazy val minPort = 10000
+  private lazy val minPort = 1024
   private lazy val maxPort = 65536
 
   def availablePort(excluded: Set[Int]): Int =
