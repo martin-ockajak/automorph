@@ -101,13 +101,13 @@ lazy val core = source(project, "core", meta, testBase % Test)
 // Effect system
 lazy val standard = source(project, "system/standard", core, testSystem % Test)
 lazy val zio = source(project, "system/zio", core, testSystem % Test).settings(
-  libraryDependencies += "dev.zio" %% "zio" % "2.0.10"
+  libraryDependencies += "dev.zio" %% "zio" % "2.0.14"
 )
 lazy val monix = source(project, "system/monix", core, testSystem % Test).settings(
   libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1"
 )
 lazy val catsEffect = source(project, "system/cats-effect", core, testSystem % Test).settings(
-  libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8"
+  libraryDependencies += "org.typelevel" %% "cats-effect" % "3.5.0"
 )
 lazy val scalazEffect = source(project, "system/scalaz-effect", core, testSystem % Test).settings(
   libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13"
@@ -121,7 +121,7 @@ lazy val circe = source(project, s"codec/circe", core, testCodec % Test).setting
     "io.circe" %% "circe-generic" % circeVersion
   )
 )
-val jacksonVersion = "2.14.2"
+val jacksonVersion = "2.15.2"
 lazy val jackson = source(project, "codec/jackson", core, testCodec % Test).settings(
   libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
@@ -156,7 +156,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", core, testTransport % 
 )
 
 // Server transport
-val tapirVersion = "1.2.12"
+val tapirVersion = "1.5.0"
 lazy val tapir = source(project, "transport/tapir", core, catsEffect % Test, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
@@ -168,10 +168,10 @@ lazy val tapir = source(project, "transport/tapir", core, catsEffect % Test, tes
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.5.Final"
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.6.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, testTransport % Test).settings(
-  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.1"
+  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.2"
 )
 val jettyVersion = "11.0.15"
 lazy val jetty = source(project, "transport/jetty", core, testTransport % Test).settings(
@@ -181,12 +181,12 @@ lazy val jetty = source(project, "transport/jetty", core, testTransport % Test).
     "org.eclipse.jetty.websocket" % "websocket-jetty-server" % jettyVersion
   )
 )
-val akkaVersion = "2.8.0"
+val akkaVersion = "2.8.2"
 lazy val akkaHttp = source(project, "transport/akka-http", core, testTransport % Test).settings(
   Test / fork := true,
   Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-http" % "10.5.0",
+    "com.typesafe.akka" %% "akka-http" % "10.5.2",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
@@ -229,10 +229,10 @@ lazy val examples = source(
 ThisBuild / Test / testOptions += Tests.Argument("-oDF")
 lazy val testBase = source(project, "test/base").settings(
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.2.15",
-    "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0",
+    "org.scalatest" %% "scalatest" % "3.2.16",
+    "org.scalatestplus" %% "scalacheck-1-17" % "3.2.16.0",
     "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
-    "ch.qos.logback" % "logback-classic" % "1.4.6",
+    "ch.qos.logback" % "logback-classic" % "1.4.7",
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
@@ -246,7 +246,7 @@ lazy val testTransport = source(
 
 
 // Compile
-ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / scalaVersion := "3.3.0"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 val commonScalacOptions = Seq(
@@ -254,6 +254,7 @@ val commonScalacOptions = Seq(
   "-feature",
   "-deprecation",
   "-unchecked",
+  "-Wvalue-discard",
   "-release",
   "11",
   "-encoding",
@@ -261,7 +262,7 @@ val commonScalacOptions = Seq(
 )
 val compileScalac3Options = commonScalacOptions ++ Seq(
   "-source",
-  "3.2",
+  "3.3",
 //  "-Wunused",
   "-language:adhocExtensions",
   "-pagewidth",
@@ -274,7 +275,6 @@ val compileScalac2Options = commonScalacOptions ++ Seq(
   "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
   "-Wextra-implicit",
   "-Wnumeric-widen",
-  "-Wvalue-discard",
   "-Wunused:imports,patvars,privates,locals,params",
   "-Vfree-terms",
   "-Vimplicits",
