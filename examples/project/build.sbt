@@ -6,11 +6,11 @@ version := "0.0.1"
 Test / parallelExecution := false
 
 val automorphVersion = "0.0.1"
-val sttpVersion = "3.8.13"
+val sttpVersion = "3.8.15"
 libraryDependencies ++= Seq(
   // Default
   "org.automorph" %% "automorph-default" % automorphVersion,
-  "ch.qos.logback" % "logback-classic" % "1.4.5",
+  "ch.qos.logback" % "logback-classic" % "1.4.7",
 
   // Plugins
   "org.automorph" %% "automorph-upickle" % automorphVersion,
@@ -21,5 +21,5 @@ libraryDependencies ++= Seq(
   "io.arivera.oss" % "embedded-rabbitmq" % "1.5.0",
 
   // Test
-  "org.scalatest" %% "scalatest" % "3.2.15" % Test
+  "org.scalatest" %% "scalatest" % "3.2.16" % Test
 )

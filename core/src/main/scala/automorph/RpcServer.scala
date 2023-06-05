@@ -8,7 +8,7 @@ import scala.collection.immutable.ListMap
 /**
  * RPC server.
  *
- * Used to serve remote API requests using specific message transport protocol and invoke bound API
+ * Used to serve remote API requests using specific transport protocol protocol and invoke bound API
  * methods to process them.
  *
  * Automatically derives remote API bindings for existing API instances.
@@ -18,7 +18,7 @@ import scala.collection.immutable.ListMap
  * @param rpcProtocol
  *   RPC protocol plugin
  * @param transport
- *   server message transport plugin
+ *   server transport protocol plugin
  * @param handler
  *   RPC request handler
  * @param functions
@@ -39,7 +39,16 @@ final case class RpcServer[Node, Codec <: MessageCodec[Node], Effect[_], Context
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends ServerBind[Node, Codec, Effect, Context] {
 
-  private val configuredTransport = transport.clone(handler)
+  private val configuredTransport = transport.withHandler(handler)
+
+  /**
+   * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
+   *
+   * @param discovery service discovery enabled
+   * @return RPC server
+   */
+  def discovery(discovery: Boolean): RpcServer[Node, Codec, Effect, Context] =
+    copy(handler = handler.discovery(discovery))
 
   /**
    * Starts this server to process incoming requests.
@@ -78,7 +87,7 @@ case object RpcServer {
    * @constructor
    *   Creates a new RPC server builder.
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -108,7 +117,7 @@ case object RpcServer {
    * Creates a RPC server with specified protocol and transport plugins supporting corresponding message context type.
    *
    * @param transport
-   *   server message transport plugin
+   *   server transport protocol plugin
    * @param protocol
    *   RPC protocol plugin
    * @tparam Node
@@ -133,7 +142,7 @@ case object RpcServer {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

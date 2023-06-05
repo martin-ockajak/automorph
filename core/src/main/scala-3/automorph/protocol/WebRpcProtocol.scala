@@ -9,7 +9,7 @@ import automorph.transport.http.HttpContext
  * Web-RPC protocol implementation.
  *
  * Provides the following Web-RPC functions for service discovery:
- *   - `api.discover` - API description in OpenAPI format
+ *   - `api.discover` - API schema in OpenAPI format
  *
  * @constructor
  *   Creates a Web-RPC 2.0 protocol implementation.
@@ -24,7 +24,7 @@ import automorph.transport.http.HttpContext
  * @param mapException
  *   maps an exception to a corresponding Web-RPC error
  * @param mapOpenApi
- *   transforms generated OpenAPI description
+ *   transforms generated OpenAPI schema
  * @param encodeRequest
  *   converts a Web-RPC request to message format node
  * @param decodeRequest
@@ -34,7 +34,7 @@ import automorph.transport.http.HttpContext
  * @param decodeResponse
  *   converts a message format node to Web-RPC response
  * @param encodeOpenApi
- *   converts an OpenAPI description to message format node
+ *   converts an OpenAPI schema to message format node
  * @param encodeString
  *   converts a string to message format node
  * @tparam Node
@@ -60,14 +60,14 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
 
 case object WebRpcProtocol extends ErrorMapping:
 
-  /** Service discovery method providing API description in OpenAPI format. */
+  /** Service discovery method providing API schema in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   /**
    * Creates a Web-RPC protocol plugin.
    *
    * Provides the following Web-RPC functions for service discovery:
-   *   - `api.discover` - API description in OpenAPI format
+   *   - `api.discover` - API schema in OpenAPI format
    *
    * @see
    *   [[https://automorph.org/rest-rpc Web-RPC protocol specification]]
@@ -80,7 +80,7 @@ case object WebRpcProtocol extends ErrorMapping:
    * @param mapException
    *   maps an exception to a corresponding Web-RPC error
    * @param mapOpenApi
-   *   transforms generated OpenAPI description
+   *   transforms generated OpenAPI schema
    * @tparam Node
    *   message node type
    * @tparam Codec

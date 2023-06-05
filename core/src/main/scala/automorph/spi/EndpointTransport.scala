@@ -1,9 +1,9 @@
 package automorph.spi
 
 /**
- * Existing server layer integration plugin.
+ * Existing transport protocol server integration plugin.
  *
- * Passively parses requests to be processed by the RPC handler and creates responses for specific transport layer.
+ * Passively parses requests to be processed by the RPC handler and creates responses for specific server.
  *
  * @tparam Effect
  *   effect type
@@ -28,5 +28,5 @@ trait EndpointTransport[Effect[_], Context, Adapter] {
    * @return
    *   server transport
    */
-  def clone(handler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
+  def withHandler(handler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
 }

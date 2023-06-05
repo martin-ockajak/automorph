@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.ClientTransport
+import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod
@@ -13,7 +13,7 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
   type Effect[T] = Identity[T]
   type Context = JettyClient.Context
 
-  override lazy val system: IdentitySystem = IdentitySystem()
+  override lazy val system: EffectSystem[Effect] = IdentitySystem()
 
   override def run[T](effect: Effect[T]): T =
     effect

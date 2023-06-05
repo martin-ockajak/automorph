@@ -68,10 +68,10 @@ final case class VertxServer[Effect[_]](
   private val messageMethodNotAllowed = "Method Not Allowed"
   private val allowedMethods = methods.map(_.name).toSet
 
-  override def clone(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
     copy(handler = handler)
 
-  override def init(): Effect[Unit] =
+  override def init(): Effect[Unit] = {
     effectSystem.evaluate(this.synchronized {
       val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
       (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
@@ -81,12 +81,14 @@ final case class VertxServer[Effect[_]](
         ))
       }
     })
+  }
 
-  override def close(): Effect[Unit] =
+  override def close(): Effect[Unit] = {
     effectSystem.evaluate(this.synchronized {
-      httpServer.close().toCompletionStage.toCompletableFuture.get
+      httpServer.close().toCompletionStage.toCompletableFuture.get()
       ()
     })
+  }
 
   private def createServer(): HttpServer = {
     // HTTP

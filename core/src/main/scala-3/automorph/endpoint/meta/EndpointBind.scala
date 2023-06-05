@@ -101,5 +101,6 @@ private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[
       transport.effectSystem,
       rpcProtocol,
       apiBindings ++ newApiBindings,
+      discovery = handler.discovery,
     )
     RpcEndpoint(transport, rpcProtocol, apiHandler, apiHandler.functions)

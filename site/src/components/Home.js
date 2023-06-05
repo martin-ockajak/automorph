@@ -62,7 +62,7 @@ const features = [
   },
   {
     title: 'Discoverable',
-    link: 'docs/Examples#api-schema',
+    link: 'docs/Examples#api-discovery',
     description: (
         <>
           Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a

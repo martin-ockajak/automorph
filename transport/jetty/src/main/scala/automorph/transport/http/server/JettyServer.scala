@@ -9,7 +9,6 @@ import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletContext, ServletRequest, ServletResponse}
 import java.time.Duration
 import java.util
-import java.util.concurrent.TimeUnit
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.component.AbstractLifeCycle
@@ -17,7 +16,7 @@ import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import scala.collection.immutable.ListMap
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{FiniteDuration, DurationInt}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -68,7 +67,7 @@ final case class JettyServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   threadPool: ThreadPool = new QueuedThreadPool,
-  idleTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  idleTimeout: FiniteDuration = 30.seconds,
   maxFrameSize: Long = 65536,
   attributes: Map[String, String] = Map.empty,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
@@ -86,7 +85,7 @@ final case class JettyServer[Effect[_]](
     }
   }
 
-  override def clone(handler: RequestHandler[Effect, Context]): JettyServer[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): JettyServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =

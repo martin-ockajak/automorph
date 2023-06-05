@@ -138,6 +138,7 @@ case object ServerBind {
         server.transport.effectSystem,
         server.rpcProtocol,
         apiBindings ++ newApiBindings,
+        server.handler.discovery,
       )
       automorph.RpcServer(server.transport, server.rpcProtocol, handler, handler.functions)
     """)

@@ -36,7 +36,7 @@ Entry points for the application logic to invoke or expose remote APIs:
 
 Traits for implementation of various integration plugins:
 
-* [Effect system](/api/automorph/spi/EffectSystem.html) - accessing remote APIs using various effect handling abstractions
+* [Effect system](/api/automorph/spi/EffectSystem.html) - accessing remote APIs using effect handling abstractions
 * [Message codec](/api/automorph/spi/MessageCodec.html) - serialization of RPC messages into structured data formats
 * [Client transport](/api/automorph/spi/ClientTransport.html) - tranmitting messages for RPC clients
 * [Server transport](/api/automorph/spi/ServerTransport.html) - transmitting messages for RPC servers

@@ -3,18 +3,20 @@ package automorph.transport.http.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{
-  Context, Request, clientAddress, getRequestContext, getRequestProperties, pathEndpointInput
+  Context, MessageFormat, Request, clientAddress, getRequestContext, getRequestProperties, pathComponents,
+  pathEndpointInput
 }
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.Random
 import scala.collection.immutable.ListMap
 import scala.util.Try
-import scala.Array.emptyByteArray
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
+import sttp.tapir.Codec.id
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{
-  EndpointInput, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, stringToPath
+  CodecFormat, EndpointIO, EndpointInput, RawBodyType, Schema, endpoint, headers, paths, queryParams, statusCode,
+  stringToPath
 }
 
 /**
@@ -36,7 +38,7 @@ import sttp.tapir.{
  * @param pathPrefix
  *   HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param method
- *   HTTP method
+ *   allowed HTTP method, all methods are allowed if empty
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
  * @param handler
@@ -45,7 +47,7 @@ import sttp.tapir.{
 final case class TapirHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   pathPrefix: String = "/",
-  method: Method = Method.POST,
+  method: Option[HttpMethod] = None,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with EndpointTransport[
@@ -54,48 +56,58 @@ final case class TapirHttpEndpoint[Effect[_]](
   ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect]
 ] {
 
-  private lazy val contentType = Header.contentType(MediaType.parse(handler.mediaType).getOrElse {
-    throw new IllegalArgumentException(s"Invalid content type: ${handler.mediaType}")
-  })
+  private val allowedMethod = method.map(httpMethod => Method(httpMethod.name))
+  private val prefixPaths = pathComponents(pathPrefix)
+  private lazy val mediaType = MediaType.parse(handler.mediaType).fold(
+    error => throw new IllegalStateException(
+      s"Invalid message content type: ${handler.mediaType}", new IllegalArgumentException(error)
+    ),
+    identity,
+  )
+  private lazy val codec = id[Array[Byte], MessageFormat](MessageFormat(mediaType), Schema.schemaForByteArray)
+  private lazy val body = EndpointIO.Body(RawBodyType.ByteArrayBody, codec, EndpointIO.Info.empty)
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+    // Define server endpoint inputs & outputs
+    val endpointMethod = allowedMethod.map(endpoint.method).getOrElse(endpoint)
+    val endpointPath = pathEndpointInput(prefixPaths).map(path => endpointMethod.in(path)).getOrElse(endpointMethod)
+    val endpointInput = endpointPath.in(body).in(paths).in(queryParams).in(headers)
+    val endpointOutput = endpointInput.out(body).out(statusCode)
+    endpointOutput.serverLogic {
+      case (requestBody, paths, queryParams, headers) =>
+        // Log the request
+        val requestId = Random.id
+        val clientIp = None
+        lazy val requestProperties = getRequestProperties(clientIp, allowedMethod, requestId)
+        log.receivedRequest(requestProperties)
 
-    // Define server endpoint
-    val publicEndpoint = pathEndpointInput(pathPrefix).map(pathInput => endpoint.in(pathInput)).getOrElse(endpoint)
-    publicEndpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(byteArrayBody).out(statusCode).out(header(contentType)).serverLogic {
-        case (requestBody, paths, queryParams, headers, clientIp) =>
-          // Log the request
-          val requestId = Random.id
-          lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
-          log.receivedRequest(requestProperties)
-
-          // Process the request
-          Try {
-            val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-            handler.processRequest(requestBody.toInputStream, requestContext, requestId).either.map(
-              _.fold(
-                error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
-                result => {
-                  // Create the response
-                  val responseBody = result.map(_.responseBody.toArray).getOrElse(emptyByteArray)
-                  val status = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
-                    .getOrElse(StatusCode.Ok)
-                  createResponse(responseBody, status, clientIp, requestId, log)
-                },
-              )
+        // Process the request
+        Try {
+          val requestContext = getRequestContext(prefixPaths ++ paths, queryParams, headers, allowedMethod)
+          val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
+          handlerResult.either.map(
+            _.fold(
+              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
+              result => {
+                // Create the response
+                val responseBody = result.map(_.responseBody).getOrElse(Array.emptyByteArray)
+                val statusCode = result.flatMap(_.exception).map(mapException).map(StatusCode.apply)
+                  .getOrElse(StatusCode.Ok)
+                createResponse(responseBody, statusCode, clientIp, requestId, log)
+              },
             )
-          }.foldError { error =>
-            effectSystem.evaluate(
-              createErrorResponse(error, clientIp, requestId, requestProperties, log)
-            )
-          }.map(Right.apply)
-      }
+          )
+        }.foldError { error =>
+          effectSystem.evaluate(
+            createErrorResponse(error, clientIp, requestId, requestProperties, log)
+          )
+        }.map(Right.apply)
+    }
   }
 
-  override def clone(handler: RequestHandler[Effect, Context]): TapirHttpEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): TapirHttpEndpoint[Effect] =
     copy(handler = handler)
 
   private def createErrorResponse(
@@ -106,14 +118,14 @@ final case class TapirHttpEndpoint[Effect[_]](
     log: MessageLog,
   ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.asArray
+    val message = error.description.toByteArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }
 
   private def createResponse(
     responseBody: Array[Byte],
-    status: StatusCode,
+    statusCode: StatusCode,
     clientIp: Option[String],
     requestId: String,
     log: MessageLog,
@@ -125,7 +137,7 @@ final case class TapirHttpEndpoint[Effect[_]](
       "Status" -> statusCode.toString,
     )
     log.sendingResponse(responseProperties)
-    (responseBody, status)
+    (responseBody, statusCode)
   }
 }
 
@@ -135,26 +147,33 @@ case object TapirHttpEndpoint {
   type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
-  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type Request = (Array[Byte], List[String], QueryParams, List[Header])
+
+  private[automorph] final case class MessageFormat(mediaType: MediaType) extends CodecFormat
 
   private val leadingSlashPattern = "^/+".r
   private val trailingSlashPattern = "/+$".r
   private val multiSlashPattern = "/+".r
 
-  private[automorph] def pathEndpointInput(path: String): Option[EndpointInput[Unit]] = {
+  private[automorph] def pathComponents(path: String): List[String] = {
     val canonicalPath = multiSlashPattern.replaceAllIn(
       trailingSlashPattern.replaceAllIn(leadingSlashPattern.replaceAllIn(path, ""), ""),
       "/"
     )
     canonicalPath.split("/") match {
-      case Array(head) if head.isEmpty => None
-      case Array(head, tail*) =>
+      case Array(head) if head.isEmpty => List.empty
+      case components => components.toList
+    }
+  }
+
+  private[automorph] def pathEndpointInput(pathComponents: List[String]): Option[EndpointInput[Unit]] =
+    pathComponents match {
+      case Nil => None
+      case head :: tail =>
         Some(tail.foldLeft[EndpointInput[Unit]](stringToPath(head)) { case (current, next) =>
           current.and(stringToPath(next))
         })
-      case _ => None
     }
-  }
 
   private[automorph] def getRequestContext(
     paths: List[String],
@@ -181,9 +200,7 @@ case object TapirHttpEndpoint {
   private[automorph] def clientAddress(clientIp: Option[String]): String =
     clientIp.getOrElse("")
 
-  private def urlPath(paths: List[String]): String =
-    paths match {
-      case Nil => "/"
-      case items => items.mkString("/")
-    }
+  private def urlPath(paths: List[String]): String = {
+    s"/${paths.mkString("/")}"
+  }
 }

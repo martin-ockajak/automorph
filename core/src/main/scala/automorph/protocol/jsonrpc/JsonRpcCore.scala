@@ -9,7 +9,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.protocol
 import automorph.spi.protocol.{ApiSchema, ParseError}
 import automorph.util.Extensions.ThrowableOps
-import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -74,7 +73,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   }
 
   override def parseRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
   ): Either[ParseError[Metadata], protocol.Request[Node, Metadata, Context]] =
@@ -93,7 +92,9 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
           request => {
             val requestArguments = request.params
               .fold(_.map(Left.apply[Node, (String, Node)]), _.map(Right.apply[Node, (String, Node)]).toSeq)
-            Right(protocol.Request(message, request.method, requestArguments, request.id.isDefined, requestId, requestContext))
+            Right(protocol.Request(
+              message, request.method, requestArguments, request.id.isDefined, requestId, requestContext
+            ))
           },
         )
       },
@@ -131,7 +132,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
   ): Either[ParseError[Metadata], protocol.Response[Node, Metadata]] =
     // Deserialize response
@@ -169,38 +170,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       ApiSchema(
         RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
         functions => encodeOpenRpc(openRpc(functions)),
-      ),
+      )
     )
-
-  /**
-   * Generates OpenRPC schema for given RPC functions.
-   *
-   * @see
-   *   [[https://spec.open-rpc.org OpenRPC specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenRPC schema
-   */
-  def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
-    mapOpenRpc(OpenRpc(functions))
-
-  /**
-   * Generates OpenAPI schema for given RPC functions.
-   *
-   * @see
-   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenAPI schema
-   */
-  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    mapOpenApi(OpenApi(functionSchemas))
-  }
 
   /**
    * Creates a copy of this protocol with specified message contex type.
@@ -252,7 +223,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * Creates a copy of this protocol with given OpenRPC description transformation.
    *
    * @param mapOpenRpc
-   *   transforms generated OpenRPC specification
+   *   transforms generated OpenRPC schema
    * @return
    *   JSON-RPC protocol
    */
@@ -263,12 +234,23 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi
-   *   transforms generated OpenAPI specification
+   *   transforms generated OpenAPI schema or removes the service discovery method if the result is None
    * @return
    *   JSON-RPC protocol
    */
   def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
+
+  private def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
+    mapOpenRpc(OpenRpc(functions))
+
+  private def openApi(functions: Iterable[RpcFunction]): OpenApi = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    mapOpenApi(OpenApi(functionSchemas))
+  }
+
 
   private def requestSchema(function: RpcFunction): Schema =
     Schema(

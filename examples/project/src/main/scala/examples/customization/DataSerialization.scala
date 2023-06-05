@@ -12,7 +12,7 @@ private[examples] case object DataSerialization {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
-    // Define a helper function to evaluate Futures
+    // Helper function to evaluate Futures
     def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Introduce custom data types
@@ -29,11 +29,11 @@ private[examples] case object DataSerialization {
     )
 
     // Provide custom data type serialization and deserialization logic
-    implicit lazy val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
+    implicit val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
       State.Off -> 0,
       State.On -> 1
     ))
-    implicit lazy val enumDecoder: Decoder[State] = Decoder.decodeInt.map(Map(
+    implicit val enumDecoder: Decoder[State] = Decoder.decodeInt.map(Map(
       0 -> State.Off,
       1 -> State.On
     ))
@@ -45,9 +45,9 @@ private[examples] case object DataSerialization {
     }
     val api = new ServerApi
 
-    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
+    // Initialize JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val server = run(
-      Default.serverAsync(7000, "/api").bind(api).init()
+      Default.rpcServerAsync(7000, "/api").bind(api).init()
     )
 
     // Define client view of the remote API
@@ -55,13 +55,13 @@ private[examples] case object DataSerialization {
       def hello(some: String, record: Record): Future[Record]
     }
 
-    // Setup JSON-RPC HTTP & WebSocket client sending POST requests to 'http://localhost:7000/api'
+    // Initialize JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = run(
-      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+      Default.rpcClientAsync(new URI("http://localhost:7000/api")).init()
     )
 
     // Call the remote API function
-    lazy val remoteApi = client.bind[ClientApi]
+    val remoteApi = client.bind[ClientApi]
     println(run(
       remoteApi.hello("world", Record("test", State.On))
     ))
@@ -69,7 +69,7 @@ private[examples] case object DataSerialization {
     // Close the RPC client
     run(client.close())
 
-    // Stop the RPC server
+    // Close the RPC server
     run(server.close())
   }
 }

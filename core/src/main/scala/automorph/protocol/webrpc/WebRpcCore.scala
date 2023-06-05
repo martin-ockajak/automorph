@@ -1,17 +1,15 @@
 package automorph.protocol.webrpc
 
-import automorph.RpcFunction
 import automorph.RpcException.{InvalidRequest, InvalidResponse}
+import automorph.RpcFunction
 import automorph.protocol.WebRpcProtocol
 import automorph.protocol.webrpc.Message.Request
 import automorph.schema.OpenApi
 import automorph.schema.openapi.{RpcSchema, Schema}
-import automorph.spi.MessageCodec
-import automorph.spi.protocol
+import automorph.spi.{MessageCodec, protocol}
 import automorph.spi.protocol.{ApiSchema, ParseError}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.ThrowableOps
-import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -79,7 +77,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   }
 
   override def parseRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
   ): Either[ParseError[Metadata], protocol.Request[Node, Metadata, Context]] =
@@ -106,7 +104,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     }
 
   private def retrieveRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
   ): Either[ParseError[Metadata], Request[Node]] =
     requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
@@ -160,7 +158,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
   ): Either[ParseError[Metadata], protocol.Response[Node, Metadata]] =
     // Deserialize response
@@ -187,46 +185,14 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       },
     )
 
-  override def apiSchemas: Seq[ApiSchema[Node]] =
-    Seq(ApiSchema(
-      RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      functions => encodeOpenApi(openApi(functions)),
-    ))
-
-  /**
-   * Generates OpenAPI schema for given RPC functions.
-   *
-   * @see
-   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions
-   *   RPC functions
-   * @return
-   *   OpenAPI schema
-   */
-  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    mapOpenApi(OpenApi(functionSchemas))
+  override def apiSchemas: Seq[ApiSchema[Node]] = {
+    Seq(
+      ApiSchema(
+        RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+        functions => encodeOpenApi(openApi(functions)),
+      )
+    )
   }
-
-  private def requestSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(function.name),
-      Some(OpenApi.argumentsDescription),
-      Option(Schema.parameters(function)).filter(_.nonEmpty),
-      Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
-    )
-
-  private def resultSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.resultTitle),
-      Some(s"$name ${OpenApi.resultTitle}"),
-      Some(Map(OpenApi.resultName -> Schema.result(function))),
-      Some(List(OpenApi.resultName)),
-    )
 
   /**
    * Creates a copy of this protocol with specified message contex type.
@@ -265,10 +231,35 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi
-   *   transforms generated OpenAPI specification
+   *   transforms generated OpenAPI schema
    * @return
    *   Web-RPC protocol
    */
   def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
+
+  private def openApi(functions: Iterable[RpcFunction]): OpenApi = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    mapOpenApi(OpenApi(functionSchemas))
+  }
+
+  private def requestSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(function.name),
+      Some(OpenApi.argumentsDescription),
+      Option(Schema.parameters(function)).filter(_.nonEmpty),
+      Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
+    )
+
+  private def resultSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"$name ${OpenApi.resultTitle}"),
+      Some(Map(OpenApi.resultName -> Schema.result(function))),
+      Some(List(OpenApi.resultName)),
+    )
 }

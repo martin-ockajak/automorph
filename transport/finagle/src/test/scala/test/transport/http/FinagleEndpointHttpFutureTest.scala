@@ -16,7 +16,7 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   type Effect[T] = Future[T]
   type Context = FinagleHttpEndpoint.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
     await(effect)
@@ -43,15 +43,14 @@ case object FinagleEndpointHttpFutureTest {
     private var endpoint = FinagleHttpEndpoint(effectSystem)
     private var server = Option.empty[ListeningServer]
 
-    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
-      endpoint = endpoint.clone(handler)
+    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+      endpoint = endpoint.withHandler(handler)
       this
     }
 
     override def init(): Effect[Unit] =
       Future {
         server = Some(Http.serve(s":$port", endpoint))
-        ()
       }
 
     override def close(): Effect[Unit] = {

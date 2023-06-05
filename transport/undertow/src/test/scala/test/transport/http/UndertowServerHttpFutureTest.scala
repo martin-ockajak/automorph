@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.{EndpointTransport, ServerTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer
@@ -14,7 +14,7 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
   type Effect[T] = Future[T]
   type Context = UndertowServer.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
     await(effect)

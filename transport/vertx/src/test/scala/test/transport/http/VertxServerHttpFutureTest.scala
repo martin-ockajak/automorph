@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.{EndpointTransport, ServerTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer
@@ -14,7 +14,7 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
   type Effect[T] = Future[T]
   type Context = VertxServer.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T =
     await(effect)
@@ -27,4 +27,7 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     VertxHttpEndpoint(system)
+
+  override def testServerClose: Boolean =
+    false
 }

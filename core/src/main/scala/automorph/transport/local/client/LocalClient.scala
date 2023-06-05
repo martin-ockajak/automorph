@@ -5,7 +5,6 @@ import automorph.spi.{ClientTransport, EffectSystem, RequestHandler}
 import automorph.transport.local.LocalContext
 import automorph.transport.local.client.LocalClient.Context
 import automorph.util.Extensions.EffectOps
-import java.io.InputStream
 
 /**
  * Local client transport plugin.
@@ -32,17 +31,21 @@ final case class LocalClient[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)] =
-    handler.processRequest(requestBody, requestContext, requestId).flatMap(_.map { result =>
-      effectSystem.successful(result.responseBody -> result.context.getOrElse(context))
-    }.getOrElse(effectSystem.failed(InvalidResponse("Missing call response", None.orNull))))
+  ): Effect[(Array[Byte], Context)] = {
+    val handlerResult = handler.processRequest(requestBody, requestContext, requestId)
+    handlerResult.flatMap(
+      _.map { result =>
+        effectSystem.successful(result.responseBody -> result.context.getOrElse(context))
+      }.getOrElse(effectSystem.failed(InvalidResponse("Missing call response", None.orNull)))
+    )
+  }
 
   override def tell(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,

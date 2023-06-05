@@ -1,10 +1,9 @@
 package automorph.util
 
 import automorph.spi.EffectSystem
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
-import java.util
 import scala.util.{Failure, Success, Try}
 
 /** Extension methods for utility types. */
@@ -54,85 +53,46 @@ private[automorph] case object Extensions {
 
     /** Converts this byte array to input stream. */
     def toInputStream: InputStream =
-      ArrayInputStream(data)
+      new ByteArrayInputStream(data)
 
-    /** Converts this byte array to string. */
+    /** Converts this input stream to byte buffer. */
+    def toByteBuffer: ByteBuffer =
+      ByteBuffer.wrap(data)
+
+    /** Converts this byte array to string using UTF-8 character encoding. */
     def asString: String =
       new String(data, charset)
   }
 
   implicit class ByteBufferOps(data: ByteBuffer) {
 
-    /** Converts this byte buffer array to byte array. */
-    def toArray: Array[Byte] =
-      if (data.hasArray) { data.array }
-      else {
+    /** Converts this byte buffer to byte array. */
+    def toByteArray: Array[Byte] =
+      if (data.hasArray) {
+        data.array
+      } else {
         val array = Array.ofDim[Byte](data.remaining)
         data.get(array)
         array
-      }
-
-    /** Converts this byte buffer array to input stream. */
-    def toInputStream: InputStream =
-      if (data.hasArray) { data.array.toInputStream }
-      else {
-        val array = Array.ofDim[Byte](data.remaining)
-        data.get(array)
-        array.toInputStream
       }
   }
 
   implicit class InputStreamOps(data: InputStream) {
 
-    /** Input stream reading buffer size. */
-    private val bufferSize = 4096
-
-    /** Converts this input stream array to byte array. */
-    def asArray(length: Int): Array[Byte] =
-      data match {
-        case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
-        case _ => toByteArray(Some(length))
+    /** Converts this input stream to byte array. */
+    def toByteArray: Array[Byte] =
+      try {
+        data.readAllBytes()
+      } finally {
+        data.close()
       }
-
-    /** Converts this input stream array to byte buffer. */
-    def toByteBuffer: ByteBuffer =
-      ByteBuffer.wrap(data.toArray)
-
-    /** Converts this input stream array to string. */
-    def asString: String =
-      data.toArray.asString
-
-    /** Converts this input stream array to byte array. */
-    def toArray: Array[Byte] =
-      data match {
-        case arrayInputStream: ArrayInputStream => arrayInputStream.data
-        case _ => toByteArray(None)
-      }
-
-    private def toByteArray(length: Option[Int]): Array[Byte] = {
-      val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
-      val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(length.getOrElse(Int.MaxValue)) { remaining =>
-        data.read(buffer, 0, Math.min(remaining, buffer.length)) match {
-          case length if length >= 0 =>
-            outputStream.write(buffer, 0, length)
-            remaining - length
-          case _ => 0
-        }
-      }.takeWhile(_ > 0).lastOption
-      outputStream.toByteArray
     }
-  }
 
   implicit class StringOps(data: String) {
 
-    /** Converts this input stream array to byte array. */
-    def asArray: Array[Byte] =
+    /** Converts this string to byte array using UTF-8 character encoding. */
+    def toByteArray: Array[Byte] =
       data.getBytes(charset)
-
-    /** Converts this input stream array to input stream. */
-    def toInputStream: InputStream =
-      ArrayInputStream(data.getBytes(charset))
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {
@@ -214,6 +174,4 @@ private[automorph] case object Extensions {
     def runAsync(implicit system: EffectSystem[Effect]): Unit =
       system.runAsync(effect)
   }
-
-  private final case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
 }

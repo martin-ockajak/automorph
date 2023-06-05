@@ -7,7 +7,6 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.EffectOps
 import automorph.util.Random
-import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.util.Try
 
@@ -22,7 +21,7 @@ import scala.util.Try
  * @constructor
  *   Creates a RPC client with specified protocol and transport plugins providing corresponding message context type.
  * @param transport
- *   client message transport plugin
+ *   client transport protocol plugin
  * @param rpcProtocol
  *   RPC protocol plugin
  * @tparam Node
@@ -197,25 +196,25 @@ final case class RpcClient[Node, Codec <: MessageCodec[Node], Effect[_], Context
    *   result value
    */
   private def processResponse[R](
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     responseContext: Context,
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R,
   ): Effect[R] =
     // Parse response
     rpcProtocol.parseResponse(responseBody, responseContext).fold(
-      error => raiseError(error.exception, requestProperties),
+      error => raiseError[R](error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} response", allProperties)
         rpcResponse.result.fold(
           // Raise error
-          error => raiseError(error, requestProperties),
+          error => raiseError[R](error, requestProperties),
           // Decode result
           result =>
             Try(decodeResult(result, responseContext)).fold(
-              error => raiseError(InvalidResponse("Malformed result", error), requestProperties),
+              error => raiseError[R](InvalidResponse("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${rpcProtocol.name} request", requestProperties)
                 system.successful(result)
@@ -251,7 +250,7 @@ case object RpcClient {
    * @constructor
    *   Creates a new RPC client builder.
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -281,7 +280,7 @@ case object RpcClient {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   message transport plugin
+   *   transport protocol plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

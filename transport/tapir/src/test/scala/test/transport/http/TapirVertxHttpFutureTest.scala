@@ -18,7 +18,7 @@
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
 //
-//  override lazy val system: FutureSystem = FutureSystem()
+//  override lazy val system: EffectSystem[Effect] = FutureSystem()
 //
 //  override def run[T](effect: Effect[T]): T =
 //    await(effect)
@@ -39,18 +39,11 @@
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
 //    private var server = Option.empty[HttpServer]
 //
-//    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
-//      endpoint = endpoint.clone(handler)
+//    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+//      endpoint = endpoint.withHandler(handler)
 //      val vertx = Vertx.vertx()
 //      val router = Router.router(vertx)
-////      router.route(HttpMethod.POST, "/").handler { context =>
-////        println(context.request().path())
-////        context.response().write("TEST")
-////        context.response().end()
-////      }
 //      VertxFutureServerInterpreter().route(endpoint.adapter)(router)
-//      println(router.getRoutes.get(0).getPath)
-//      println(router.getRoutes.get(0).methods())
 //      server = Some(vertx.createHttpServer().requestHandler(router))
 //      this
 //    }

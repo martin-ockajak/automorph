@@ -2,7 +2,7 @@ package examples
 
 import examples.metadata.{HttpAuthentication, HttpRequest, HttpResponse}
 import examples.basic.{AsynchronousCall, OptionalParameters, SynchronousCall}
-import examples.special.{ApiSchema, DynamicPayload, OneWayMessage, PositionalArguments}
+import examples.special.{ApiDiscovery, DynamicPayload, OneWayMessage, PositionalArguments}
 import examples.customization.{ClientFunctionNames, DataSerialization, ServerFunctionNames}
 import examples.errors.{ClientExceptions, HttpStatusCode, ServerErrors}
 import examples.integration.{EffectSystem, MessageCodec, RpcProtocol}
@@ -61,7 +61,7 @@ class ExamplesTest extends BaseTest with Mutex {
     }
     "Special" - {
       Seq[Any](
-        ApiSchema,
+        ApiDiscovery,
         DynamicPayload,
         OneWayMessage,
         PositionalArguments,

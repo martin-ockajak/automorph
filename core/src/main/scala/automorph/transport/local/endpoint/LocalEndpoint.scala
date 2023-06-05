@@ -29,7 +29,7 @@ final case class LocalEndpoint[Effect[_]](
   override def adapter: Unit =
     ()
 
-  override def clone(handler: RequestHandler[Effect, Context]): LocalEndpoint[Effect] =
+  override def withHandler(handler: RequestHandler[Effect, Context]): LocalEndpoint[Effect] =
     copy(handler = handler)
 }
 

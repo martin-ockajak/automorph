@@ -8,8 +8,8 @@ import scala.collection.immutable.ListMap
 /**
  * RPC endpoint.
  *
- * Integrates with an existing message transport layer to receive remote API requests using
- * specific message transport protocol and invoke bound API methods to process them.
+ * Integrates with an existing server to receive remote API requests using
+ * specific transport protocol and invoke bound API methods to process them.
  *
  * Automatically derives remote API bindings for existing API instances.
  *
@@ -41,11 +41,20 @@ final case class RpcEndpoint[Node, Codec <: MessageCodec[Node], Effect[_], Conte
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends EndpointBind[Node, Codec, Effect, Context, Adapter] {
 
-  private val configuredTransport = transport.clone(handler)
+  private val configuredTransport = transport.withHandler(handler)
 
   /** Transport layer adapter. */
   def adapter: Adapter =
     configuredTransport.adapter
+
+  /**
+   * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
+   *
+   * @param discovery service discovery enabled
+   * @return RPC server
+   */
+  def discovery(discovery: Boolean): RpcEndpoint[Node, Codec, Effect, Context, Adapter] =
+    copy(handler = handler.discovery(discovery))
 
   override def toString: String = {
     val plugins = Map[String, Any](
@@ -66,7 +75,7 @@ case object RpcEndpoint {
    * @constructor
    *   Creates a new RPC endpoint builder.
    * @param transport
-   *   message transport plugin
+   *   server integration plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -74,7 +83,9 @@ case object RpcEndpoint {
    * @tparam Adapter
    *   transport layer transport type
    */
-  final case class EndpointBuilder[Effect[_], Context, Adapter](transport: EndpointTransport[Effect, Context, Adapter]) {
+  final case class EndpointBuilder[Effect[_], Context, Adapter](
+    transport: EndpointTransport[Effect, Context, Adapter]
+  ) {
 
     /**
      * Creates a new RPC endpoint with specified RPC protocol plugin.
@@ -100,7 +111,7 @@ case object RpcEndpoint {
    * @param transport
    *   endpoint transport later transport
    * @param rpcProtocol
-   * RPC protocol plugin
+   *   RPC protocol plugin
    * @tparam Node
    *   message node type
    * @tparam Codec
@@ -125,7 +136,7 @@ case object RpcEndpoint {
    * Creates an RPC client builder with specified effect transport plugin.
    *
    * @param transport
-   *   transport layer transport plugin
+   *   transport protocol server plugin
    * @tparam Effect
    *   effect type
    * @tparam Context

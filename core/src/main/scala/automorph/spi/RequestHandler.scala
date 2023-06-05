@@ -1,7 +1,6 @@
 package automorph.spi
 
 import automorph.spi.RequestHandler.Result
-import java.io.InputStream
 
 /**
  * RPC request handler.
@@ -19,7 +18,7 @@ trait RequestHandler[Effect[_], Context] {
    * Processes an RPC request by invoking a bound remote function based on the specified RPC request
    * along with request context and return an RPC response.
    *
-   * @param body
+   * @param requestBody
    *   request message body
    * @param context
    *   request context
@@ -28,7 +27,18 @@ trait RequestHandler[Effect[_], Context] {
    * @return
    *   request processing result
    */
-  def processRequest(body: InputStream, context: Context, id: String): Effect[Option[Result[Context]]]
+  def processRequest(requestBody: Array[Byte], context: Context, id: String): Effect[Option[Result[Context]]]
+
+  /**
+   * Enable or disable automatic provision of service discovery via RPC functions returning bound API schema.
+   *
+   * @param discovery service discovery enabled
+   * @return RPC request handler
+   */
+  def discovery(discovery: Boolean): RequestHandler[Effect, Context]
+
+  /** * Automatic provision of service discovery via RPC functions returning bound API schema. */
+  def discovery: Boolean
 
   /** Message format media (MIME) type. */
   def mediaType: String
@@ -49,7 +59,7 @@ case object RequestHandler {
    *   response context type
    */
   final case class Result[Context](
-    responseBody: InputStream,
+    responseBody: Array[Byte],
     exception: Option[Throwable],
     context: Option[Context],
   )
@@ -66,12 +76,15 @@ case object RequestHandler {
    */
   private[automorph] def dummy[Effect[_], Context]: RequestHandler[Effect, Context] =
     new RequestHandler[Effect, Context] {
-      def processRequest(
-        body: InputStream,
-        context: Context,
-        id: String,
-      ): Effect[Option[Result[Context]]] =
+      def processRequest(requestBody: Array[Byte], context: Context, id: String): Effect[Option[Result[Context]]] =
         throw new IllegalStateException("RPC request handler not initialized")
+
+      override def discovery(enabled: Boolean): RequestHandler[Effect, Context] =
+        this
+
+      /** * Automatic provision of service discovery via RPC functions returning bound API schema. */
+      override def discovery: Boolean =
+        false
 
       /** Message format media (MIME) type. */
       override def mediaType: String =

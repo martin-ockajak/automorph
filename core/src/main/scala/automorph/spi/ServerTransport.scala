@@ -1,7 +1,7 @@
 package automorph.spi
 
 /**
- * Server message transport protocol plugin.
+ * Server transport protocol plugin.
  *
  * Actively receives requests to be processed by the RPC handler and sends responses using specific transport protocol.
  *
@@ -23,7 +23,7 @@ trait ServerTransport[Effect[_], Context] {
    * @return
    *   server transport
    */
-  def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
+  def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
 
   /**
    * Starts this server to process incoming requests.

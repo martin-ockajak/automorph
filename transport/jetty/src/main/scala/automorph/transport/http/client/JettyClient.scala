@@ -5,8 +5,7 @@ import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.http.client.JettyClient.{Context, Message, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
-import java.io.InputStream
+import automorph.util.Extensions.{ByteArrayOps, EffectOps}
 import java.net.URI
 import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
@@ -54,7 +53,7 @@ final case class JettyClient[Effect[_]](
   httpClient: HttpClient = defaultClient,
 ) extends ClientTransport[Effect, Context] with Logging {
 
-  private type Response = (InputStream, Option[Int], Seq[(String, String)])
+  private type Response = (Array[Byte], Option[Int], Seq[(String, String)])
 
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
@@ -62,11 +61,11 @@ final case class JettyClient[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   override def call(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
-  ): Effect[(InputStream, Context)] =
+  ): Effect[(Array[Byte], Context)] =
     // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
@@ -89,7 +88,7 @@ final case class JettyClient[Effect[_]](
     }
 
   override def tell(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestContext: Context,
     requestId: String,
     mediaType: String,
@@ -106,6 +105,8 @@ final case class JettyClient[Effect[_]](
     effectSystem.evaluate(this.synchronized {
       if (!httpClient.isStarted) {
         httpClient.start()
+      } else {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already initialized")
       }
       webSocketClient.start()
     })
@@ -117,7 +118,7 @@ final case class JettyClient[Effect[_]](
     })
 
   private def send(
-    request: Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)],
+    request: Either[Request, (Effect[websocket.api.Session], Effect[Response], Array[Byte])],
     requestUrl: URI,
     requestId: String,
     protocol: Protocol,
@@ -195,7 +196,7 @@ final case class JettyClient[Effect[_]](
 
   private def httpResponse(response: api.Response, responseBody: Array[Byte]): Response = {
     val headers = response.getHeaders.asScala.map(field => field.getName -> field.getValue).toSeq
-    (responseBody.toInputStream, Some(response.getStatus), headers)
+    (responseBody, Some(response.getStatus), headers)
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
@@ -209,10 +210,10 @@ final case class JettyClient[Effect[_]](
     }
 
   private def createRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     mediaType: String,
     requestContext: Context,
-  ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)], URI)] = {
+  ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], Array[Byte])], URI)] = {
     val requestUrl = requestContext
       .overrideUrl(requestContext.transportContext.map(transport => transport.request.getURI).getOrElse(url))
     requestUrl.getScheme.toLowerCase match {
@@ -237,7 +238,7 @@ final case class JettyClient[Effect[_]](
   }
 
   private def createHttpRequest(
-    requestBody: InputStream,
+    requestBody: Array[Byte],
     requestUrl: URI,
     mediaType: String,
     httpContext: Context,
@@ -247,7 +248,7 @@ final case class JettyClient[Effect[_]](
       httpContext.transportContext.map(_.request.getMethod).map(HttpMethod.valueOf)
     }.getOrElse(method).name)
     val transportRequest = httpContext.transportContext.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
-    val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody.toArray))
+    val bodyRequest = transportRequest.method(requestMethod).body(new BytesRequestContent(requestBody))
 
     // Headers
     val headersRequest = bodyRequest.headers { httpFields =>
@@ -279,8 +280,7 @@ final case class JettyClient[Effect[_]](
     new WebSocketListener {
 
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
-        val message = util.Arrays.copyOfRange(payload, offset, offset + length)
-        val responseBody = message.toInputStream
+        val responseBody = util.Arrays.copyOfRange(payload, offset, offset + length)
         response.succeed((responseBody, None, Seq())).runAsync
       }
 

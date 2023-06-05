@@ -52,7 +52,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   RPC client
    */
-  def client[Effect[_]](
+  def rpcClient[Effect[_]](
     effectSystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
@@ -82,7 +82,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   asynchronous RPC client
    */
-  def clientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
+  def rpcClientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
   ): RpcClient[Node, Codec, AsyncEffect, ClientContext] =
     RpcClient(clientTransport(effectSystemAsync, url, method), rpcProtocol)
@@ -108,11 +108,11 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   synchronous RPC client
    */
-  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): RpcClient[Node, Codec, SyncEffect, ClientContext] =
+  def rpcClientSync(url: URI, method: HttpMethod = HttpMethod.Post): RpcClient[Node, Codec, SyncEffect, ClientContext] =
     RpcClient(clientTransport(effectSystemSync, url, method), rpcProtocol)
 
   /**
-   * Creates a standard JRE HTTP & WebSocket client message transport plugin with
+   * Creates a standard JRE HTTP & WebSocket client transport protocol plugin with
    * specified effect system plugin.
    *
    * @see
@@ -132,7 +132,7 @@ object Default extends DefaultRpcProtocol {
    * @tparam Effect
    *   effect type
    * @return
-   *   client message transport plugin
+   *   client transport protocol plugin
    */
   def clientTransport[Effect[_]](
     effectSystem: EffectSystem[Effect],
@@ -174,7 +174,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   RPC server
    */
-  def server[Effect[_]](
+  def rpcServer[Effect[_]](
     effectSystem: EffectSystem[Effect],
     port: Int,
     path: String = "/",
@@ -214,7 +214,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   asynchronous RPC server
    */
-  def serverAsync(
+  def rpcServerAsync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -251,7 +251,7 @@ object Default extends DefaultRpcProtocol {
    * @return
    *   synchronous RPC server
    */
-  def serverSync(
+  def rpcServerSync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -262,7 +262,7 @@ object Default extends DefaultRpcProtocol {
     RpcServer(serverTransport(effectSystemSync, port, path, methods, webSocket, mapException, builder), rpcProtocol)
 
   /**
-   * Creates an Undertow RPC over HTTP & WebSocket server message transport plugin with
+   * Creates an Undertow RPC over HTTP & WebSocket server transport protocol plugin with
    * specified effect system plugin.
    *
    * @see
@@ -290,7 +290,7 @@ object Default extends DefaultRpcProtocol {
    * @tparam Effect
    *   effect type
    * @return
-   *   server message transport plugin
+   *   server transport protocol plugin
    */
   def serverTransport[Effect[_]](
     effectSystem: EffectSystem[Effect],
