@@ -11,7 +11,7 @@ trait Network {
   def availablePort(excluded: Set[Int]): Int =
     LazyList.range(minPort, maxPort).filterNot(excluded.contains).find { port =>
       // Consider an available port to be exclusively acquired if a lock file was newly atomically created
-      val lockFile = Network.portLockDirectory.resolve(f"port-$port%05d.lock").toFile
+      val lockFile = Network.lockDirectory.resolve(f"port-$port%05d.lock").toFile
       lockFile.createNewFile() && {
         lockFile.deleteOnExit()
         portAvailable(port)
@@ -24,7 +24,7 @@ trait Network {
 
 case object Network {
 
-  private lazy val portLockDirectory: Path = {
+  private lazy val lockDirectory: Path = {
     val projectDir = Paths.get("")
     val targetDir = projectDir.resolve("target")
     if (!Files.exists(targetDir)) {
