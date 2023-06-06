@@ -8,7 +8,6 @@ import org.scalacheck.{Arbitrary, Gen}
 case object HttpContextGenerator {
 
   private val charset = StandardCharsets.UTF_8
-//  private val methods = Seq(HttpMethod.Post, HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete)
   private val methods = Seq(HttpMethod.Post)
   private val maxItems = 16
   private val maxNameSize = 16
