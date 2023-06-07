@@ -253,7 +253,7 @@ lazy val testTransport = source(
 
 // Compile
 ThisBuild / scalaVersion := "3.3.0"
-ThisBuild / crossScalaVersions += "2.13.10"
+ThisBuild / crossScalaVersions += "2.13.11"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 val commonScalacOptions = Seq(
   "-language:higherKinds",
