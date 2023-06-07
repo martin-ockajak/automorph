@@ -42,9 +42,6 @@ trait ProtocolCodecTest extends CoreTest {
   def endpointTransport: EndpointTransport[Effect, Context, ?] =
     LocalEndpoint(system).asInstanceOf[EndpointTransport[Effect, Context, ?]]
 
-  def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
-    clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
-
   def testServerClose: Boolean =
     true
 
@@ -86,6 +83,9 @@ trait ProtocolCodecTest extends CoreTest {
     }
     super.afterAll()
   }
+
+  private def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
+    clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
 
   private def circeJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
@@ -148,7 +148,9 @@ trait ProtocolCodecTest extends CoreTest {
       implicit lazy val structureRw: ReadWriter[Structure] = macroRW
       implicit lazy val recordRw: ReadWriter[Record] = macroRW
     }
-    val codec = UpickleJsonCodec(new Custom)
+    val custom = new Custom
+    Seq(custom.enumRw, custom.structureRw, custom.recordRw)
+    val codec = UpickleJsonCodec(custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val server =
@@ -172,7 +174,9 @@ trait ProtocolCodecTest extends CoreTest {
       implicit lazy val structureRw: ReadWriter[Structure] = macroRW
       implicit lazy val recordRw: ReadWriter[Record] = macroRW
     }
-    val codec = UpickleMessagePackCodec(new Custom)
+    val custom = new Custom
+    Seq(custom.enumRw, custom.structureRw, custom.recordRw)
+    val codec = UpickleMessagePackCodec(custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val server =
