@@ -20,10 +20,7 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   private def acquirePort: Int =
     ClientServerTest.synchronized {
-      println(s"Acquiring port: ${this.getClass.getSimpleName}")
-      val port = availablePort()
-      println(s"Acquired port: ${this.getClass.getSimpleName} - $port")
-      port
+      availablePort()
     }
 }
 

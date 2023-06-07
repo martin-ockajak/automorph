@@ -23,10 +23,11 @@ trait Network {
 }
 
 case object Network {
+  private val targetDirectoryProperty = "project.target"
+  private val targetDirectoryDefault = "target"
 
   private lazy val lockDirectory: Path = {
-    val projectDir = Paths.get("")
-    val targetDir = projectDir.resolve("target")
+    val targetDir = Paths.get(Option(System.getProperty(targetDirectoryProperty)).getOrElse(targetDirectoryDefault))
     if (!Files.exists(targetDir)) {
       throw new IllegalStateException(s"Target directory does not exist: $targetDir")
     }

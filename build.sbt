@@ -25,7 +25,10 @@ val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"
 ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
 apiURL := Some(url(apiUrl))
-onLoadMessage := ""
+onLoadMessage := {
+  System.setProperty("project.target", s"${target.value}")
+  ""
+}
 
 
 // Structure
@@ -149,6 +152,7 @@ val embeddedRabbitMqVersion = "1.5.0"
 lazy val rabbitmq = source(project, "transport/rabbitmq", core, testTransport % Test).settings(
   Test / fork := true,
   Test / testForkedParallel := true,
+  Test / javaOptions += s"-Dproject.target=${System.getProperty("project.target")}",
   libraryDependencies ++= Seq(
     "com.rabbitmq" % "amqp-client" % "5.17.0",
     "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion % Test
@@ -185,6 +189,7 @@ val akkaVersion = "2.8.2"
 lazy val akkaHttp = source(project, "transport/akka-http", core, testTransport % Test).settings(
   Test / fork := true,
   Test / testForkedParallel := true,
+  Test / javaOptions += s"-Dproject.target=${System.getProperty("project.target")}",
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http" % "10.5.2",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
@@ -215,12 +220,13 @@ lazy val examples = source(
   publish / skip := true,
   Test / fork := true,
   Test / testForkedParallel := true,
+  Test / javaOptions += s"-Dproject.target=${System.getProperty("project.target")}",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion,
     "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion
   ),
-  Compile / scalaSource :=  baseDirectory.value / "project/src/main/scala",
+  Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
   Test / scalaSource := baseDirectory.value / "project/src/test/scala"
 )
 
