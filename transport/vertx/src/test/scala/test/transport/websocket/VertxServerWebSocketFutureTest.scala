@@ -23,8 +23,8 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    VertxServer(system, port(id))
+  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
+    VertxServer(system, port(fixtureId))
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     VertxWebSocketEndpoint(system)

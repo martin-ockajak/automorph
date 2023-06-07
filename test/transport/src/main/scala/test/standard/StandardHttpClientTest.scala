@@ -6,6 +6,6 @@ import test.core.ClientServerTest
 
 trait StandardHttpClientTest extends ClientServerTest {
 
-  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    NanoServer[Effect](system, port(id)).asInstanceOf[ServerTransport[Effect, Context]]
+  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
+    NanoServer[Effect](system, port(fixtureId)).asInstanceOf[ServerTransport[Effect, Context]]
 }

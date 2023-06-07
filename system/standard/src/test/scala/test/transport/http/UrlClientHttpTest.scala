@@ -14,9 +14,9 @@ trait UrlClientHttpTest extends ClientServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    UrlClient(system, url(id), HttpMethod.Put)
+  override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
+    UrlClient(system, url(fixtureId), HttpMethod.Put)
 
-  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    NanoServer[Effect](system, port(id))
+  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
+    NanoServer[Effect](system, port(fixtureId))
 }

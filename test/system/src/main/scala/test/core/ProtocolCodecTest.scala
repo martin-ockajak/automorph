@@ -35,15 +35,15 @@ trait ProtocolCodecTest extends CoreTest {
     }
   }
 
-  def clientTransport(id: Int): ClientTransport[Effect, ?]
+  def clientTransport(fixtureId: Int): ClientTransport[Effect, ?]
 
-  def serverTransport(id: Int): ServerTransport[Effect, Context]
+  def serverTransport(fixtureId: Int): ServerTransport[Effect, Context]
 
   def endpointTransport: EndpointTransport[Effect, Context, ?] =
     LocalEndpoint(system).asInstanceOf[EndpointTransport[Effect, Context, ?]]
 
-  def typedClientTransport(id: Int): ClientTransport[Effect, Context] =
-    clientTransport(id).asInstanceOf[ClientTransport[Effect, Context]]
+  def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
+    clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
 
   def testServerClose: Boolean =
     true
@@ -94,7 +94,8 @@ trait ProtocolCodecTest extends CoreTest {
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
-    val server = RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server =
+      RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = RpcClient.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -126,7 +127,8 @@ trait ProtocolCodecTest extends CoreTest {
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
-    val server = RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server =
+      RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = RpcClient.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -149,7 +151,8 @@ trait ProtocolCodecTest extends CoreTest {
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
-    val server = RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server =
+      RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = RpcClient.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -172,7 +175,8 @@ trait ProtocolCodecTest extends CoreTest {
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
-    val server = RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server =
+      RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = RpcClient.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -227,7 +231,8 @@ trait ProtocolCodecTest extends CoreTest {
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
     RpcEndpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
-    val server = RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server =
+      RpcServer.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = RpcClient.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,

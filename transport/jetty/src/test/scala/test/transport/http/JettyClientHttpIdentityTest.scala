@@ -21,8 +21,8 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(id: Int): ClientTransport[Effect, Context] = {
+  override def clientTransport(fixtureId: Int): ClientTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyClient(system, url(id), HttpMethod.Post)
+    JettyClient(system, url(fixtureId), HttpMethod.Post)
   }
 }

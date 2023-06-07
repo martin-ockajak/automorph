@@ -23,9 +23,9 @@ class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(id: Int): ClientTransport[Effect, Context] = {
+  override def clientTransport(fixtureId: Int): ClientTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyClient(system, url(id), HttpMethod.Get)
+    JettyClient(system, url(fixtureId), HttpMethod.Get)
   }
 
   override def webSocket: Boolean =

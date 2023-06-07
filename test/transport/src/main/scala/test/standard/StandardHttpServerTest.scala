@@ -7,6 +7,6 @@ import test.core.ClientServerTest
 
 trait StandardHttpServerTest extends ClientServerTest {
 
-  override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    HttpClient(system, url(id), HttpMethod.Post)
+  override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
+    HttpClient(system, url(fixtureId), HttpMethod.Post)
 }

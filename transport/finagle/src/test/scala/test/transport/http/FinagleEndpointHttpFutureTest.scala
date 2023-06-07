@@ -24,8 +24,8 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    FinagleServer(system, port(id))
+  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
+    FinagleServer(system, port(fixtureId))
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     FinagleHttpEndpoint(system)
