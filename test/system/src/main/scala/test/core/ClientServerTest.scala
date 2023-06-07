@@ -9,7 +9,7 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   def port(fixtureId: Int): Int =
     ports.synchronized {
-      ports.getOrElseUpdate(fixtureId, acquirePort)
+      ports.getOrElseUpdate(fixtureId, availablePort())
     }
 
   def url(fixtureId: Int): URI = {
@@ -19,13 +19,4 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   def webSocket: Boolean =
     false
-
-  private def acquirePort: Int =
-    ClientServerTest.synchronized {
-      availablePort()
-    }
-}
-
-case object ClientServerTest {
-  private val usedPorts = mutable.HashSet[Int]()
 }
