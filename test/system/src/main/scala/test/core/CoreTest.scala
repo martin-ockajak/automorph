@@ -1,11 +1,10 @@
 package test.core
 
-import automorph.RpcException.{
-  FunctionNotFound, InvalidArguments, InvalidRequest, InvalidResponse
-}
+import automorph.RpcException.{FunctionNotFound, InvalidArguments, InvalidRequest, InvalidResponse}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.{RpcClient, RpcServer}
 import org.scalacheck.Arbitrary
+import org.slf4j.{Logger, LoggerFactory}
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
 import test.base.BaseTest
@@ -43,6 +42,7 @@ trait CoreTest extends BaseTest {
     val genericServer: GenericServer[Effect, Context] = server.asInstanceOf[GenericServer[Effect, Context]]
   }
 
+  val logger: Logger = LoggerFactory.getLogger(getClass)
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
   val complexApi: ComplexApiType = ComplexApiImpl(system, arbitraryContext.arbitrary.sample.get)
 
@@ -57,7 +57,7 @@ trait CoreTest extends BaseTest {
   "" - {
     if (BaseTest.testBasic) {
       // Basic tests
-      testFixtures.take(1).foreach { fixture =>
+      fixtures.take(1).foreach { fixture =>
         val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName
         codecName.replaceAll("MessageCodec$", "") - {
           "Basic" - {
@@ -72,7 +72,7 @@ trait CoreTest extends BaseTest {
       }
     } else {
       // Full tests
-      testFixtures.foreach { fixture =>
+      fixtures.foreach { fixture =>
         val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName
         codecName.replaceAll("MessageCodec$", "") - {
           "Static" - {
@@ -190,19 +190,19 @@ trait CoreTest extends BaseTest {
               "Call" in {
                 check { (a0: String) =>
                   val expected = run(simpleApi.method(a0))
-                  executeLogError(fixture.call("method", "argument" -> a0)) == expected
+                  execute("Dynamic / Simple API / Call", fixture.call("method", "argument" -> a0)) == expected
                 }
               }
               "Tell" in {
                 check { (a0: String) =>
-                  executeLogError(fixture.tell("method", "argument" -> a0))
+                  execute("Dynamic / Simple API / Tell", fixture.tell("method", "argument" -> a0))
                   true
                 }
               }
               "Alias" in {
                 check { (a0: String) =>
                   val expected = run(simpleApi.method(a0))
-                  executeLogError(fixture.call("function", "argument" -> a0)) == expected
+                  execute("Dynamic / Simple API / Alias", fixture.call("function", "argument" -> a0)) == expected
                 }
               }
             }
@@ -217,11 +217,11 @@ trait CoreTest extends BaseTest {
     super.afterAll()
   }
 
-  private def executeLogError[T](value: => Effect[T]): T =
+  private def execute[T](description: String, value: => Effect[T]): T =
     Try(run(value)) match {
       case Success(result) => result
       case Failure(error) =>
-        error.printStackTrace(System.out)
+        logger.error(description, error)
         throw error
     }
 
@@ -230,20 +230,15 @@ trait CoreTest extends BaseTest {
       val (testedApi, referenceApi) = apis
       val result = run(function(testedApi))
       val expected = run(function(referenceApi))
-      expected == result
+      val outcome = expected == result
+      if (!outcome) {
+        logger.error(s"Actual API call result not equal to the expected result: $result != $expected")
+      }
+      outcome
     } match {
       case Success(result) => result
       case Failure(error) =>
-        error.printStackTrace(System.out)
+        logger.error("API call failed", error)
         false
-    }
-
-  private def testFixtures: Seq[TestFixture] =
-    fixtures.map { fixture =>
-      Try(fixture).recover {
-        case error =>
-          error.printStackTrace(System.out)
-          throw error
-      }.get
     }
 }

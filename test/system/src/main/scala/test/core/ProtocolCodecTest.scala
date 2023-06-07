@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
+import scala.util.Try
 import test.base.BaseTest
 import test.{Enum, Record, Structure}
 
@@ -46,7 +47,13 @@ trait ProtocolCodecTest extends CoreTest {
     true
 
   override def fixtures: Seq[TestFixture] =
-    testFixtures
+    Try {
+      testFixtures
+    }.recover {
+      case error =>
+        logger.error(s"Failed to initialize test fixtures")
+        throw error
+    }.get
 
   override def beforeAll(): Unit = {
     super.beforeAll()
