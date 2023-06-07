@@ -28,7 +28,7 @@ case object Network {
     val projectDir = Paths.get("")
     val targetDir = projectDir.resolve("target")
     if (!Files.exists(targetDir)) {
-      throw new IllegalStateException(s"Project directory does not contain a target directory: $projectDir")
+      throw new IllegalStateException(s"Target directory does not exist: $targetDir")
     }
     val lockDir = targetDir.resolve("lock")
     Files.createDirectories(lockDir)
