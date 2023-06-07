@@ -30,8 +30,8 @@ case object Network {
     if (!Files.exists(targetDir)) {
       throw new IllegalStateException(s"Project directory does not contain a target directory: $projectDir")
     }
-    val portLockDir = targetDir.resolve("port.lock")
-    Files.createDirectories(portLockDir)
-    portLockDir
+    val lockDir = targetDir.resolve("lock")
+    Files.createDirectories(lockDir)
+    lockDir
   }
 }
