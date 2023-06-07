@@ -8,7 +8,9 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
   private lazy val ports: mutable.Map[Int, Int] = mutable.HashMap()
 
   def port(fixtureId: Int): Int =
-    ports.getOrElseUpdate(fixtureId, acquirePort)
+    ports.synchronized {
+      ports.getOrElseUpdate(fixtureId, acquirePort)
+    }
 
   def url(fixtureId: Int): URI = {
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
