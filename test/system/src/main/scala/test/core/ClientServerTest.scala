@@ -9,7 +9,7 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   def port(fixtureId: Int): Int =
     ports.synchronized {
-      ports.getOrElseUpdate(fixtureId, availablePort())
+      ports.getOrElseUpdate(fixtureId, claimPort())
     }
 
   def url(fixtureId: Int): URI = {

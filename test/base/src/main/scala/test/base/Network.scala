@@ -8,7 +8,7 @@ trait Network {
   private lazy val minPort = 16384
   private lazy val maxPort = 65536
 
-  def availablePort(): Int =
+  def claimPort(): Int =
     LazyList.range(minPort, maxPort).find { port =>
       // Consider an available port to be exclusively acquired if a lock file was newly atomically created
       val lockFile = Network.lockDirectory.resolve(f"port-$port%05d.lock").toFile
