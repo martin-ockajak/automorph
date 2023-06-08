@@ -1,7 +1,7 @@
 package automorph.codec
 
 import upickle.AttributeTagged
-import upickle.core.{Abort, ParseUtils, Visitor}
+import upickle.core.{Abort, ByteUtils, CharUtils, ParseUtils, Visitor}
 
 /**
  * uPickle message codec customization.
@@ -45,17 +45,20 @@ trait UpickleCustom extends AttributeTagged {
     override def visitFalse(index: Int) =
       false
 
+    override def visitString(s: CharSequence, index: Int): Boolean =
+      s.toString.toBoolean
+
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val DoubleReader: Reader[Double] = new SimpleReader[Double] {
+  implicit override val DoubleReader: Reader[Double] = new NumericReader[Double] {
 
     override def expectedMsg =
       "expected number"
 
     override def visitString(s: CharSequence, index: Int): Double =
-      s.toString.toDouble
+      visitFloat64String(s.toString, index)
 
     override def visitInt32(d: Int, index: Int): Double =
       d.toDouble
@@ -76,10 +79,13 @@ trait UpickleCustom extends AttributeTagged {
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val IntReader: Reader[Int] = new SimpleReader[Int] {
+  implicit override val IntReader: Reader[Int] = new NumericReader[Int] {
 
     override def expectedMsg =
       "expected number"
+
+    override def visitString(s: CharSequence, index: Int): Int =
+      visitFloat64String(s.toString, index)
 
     override def visitInt32(d: Int, index: Int): Int =
       d
@@ -96,17 +102,27 @@ trait UpickleCustom extends AttributeTagged {
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Int =
       ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toInt
 
+    override def visitFloat64ByteParts(
+      s: Array[Byte], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Int =
+      ByteUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toInt
+
+    override def visitFloat64CharParts(
+      s: Array[Char], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Int =
+      CharUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toInt
+
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val FloatReader: Reader[Float] = new SimpleReader[Float] {
+  implicit override val FloatReader: Reader[Float] = new NumericReader[Float] {
 
     override def expectedMsg =
       "expected number"
 
     override def visitString(s: CharSequence, index: Int): Float =
-      s.toString.toFloat
+      visitFloat64String(s.toString, index)
 
     override def visitInt32(d: Int, index: Int): Float =
       d.toFloat
@@ -130,10 +146,13 @@ trait UpickleCustom extends AttributeTagged {
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val ShortReader: Reader[Short] = new SimpleReader[Short] {
+  implicit override val ShortReader: Reader[Short] = new NumericReader[Short] {
 
     override def expectedMsg =
       "expected number"
+
+    override def visitString(s: CharSequence, index: Int): Short =
+      visitFloat64String(s.toString, index)
 
     override def visitInt32(d: Int, index: Int): Short =
       d.toShort
@@ -150,14 +169,27 @@ trait UpickleCustom extends AttributeTagged {
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Short =
       ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toShort
 
+    override def visitFloat64ByteParts(
+      s: Array[Byte], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Short =
+      ByteUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toShort
+
+    override def visitFloat64CharParts(
+      s: Array[Char], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Short =
+      CharUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toShort
+
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val ByteReader: Reader[Byte] = new SimpleReader[Byte] {
+  implicit override val ByteReader: Reader[Byte] = new NumericReader[Byte] {
 
     override def expectedMsg =
       "expected number"
+
+    override def visitString(s: CharSequence, index: Int): Byte =
+      visitFloat64String(s.toString, index)
 
     override def visitInt32(d: Int, index: Int): Byte =
       d.toByte
@@ -174,17 +206,27 @@ trait UpickleCustom extends AttributeTagged {
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Byte =
       ParseUtils.parseIntegralNum(s, decIndex, expIndex, index).toByte
 
+    override def visitFloat64ByteParts(
+      s: Array[Byte], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Byte =
+      ByteUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toByte
+
+    override def visitFloat64CharParts(
+      s: Array[Char], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Byte =
+      CharUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex).toByte
+
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val CharReader: Reader[Char] = new SimpleReader[Char] {
+  implicit override val CharReader: Reader[Char] = new NumericReader[Char] {
 
     override def expectedMsg =
       "expected char"
 
     override def visitString(d: CharSequence, index: Int): Char =
-      d.charAt(0)
+      d.toString.charAt(0)
 
     override def visitChar(d: Char, index: Int): Char =
       d
@@ -208,13 +250,13 @@ trait UpickleCustom extends AttributeTagged {
       throw Abort(s"$expectedMsg got null")
   }
 
-  implicit override val LongReader: Reader[Long] = new SimpleReader[Long] {
+  implicit override val LongReader: Reader[Long] = new NumericReader[Long] {
 
     override def expectedMsg =
       "expected number"
 
     override def visitString(d: CharSequence, index: Int): Long =
-      ParseUtils.parseLong(d, 0, d.length())
+      visitFloat64String(d.toString, index)
 
     override def visitInt32(d: Int, index: Int): Long =
       d.toLong
@@ -230,6 +272,16 @@ trait UpickleCustom extends AttributeTagged {
 
     override def visitFloat64StringParts(s: CharSequence, decIndex: Int, expIndex: Int, index: Int): Long =
       ParseUtils.parseIntegralNum(s, decIndex, expIndex, index)
+
+    override def visitFloat64ByteParts(
+      s: Array[Byte], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Long =
+      ByteUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex)
+
+    override def visitFloat64CharParts(
+      s: Array[Char], arrOffset: Int, arrLength: Int, decIndex: Int, expIndex: Int, index: Int
+    ): Long =
+      CharUtils.parseIntegralNum(s, arrOffset, arrLength, decIndex, expIndex)
 
     override def visitNull(index: Int) =
       throw Abort(s"$expectedMsg got null")
