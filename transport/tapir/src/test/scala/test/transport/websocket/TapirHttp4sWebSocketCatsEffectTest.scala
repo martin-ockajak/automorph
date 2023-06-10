@@ -3,8 +3,9 @@
 //import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 //import automorph.system.CatsEffectSystem
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
+//import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint
 //import cats.effect.IO
-//import cats.effect.unsafe.implicits.globals
+//import cats.effect.unsafe.implicits.global
 //import com.comcast.ip4s.Port
 //import org.http4s.ember.server.EmberServerBuilder
 //import org.http4s.server.Router
@@ -19,7 +20,7 @@
 //class TapirHttp4sWebSocketCatsEffectTest extends StandardHttpServerTest {
 //
 //  type Effect[T] = IO[T]
-//  type Context = TapirHttpEndpoint.Context
+//  type Context = TapirWebSocketEndpoint.Context
 //
 //  override lazy val system: EffectSystem[Effect] = CatsEffectSystem()
 //
@@ -34,15 +35,12 @@
 //
 //  override def webSocket: Boolean =
 //    true
-//
-//  override def portRange: Range =
-//    Range(25000, 30000)
 //}
 //
 //case object TapirHttp4sWebSocketCatsEffectTest {
 //
 //  type Effect[T] = IO[T]
-//  type Context = TapirHttpEndpoint.Context
+//  type Context = TapirWebSocketEndpoint.Context
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
