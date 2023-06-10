@@ -8,14 +8,13 @@
 //import cats.effect.unsafe.implicits.global
 //import com.comcast.ip4s.Port
 //import org.http4s.ember.server.EmberServerBuilder
-//import org.http4s.server.Router
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.duration.Duration
 //import scala.concurrent.{Await, Future}
 //import sttp.tapir.server.http4s.Http4sServerInterpreter
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
-//import test.transport.http.TapirHttp4sWebSocketCatsEffectTest.TapirServer
+//import test.transport.websocket.TapirHttp4sWebSocketCatsEffectTest.TapirServer
 //
 //class TapirHttp4sWebSocketCatsEffectTest extends StandardHttpServerTest {
 //
@@ -55,7 +54,7 @@
 //      effectSystem.evaluate {
 //        val serviceBuilder = Http4sServerInterpreter[IO]().toWebSocketRoutes(endpoint.adapter)
 //        val serverBuilder = EmberServerBuilder.default[IO].withPort(Port.fromInt(port).get).withHttpWebSocketApp(
-//          builder => Router("/" -> serviceBuilder(builder).orNotFound)
+//          builder => serviceBuilder(builder).orNotFound
 //        )
 //        server = Some(serverBuilder.build.useForever.unsafeRunCancelable())
 //      }
