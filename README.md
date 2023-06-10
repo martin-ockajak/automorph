@@ -70,8 +70,15 @@ less target/test.log
 export LOG_CODE=true
 ```
 
-### Enable basic tests only
+### Enable simple remote API tests
 
 ```bash
-export TEST_BASIC=true
+export TEST_LEVEL=simple
 ```
+
+### Enable all remote API tests
+
+```bash
+export TEST_LEVEL=all
+```
+

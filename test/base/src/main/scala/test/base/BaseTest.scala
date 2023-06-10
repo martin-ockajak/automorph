@@ -14,8 +14,6 @@ import org.scalatestplus.scalacheck.{Checkers, ScalaCheckPropertyChecks}
  *   - result assertion matchers
  *   - additional test clues
  *   - property-based checks
- *   - asynchronous values retrieval
- *   - free network port detection
  */
 trait BaseTest
   extends AnyFreeSpecLike
@@ -29,10 +27,18 @@ trait BaseTest
 
 case object BaseTest {
 
-  /** Enable basic tests only environment variable. */
-  private val testBasicEnvironment = "TEST_BASIC"
+  /** Test level environment variable. */
+  private val testLevelEnvironment = "TEST_LEVEL"
+  /** Execute simple remote API tests */
+  private val testSimpleValue = "simple"
+  /** Execute all remote API tests */
+  private val testAllValue = "all"
 
-  /** Basic tests enabled only. */
-  final def testBasic: Boolean =
-    Option(System.getenv(testBasicEnvironment)).isDefined
+  /** Execute simple remote API tests */
+  final def testSimple: Boolean =
+    Option(System.getenv(testLevelEnvironment)).exists(_.toLowerCase == testSimpleValue)
+
+  /** Execute all remote API tests */
+  final def testAll: Boolean =
+    Option(System.getenv(testLevelEnvironment)).exists(_.toLowerCase == testAllValue)
 }
