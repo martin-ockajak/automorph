@@ -35,10 +35,9 @@
     <discardingThreshold>0</discardingThreshold>
   </appender>
 
-  <root level="OFF">
+  <root level="${LOG_LEVEL:-OFF}">
     <appender-ref ref="Console" />
     <appender-ref ref="File" />
   </root>
   <logger name="test" level="TRACE"/>
 </configuration>
-
