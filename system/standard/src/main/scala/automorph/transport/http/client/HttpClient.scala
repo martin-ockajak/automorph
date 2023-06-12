@@ -68,7 +68,7 @@ final case class HttpClient[Effect[_]](
     requestId: String,
     mediaType: String,
   ): Effect[(Array[Byte], Context)] =
-  // Send the request
+    // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
       send(request, requestUrl, requestId, protocol).either.flatMap { result =>
