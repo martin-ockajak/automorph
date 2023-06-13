@@ -232,7 +232,7 @@ lazy val examples = source(
 
 
 // Test
-ThisBuild / Test / testOptions += Tests.Argument("-oDF")
+ThisBuild / Test / testOptions += Tests.Argument("-f", (target.value / "test.results").getPath, "-oDF")
 lazy val testBase = source(project, "test/base").settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.16",
