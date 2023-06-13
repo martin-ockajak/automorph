@@ -25,4 +25,7 @@ class SttpClientHttpUrlConnectionHttpIdentityTest extends StandardHttpClientTest
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, HttpURLConnectionBackend(), url(fixtureId), HttpMethod.Post)
+
+  override def integration: Boolean =
+    true
 }

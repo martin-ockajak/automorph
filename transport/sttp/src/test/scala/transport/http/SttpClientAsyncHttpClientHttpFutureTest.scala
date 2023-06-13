@@ -26,4 +26,7 @@ class SttpClientAsyncHttpClientHttpFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, AsyncHttpClientFutureBackend(), url(fixtureId), HttpMethod.Post)
+
+  override def integration: Boolean =
+    true
 }

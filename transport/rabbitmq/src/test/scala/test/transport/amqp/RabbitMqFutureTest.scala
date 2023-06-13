@@ -60,6 +60,9 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     )
   }
 
+  override def integration: Boolean =
+    true
+
   override def afterAll(): Unit = {
     try {
       super.afterAll()

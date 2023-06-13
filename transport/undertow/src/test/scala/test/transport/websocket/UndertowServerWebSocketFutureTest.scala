@@ -29,6 +29,9 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     UndertowWebSocketEndpoint(system)
 
+  override def integration: Boolean =
+    true
+
   override def webSocket: Boolean =
     true
 }

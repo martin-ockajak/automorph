@@ -30,6 +30,9 @@ class JettyServerWebSocketFutureTest extends StandardHttpServerTest {
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     JettyWebSocketEndpoint(system)
 
+  override def integration: Boolean =
+    true
+
   override def webSocket: Boolean =
     true
 }

@@ -29,6 +29,9 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     FinagleHttpEndpoint(system)
+
+  override def integration: Boolean =
+    true
 }
 
 case object FinagleEndpointHttpFutureTest {

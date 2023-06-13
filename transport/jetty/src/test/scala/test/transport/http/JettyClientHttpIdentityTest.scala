@@ -25,4 +25,7 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyClient(system, url(fixtureId), HttpMethod.Post)
   }
+
+  override def integration: Boolean =
+    true
 }

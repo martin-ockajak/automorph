@@ -27,4 +27,7 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     UndertowHttpEndpoint(system)
+
+  override def integration: Boolean =
+    true
 }

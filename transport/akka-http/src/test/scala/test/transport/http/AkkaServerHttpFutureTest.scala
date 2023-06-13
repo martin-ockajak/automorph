@@ -29,4 +29,6 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     AkkaHttpEndpoint(system)
 
+  override def integration: Boolean =
+    true
 }

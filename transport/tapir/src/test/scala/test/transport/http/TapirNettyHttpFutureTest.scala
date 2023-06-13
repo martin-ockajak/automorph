@@ -26,6 +26,9 @@ class TapirNettyHttpFutureTest extends StandardHttpServerTest {
 
   def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
     TapirServer(system, port(fixtureId))
+
+  override def integration: Boolean =
+    true
 }
 
 case object TapirNettyHttpFutureTest {

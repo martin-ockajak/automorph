@@ -9,7 +9,8 @@ https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](
 https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 
-## This is a preview of an upcoming release. Please do not attempt to use it but feel free to review.
+
+## This is a preview of an upcoming release without the artifacts being published. Please do not use it in any way but feel free to review the documentation.
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](
 https://www.scala-lang.org/) providing an easy way to invoke and expose remote APIs using [JSON-RPC](
@@ -27,18 +28,51 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 ## Requirements
 
 * [JDK](https://openjdk.java.net/) 11+
-* [SBT](https://www.scala-sbt.org/) 1.8+
+* [SBT](https://www.scala-sbt.org/) 1.9+
 * [NodeJS](https://nodejs.org/) 19+
 * [Yarn](https://yarnpkg.com/) 1.22+
 
 
-## Commands
+## Testing
 
-### Test
+### Test using basic tests
 
 ```bash
 sbt '+ test'
 ```
+
+### Test using simple remote API tests only
+
+```bash
+TEST_LEVEL=simple sbt '+ test'
+```
+
+### Test using complex remote API tests including all integration tests
+
+```bash
+TEST_LEVEL=all sbt '+ test'
+```
+
+### Test with specific console log level
+
+```bash
+LOG_LEVEL=DEBUG sbt '+ test'
+```
+
+### Test with generated code logging
+
+```bash
+LOG_CODE=true sbt '+ test'
+```
+
+### Review test logs
+
+```
+less target/test.log
+```
+
+
+## Documentation
 
 ### Generate documentation
 
@@ -50,35 +84,5 @@ sbt site
 
 ```bash
 sbt serveSite
-```
-
-### Set console log level
-
-```bash
-export LOG_LEVEL=INFO
-```
-
-### Review test logs
-
-```
-less target/test.log
-```
-
-### Enable generated code logging
-
-```bash
-export LOG_CODE=true
-```
-
-### Enable simple remote API tests
-
-```bash
-export TEST_LEVEL=simple
-```
-
-### Enable all remote API tests
-
-```bash
-export TEST_LEVEL=all
 ```
 

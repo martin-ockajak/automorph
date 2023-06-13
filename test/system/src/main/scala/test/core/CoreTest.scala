@@ -54,6 +54,9 @@ trait CoreTest extends BaseTest {
 
   def fixtures: Seq[TestFixture]
 
+  def integration: Boolean =
+    false
+
   "" - {
     if (BaseTest.testSimple) {
       // Simple tests
@@ -71,7 +74,7 @@ trait CoreTest extends BaseTest {
         }
       }
     } else {
-      if (BaseTest.testAll) {
+      if (BaseTest.testAll || !integration) {
         // All tests
         fixtures.foreach { fixture =>
           val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName

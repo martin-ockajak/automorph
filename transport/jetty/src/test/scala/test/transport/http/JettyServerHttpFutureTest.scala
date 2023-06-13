@@ -29,4 +29,7 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     JettyHttpEndpoint(system)
+
+  override def integration: Boolean =
+    true
 }

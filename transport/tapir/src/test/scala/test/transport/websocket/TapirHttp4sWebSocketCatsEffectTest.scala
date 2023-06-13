@@ -30,6 +30,9 @@
 //  def serverTransport(id: Int): ServerTransport[Effect, Context] =
 //    TapirServer(system, port(id))
 //
+//  override def integration: Boolean =
+//    true
+//
 //  override def webSocket: Boolean =
 //    true
 //}

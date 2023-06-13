@@ -23,14 +23,12 @@ trait ProtocolCodecTest extends CoreTest {
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
-    Seq(
-      if (BaseTest.testSimple) {
-        Seq(circeJsonFixture(0))
-      } else {
-        Seq.empty
-      },
-      if (BaseTest.testAll) {
+    if (BaseTest.testSimple) {
+      Seq(circeJsonFixture(0))
+    } else {
+      if (BaseTest.testAll || !integration) {
         Seq(
+          circeJsonFixture(0),
           jacksonJsonFixture(1),
           uPickleJsonFixture(2),
           uPickleMessagePackFixture(3),
@@ -38,8 +36,8 @@ trait ProtocolCodecTest extends CoreTest {
         )
       } else {
         Seq.empty
-      },
-    ).flatten
+      }
+    }
   }
 
   def clientTransport(fixtureId: Int): ClientTransport[Effect, ?]

@@ -27,6 +27,9 @@ class SttpClientHttpClientWebSocketFutureTest extends StandardHttpClientTest {
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient(system, HttpClientFutureBackend(), url(fixtureId), HttpMethod.Get)
 
+  override def integration: Boolean =
+    true
+
   override def webSocket: Boolean =
     true
 }
