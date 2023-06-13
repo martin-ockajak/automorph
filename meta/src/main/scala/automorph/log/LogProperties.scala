@@ -8,4 +8,7 @@ private[automorph] case object LogProperties {
 
   /** Message body */
   val messageBody = "Message Body"
+
+  /** Client address. */
+  val client = "Client"
 }

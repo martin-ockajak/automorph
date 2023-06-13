@@ -51,7 +51,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
 ] {
 
   private val prefixPaths = pathComponents(pathPrefix)
-  private val log = MessageLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.WebSocket.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[
@@ -70,7 +70,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
       // Log the request
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(clientIp, None, requestId)
-      logger.debug("Received WebSocket request", requestProperties)
+      log.receivedRequest(requestProperties)
 
       // Process the request
       system.successful(Right { requestBody =>
@@ -112,7 +112,8 @@ final case class TapirWebSocketEndpoint[Effect[_]](
     log: MessageLog,
   ): Array[Byte] = {
     // Log the response
-    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(clientIp))
+    lazy val responseProperties =
+      ListMap(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(clientIp))
     log.sendingResponse(responseProperties)
     responseBody
   }

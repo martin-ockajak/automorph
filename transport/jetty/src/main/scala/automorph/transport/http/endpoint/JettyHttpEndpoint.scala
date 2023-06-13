@@ -107,7 +107,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     val responseStatus = responseContext.flatMap(_.statusCode).getOrElse(status)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "Status" -> responseStatus.toString,
     )
     log.sendingResponse(responseProperties)
@@ -143,7 +143,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     val url = s"${request.getRequestURI}$query"
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "URL" -> url,
       "Method" -> request.getMethod,
     )

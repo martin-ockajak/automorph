@@ -147,7 +147,7 @@ case object UndertowWebSocketEndpoint {
       // Log the response
       lazy val responseProperties = ListMap(
         LogProperties.requestId -> requestId,
-        "Client" -> clientAddress(exchange)
+        LogProperties.client -> clientAddress(exchange)
       )
       log.sendingResponse(responseProperties)
 
@@ -166,7 +166,7 @@ case object UndertowWebSocketEndpoint {
     private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
       val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
       val url = s"${exchange.getRequestURI}$query"
-      Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange), "URL" -> url)
+      Map(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(exchange), "URL" -> url)
     }
 
     private def clientAddress(exchange: WebSocketHttpExchange): String = {

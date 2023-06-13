@@ -101,7 +101,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.apply)).getOrElse(status)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "Status" -> responseStatus.toString,
     )
 
@@ -128,7 +128,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
   private def getRequestProperties(request: Request, requestId: String): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "URL" -> request.uri,
       "Method" -> request.method.toString,
     )

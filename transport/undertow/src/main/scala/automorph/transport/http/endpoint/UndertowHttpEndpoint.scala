@@ -122,7 +122,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(exchange),
+      LogProperties.client -> clientAddress(exchange),
       "Status" -> responseStatusCode.toString,
     )
     log.sendingResponse(responseProperties)
@@ -162,7 +162,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     val url = s"${exchange.getRequestURI}$query"
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(exchange),
+      LogProperties.client -> clientAddress(exchange),
       "URL" -> url,
       "Method" -> exchange.getRequestMethod.toString,
     )

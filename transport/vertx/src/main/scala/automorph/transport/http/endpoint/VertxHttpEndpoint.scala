@@ -105,7 +105,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "Status" -> responseStatusCode.toString,
     )
     log.sendingResponse(responseProperties)
@@ -136,7 +136,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private def getRequestProperties(request: HttpServerRequest, requestId: String): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(request),
+      LogProperties.client -> clientAddress(request),
       "URL" -> request.absoluteURI,
       "Method" -> request.method.name,
     )

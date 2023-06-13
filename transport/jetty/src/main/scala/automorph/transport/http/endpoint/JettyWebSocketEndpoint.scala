@@ -108,7 +108,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
     // Log the response
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(session),
+      LogProperties.client -> clientAddress(session),
     )
     log.sendingResponse(responseProperties)
 
@@ -130,7 +130,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
     val url = s"${request.getRequestURI}$query"
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(session),
+      LogProperties.client -> clientAddress(session),
       "URL" -> url,
       "Method" -> request.getMethod,
     )

@@ -90,7 +90,8 @@ final case class VertxWebSocketEndpoint[Effect[_]](
 
   private def sendResponse(responseBody: Array[Byte], session: ServerWebSocket, requestId: String): Unit = {
     // Log the response
-    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(session))
+    lazy val responseProperties =
+      ListMap(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(session))
     log.sendingResponse(responseProperties)
 
     // Send the response
@@ -114,7 +115,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
   }
 
   private def getRequestProperties(request: ServerWebSocket, requestId: String): Map[String, String] =
-    ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(request), "URL" -> request.uri)
+    ListMap(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(request), "URL" -> request.uri)
 }
 
 case object VertxWebSocketEndpoint {

@@ -229,7 +229,8 @@ final case class NanoServer[Effect[_]] (
   ): HttpResponse = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
-    lazy val responseProperties = Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(session)) ++
+    lazy val responseProperties =
+      Map(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(session)) ++
       (protocol match {
         case Protocol.Http => Some("Status" -> responseStatus.toString)
         case _ => None
@@ -259,7 +260,7 @@ final case class NanoServer[Effect[_]] (
     val url = s"${session.getUri}$query"
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(session),
+      LogProperties.client -> clientAddress(session),
       "Protocol" -> protocol.toString,
       "URL" -> url,
     ) ++ Option.when(protocol == Protocol.Http)("Method" -> session.getMethod.toString)

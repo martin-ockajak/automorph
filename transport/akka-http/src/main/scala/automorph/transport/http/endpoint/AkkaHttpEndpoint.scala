@@ -1,11 +1,9 @@
 package automorph.transport.http.endpoint
 
-import akka.http.scaladsl.model.StatusCodes.InternalServerError
+import akka.http.scaladsl.model.StatusCodes.{InternalServerError, Locked}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Directives.{
-  complete, extractClientIP, extractExecutionContext, extractMaterializer, extractRequest, onComplete
-}
+import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractExecutionContext, extractMaterializer, extractRequest, onComplete}
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import automorph.log.{LogProperties, Logging, MessageLog}
@@ -16,7 +14,7 @@ import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.concurrent.duration.{FiniteDuration, DurationInt}
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.Try
 
 /**
@@ -145,7 +143,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
     val responseStatusCode = responseContext.flatMap(_.statusCode.map(StatusCode.int2StatusCode)).getOrElse(statusCode)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(remoteAddress),
+      LogProperties.client -> clientAddress(remoteAddress),
       "Status" -> responseStatusCode.intValue.toString,
     )
     log.sendingResponse(responseProperties)
@@ -174,7 +172,7 @@ final case class AkkaHttpEndpoint[Effect[_]](
   ): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(remoteAddress),
+      LogProperties.client -> clientAddress(remoteAddress),
       "URL" -> request.uri.toString,
       "Method" -> request.method.value,
     )

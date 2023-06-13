@@ -133,7 +133,7 @@ final case class TapirHttpEndpoint[Effect[_]](
     // Log the response
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(clientIp),
+      LogProperties.client -> clientAddress(clientIp),
       "Status" -> statusCode.toString,
     )
     log.sendingResponse(responseProperties)
@@ -194,7 +194,7 @@ case object TapirHttpEndpoint {
     method: Option[Method],
     requestId: String,
   ): Map[String, String] =
-    ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(clientIp)) ++
+    ListMap(LogProperties.requestId -> requestId, LogProperties.client -> clientAddress(clientIp)) ++
       method.map("Method" -> _.toString)
 
   private[automorph] def clientAddress(clientIp: Option[String]): String =
