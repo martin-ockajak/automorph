@@ -70,9 +70,9 @@ object which provides a convenient way to create default plugin instances or com
 | [UrlClient](/api/automorph/transport/http/client/UrlClient.html) | [automorph-core](https://mvnrepository.com/artifact/org.automorph/automorph-core) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [RabbitMqClient](/api/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 | [SttpClient](/api/automorph/transport/http/client/SttpClient.html)| [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) | |
+| -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [Armeria](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [AsyncHttpClient](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [HttpClient](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP ), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| -> | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [Armeria](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [LocalClient](/api/automorph/transport/local/client/LocalClient.html) | [automorph-core](https://mvnrepository.com/artifact/org.automorph/automorph-core) |  |  |
 
 
@@ -101,8 +101,9 @@ object which provides a convenient way to create default plugin instances or com
 | [AkkaHttpEndpoint](/api/automorph/transport/http/endpoint/AkkaHttpEndpoint.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [FinagleEndpoint](/api/automorph/transport/http/endpoint/FinagleHttpEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [TapirHttpEndpoint](/api/automorph/transport/http/endpoint/TapirHttpEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Vert.x](https://tapir.softwaremill.com/en/latest/server/vertx.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Armeria](https://tapir.softwaremill.com/en/latest/server/armeria.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Vert.x](https://tapir.softwaremill.com/en/latest/server/vertx.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
+| -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Http4s](https://tapir.softwaremill.com/en/latest/server/http4s.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | -> | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Netty](https://tapir.softwaremill.com/en/latest/server/netty.html)| [HTTP](https://en.wikipedia.org/wiki/HTTP) |
 | [LocalEndpoint](/api/automorph/transport/local/endpoint/LocalEndpoint.html) | [automorph-core](https://mvnrepository.com/artifact/org.automorph/automorph-core) |  |  |
 
