@@ -76,7 +76,7 @@ const features = [
     link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
     description: (
         <>
-          Supports <a href="https://www.scala-lang.org/">Scala</a> 3.2+ and 2.13+ on <a
+          Supports <a href="https://www.scala-lang.org/">Scala</a> 3.3+ and 2.13+ on <a
             href="https://openjdk.java.net/">JRE</a> 11+ and integrates with various popular <a
             href="docs/Plugins">libraries</a>.
         </>
