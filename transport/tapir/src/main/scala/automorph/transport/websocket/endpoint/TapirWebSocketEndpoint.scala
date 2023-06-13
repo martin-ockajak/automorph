@@ -55,7 +55,7 @@ final case class TapirWebSocketEndpoint[Effect[_]](
   private implicit val system: EffectSystem[Effect] = effectSystem
 
   def adapter: ServerEndpoint.Full[
-    Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect
+    Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect] & WebSockets, Effect
   ] = {
 
     // Define server endpoint inputs & outputs

@@ -2,7 +2,6 @@
 //
 //import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 //import automorph.system.CatsEffectSystem
-//import automorph.transport.http.endpoint.TapirHttpEndpoint
 //import automorph.transport.websocket.endpoint.TapirWebSocketEndpoint
 //import cats.effect.IO
 //import cats.effect.unsafe.implicits.global
@@ -43,7 +42,7 @@
 //  type Context = TapirWebSocketEndpoint.Context
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
-//    private var endpoint = TapirHttpEndpoint(effectSystem)
+//    private var endpoint = TapirWebSocketEndpoint(effectSystem)
 //    private var server = Option.empty[IO[Unit]]
 //
 //    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
