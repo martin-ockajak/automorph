@@ -11,9 +11,9 @@ sidebar_position: 1
 
 ## Goals
 
-* Enable **remote access** to **existing APIs** with **no need to create an intermediate layer**
+* Enable **remote access** to **APIs** while **automatically creating the intermediate layer**
 * Support managing **dynamic message payload** and accessing **transport protocol metadata**
-* Provide **smooth integration** with related **libraries** and existing **applications**
+* Provide **smooth integration** with existing **applications** and related **libraries**
 
 
 ## Requirements
@@ -46,12 +46,12 @@ Traits for implementation of various integration plugins:
 
 ## Limitations
 
-* JSON-RPC protocol implementation does not support batch requests
 * Remote APIs must not contain [overloaded methods](https://en.wikipedia.org/wiki/Function_overloading)
 * Remote API methods must not use [type parameters](https://docs.scala-lang.org/tour/polymorphic-methods.html)
 * Remote API methods must not be [inline](https://docs.scala-lang.org/scala3/guides/macros/inline.html)
 * Remote APIs must not be used from within the [App](https://scala-lang.org/api/3.x/scala/App.html) trait nor from
 within any other [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) scope
+* JSON-RPC protocol implementation does not support batch requests
 * Due to Scala 2 [type inference](https://docs.scala-lang.org/tour/type-inference.html) constraints it may be necessary
 to explicitly supply type parameters when creating RPC protocol plugin instances
 
@@ -59,7 +59,7 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 ## Known issues
 
 - Mangled Scaladoc signatures for a few nonessential methods
-- Missing Monix effect system in Scaladoc index
+- Missing Monix effect system plugin in Scaladoc index
 
 
 ## Supported standards
@@ -96,6 +96,7 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
-* [http4s](https://http4s.org)
+* [Tapir](https://tapir.softwaremill.com)
 * [STTP](https://sttp.softwaremill.com)
 * [ZIO](https://zio.dev)
+
