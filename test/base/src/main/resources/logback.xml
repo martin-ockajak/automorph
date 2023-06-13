@@ -5,9 +5,6 @@
   <!-- Release logging resources on application termination -->
   <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
-  <!-- Default pattern -->
-  <property name="defaultPattern" value="%date \(%level\) %message" />
-
   <!-- Simple console logging -->
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -35,9 +32,12 @@
     <discardingThreshold>0</discardingThreshold>
   </appender>
 
+  <!-- Root log level -->
   <root level="${LOG_LEVEL:-OFF}">
     <appender-ref ref="Console" />
     <appender-ref ref="File" />
   </root>
+
+  <!-- TeSt-specific log level -->
   <logger name="test" level="TRACE"/>
 </configuration>
