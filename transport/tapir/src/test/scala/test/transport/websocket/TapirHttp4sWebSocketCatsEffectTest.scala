@@ -9,8 +9,6 @@
 //import com.comcast.ip4s.Port
 //import org.http4s.ember.server.EmberServerBuilder
 //import org.scalacheck.Arbitrary
-//import scala.concurrent.duration.Duration
-//import scala.concurrent.{Await, Future}
 //import sttp.tapir.server.http4s.Http4sServerInterpreter
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
@@ -43,7 +41,7 @@
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
 //    private var endpoint = TapirHttpEndpoint(effectSystem)
-//    private var server = Option.empty[() => Future[Unit]]
+//    private var server = Option.empty[IO[Unit]]
 //
 //    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
 //      endpoint = endpoint.withHandler(handler)
@@ -56,13 +54,13 @@
 //        val serverBuilder = EmberServerBuilder.default[IO].withPort(Port.fromInt(port).get).withHttpWebSocketApp(
 //          builder => serviceBuilder(builder).orNotFound
 //        )
-//        server = Some(serverBuilder.build.useForever.unsafeRunCancelable())
+//        server = Some(serverBuilder.build.allocated.unsafeRunSync()._2)
 //      }
 //
 //    override def close(): Effect[Unit] =
 //      server.map { activeServer =>
 //        effectSystem.evaluate {
-//          Await.result(activeServer(), Duration.Inf)
+//          activeServer.unsafeRunSync()
 //        }
 //      }.getOrElse(effectSystem.successful {})
 //    }
