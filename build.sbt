@@ -143,7 +143,7 @@ lazy val sttp =
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
-    "kcom.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "armeria-backend" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
