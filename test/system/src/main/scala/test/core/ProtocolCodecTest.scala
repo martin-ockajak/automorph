@@ -24,15 +24,15 @@ trait ProtocolCodecTest extends CoreTest {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
     if (BaseTest.testSimple) {
-      Seq(circeJsonFixture(0))
+      Seq(circeJsonRpcJsonFixture(0))
     } else {
       if (BaseTest.testAll || !integration) {
         Seq(
-          circeJsonFixture(0),
-          jacksonJsonFixture(1),
-          uPickleJsonFixture(2),
-          uPickleMessagePackFixture(3),
-          argonautJsonFixture(4),
+          circeJsonRpcJsonFixture(0),
+          jacksonJsonRpcJsonFixture(1),
+          uPickleJsonRpcJsonFixture(2),
+          uPickleJsonRpcMessagePackFixture(3),
+          argonautJsonRpcJsonFixture(4),
         )
       } else {
         Seq.empty
@@ -98,7 +98,7 @@ trait ProtocolCodecTest extends CoreTest {
   private def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
     clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
 
-  private def circeJsonFixture(id: Int)(implicit context: Context): TestFixture = {
+  private def circeJsonRpcJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
     implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
     Seq(enumEncoder, enumDecoder)
@@ -119,7 +119,7 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
-  private def jacksonJsonFixture(id: Int)(implicit context: Context): TestFixture = {
+  private def jacksonJsonRpcJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     val enumModule = new SimpleModule().addSerializer(
       classOf[Enum.Enum],
       new StdSerializer[Enum.Enum](classOf[Enum.Enum]) {
@@ -152,7 +152,7 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
-  private def uPickleJsonFixture(id: Int)(implicit context: Context): TestFixture = {
+  private def uPickleJsonRpcJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     class Custom extends UpickleJsonCustom {
       implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
         .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
@@ -178,7 +178,7 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
-  private def uPickleMessagePackFixture(id: Int)(implicit context: Context): TestFixture = {
+  private def uPickleJsonRpcMessagePackFixture(id: Int)(implicit context: Context): TestFixture = {
     class Custom extends UpickleMessagePackCustom {
       implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
         .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
@@ -204,7 +204,7 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
-  private def argonautJsonFixture(id: Int)(implicit context: Context): TestFixture = {
+  private def argonautJsonRpcJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumCodecJson: CodecJson[Enum.Enum] =
       CodecJson((v: Enum.Enum) => jNumber(Enum.toOrdinal(v)), cursor => cursor.focus.as[Int].map(Enum.fromOrdinal))
     implicit val structureCodecJson: CodecJson[Structure] = Argonaut
