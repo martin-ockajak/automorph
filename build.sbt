@@ -32,7 +32,10 @@ onLoadMessage := {
 
 
 // Structure
-lazy val root = project.in(file(".")).settings(name := projectName, publish / skip := true).aggregate(
+lazy val root = project.in(file(".")).settings(
+  name := projectName,
+  publish / skip := true
+).aggregate(
   // Core
   meta,
   core,
@@ -234,6 +237,7 @@ lazy val examples = source(
 // Test
 ThisBuild / Test / testOptions += Tests.Argument("-f", (target.value / "test.results").getPath, "-oDF")
 lazy val testBase = source(project, "test/base").settings(
+  publish / skip := true,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.16",
     "org.scalatestplus" %% "scalacheck-1-17" % "3.2.16.0",
@@ -243,11 +247,14 @@ lazy val testBase = source(project, "test/base").settings(
   )
 )
 lazy val testCodec = source(project, "test/codec", testBase, meta).settings(
+  publish / skip := true,
   libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
 )
-lazy val testSystem = source(project, "test/system", testCodec, core, circe, jackson, upickle, argonaut)
-lazy val testTransport = source(
-  project, "test/transport", testSystem, standard,
+lazy val testSystem = source(project, "test/system", testCodec, core, circe, jackson, upickle, argonaut).settings(
+  publish / skip := true
+)
+lazy val testTransport = source(project, "test/transport", testSystem, standard).settings(
+  publish / skip := true
 )
 
 
