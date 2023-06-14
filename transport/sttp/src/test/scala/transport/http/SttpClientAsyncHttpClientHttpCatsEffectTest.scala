@@ -1,32 +1,31 @@
 package transport.http
 
-import automorph.spi.ClientTransport
-import automorph.system.ZioSystem
+import automorph.spi.{ClientTransport, EffectSystem}
+import automorph.system.CatsEffectSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import org.scalacheck.Arbitrary
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
-import zio.{Task, Unsafe}
 
-class SttpClientAsyncHttpClientHttpZioTest extends StandardHttpClientTest {
+class SttpClientAsyncHttpClientHttpCatsEffectTest extends StandardHttpClientTest {
 
-  type Effect[T] = Task[T]
+  type Effect[T] = IO[T]
   type Context = SttpClient.Context
 
-  override lazy val system: ZioSystem[Any] = ZioSystem.default
+  override lazy val system: EffectSystem[Effect] = CatsEffectSystem()
 
   override def run[T](effect: Effect[T]): T =
-    Unsafe.unsafe { implicit unsafe =>
-      system.runtime.unsafe.run(effect).getOrThrow()
-    }
+    effect.unsafeRunSync()
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    SttpClient.http(system, run(AsyncHttpClientZioBackend()), url(id), HttpMethod.Post)
+    SttpClient.http(system, run(AsyncHttpClientCatsBackend()), url(id), HttpMethod.Post)
 
   override def integration: Boolean =
     true
