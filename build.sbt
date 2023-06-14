@@ -82,13 +82,15 @@ def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectRefere
     }),
   )
   path.split('/') match {
-    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => subProject
+    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => subProject.settings(
+      publish / skip := true
+    )
     case Array(directory) => subProject.settings(
-        name := s"$projectName-$directory"
-      )
+      name := s"$projectName-$directory"
+    )
     case Array(_, directories @ _*) => subProject.settings(
-        name := s"$projectName-${directories.mkString("-")}"
-      )
+      name := s"$projectName-${directories.mkString("-")}"
+    )
   }
 }
 
@@ -220,7 +222,6 @@ lazy val default = project.dependsOn(standard, circe, undertow, testTransport % 
 lazy val examples = source(
   project, "examples", default, upickle, zio, sttp, rabbitmq, testBase % Test
 ).settings(
-  publish / skip := true,
   Test / fork := true,
   Test / testForkedParallel := true,
   Test / javaOptions += s"-Dproject.target=${System.getProperty("project.target")}",
@@ -237,7 +238,6 @@ lazy val examples = source(
 // Test
 ThisBuild / Test / testOptions += Tests.Argument("-f", (target.value / "test.results").getPath, "-oDF")
 lazy val testBase = source(project, "test/base").settings(
-  publish / skip := true,
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.16",
     "org.scalatestplus" %% "scalacheck-1-17" % "3.2.16.0",
@@ -247,15 +247,10 @@ lazy val testBase = source(project, "test/base").settings(
   )
 )
 lazy val testCodec = source(project, "test/codec", testBase, meta).settings(
-  publish / skip := true,
   libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
 )
-lazy val testSystem = source(project, "test/system", testCodec, core, circe, jackson, upickle, argonaut).settings(
-  publish / skip := true
-)
-lazy val testTransport = source(project, "test/transport", testSystem, standard).settings(
-  publish / skip := true
-)
+lazy val testSystem = source(project, "test/system", testCodec, core, circe, jackson, upickle, argonaut)
+lazy val testTransport = source(project, "test/transport", testSystem, standard)
 
 
 // Compile
