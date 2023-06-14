@@ -100,3 +100,8 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 * [STTP](https://sttp.softwaremill.com)
 * [ZIO](https://zio.dev)
 
+
+## Special thanks to
+
+* Luigi Antognini
+
