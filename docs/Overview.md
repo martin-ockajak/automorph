@@ -92,6 +92,16 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 * [OpenAPI](https://github.com/OAI/OpenAPI-Specification)
 
 
+## Author
+
+* Martin Ockajak
+
+
+## Special thanks to
+
+* Luigi Antognini
+
+
 ## Inspired by
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
@@ -99,9 +109,4 @@ to explicitly supply type parameters when creating RPC protocol plugin instances
 * [Tapir](https://tapir.softwaremill.com)
 * [STTP](https://sttp.softwaremill.com)
 * [ZIO](https://zio.dev)
-
-
-## Special thanks to
-
-* Luigi Antognini
 

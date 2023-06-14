@@ -82,7 +82,12 @@ def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectRefere
     }),
   )
   path.split('/') match {
-    case Array(directory, _ @_*) if Seq("examples", "test").contains(directory) => subProject.settings(
+    case Array("examples") => subProject.settings(
+      name := s"$projectName-examples",
+      publish / skip := true
+    )
+    case Array("test", directory) => subProject.settings(
+      name := s"$projectName-test-$directory",
       publish / skip := true
     )
     case Array(directory) => subProject.settings(
