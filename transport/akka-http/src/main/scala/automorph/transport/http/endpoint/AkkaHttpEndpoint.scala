@@ -1,9 +1,11 @@
 package automorph.transport.http.endpoint
 
-import akka.http.scaladsl.model.StatusCodes.{InternalServerError, Locked}
+import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractExecutionContext, extractMaterializer, extractRequest, onComplete}
+import akka.http.scaladsl.server.Directives.{
+  complete, extractClientIP, extractExecutionContext, extractMaterializer, extractRequest, onComplete
+}
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import automorph.log.{LogProperties, Logging, MessageLog}
