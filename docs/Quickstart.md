@@ -158,4 +158,3 @@ sbt run
 - Integrate with preferred platforms by including additional plugins
 - Configure RPC client, server or endpoint properties
 - Remove unused examples and build dependencies
-

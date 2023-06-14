@@ -275,8 +275,6 @@ val commonScalacOptions = Seq(
 val compileScalac3Options = commonScalacOptions ++ Seq(
   "-source",
   "3.3",
-//  "-Wunused",
-  "-Wvalue-discard",
   "-language:adhocExtensions",
   "-pagewidth",
   "120"
@@ -305,6 +303,8 @@ val docScalac2Options = compileScalac2Options ++ Seq(
 ThisBuild / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((3, _)) => compileScalac3Options ++ Seq(
     "-indent",
+//    "-Wunused",
+    "-Wvalue-discard",
     "-Xcheck-macros",
     "-Ysafe-init"
   )
@@ -429,10 +429,10 @@ ThisBuild / publishTo := {
 }
 ThisBuild / pomIncludeRepository := { _ => false }
 ThisBuild / publishMavenStyle := true
+ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / releaseCrossBuild := true
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
-ThisBuild / versionScheme := Some("early-semver")
 credentials ++= Seq(
   Credentials("GnuPG Key ID", "gpg", "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63", "")
 ) ++ (if (repositoryCredentialsPath.isFile) {
@@ -440,4 +440,3 @@ credentials ++= Seq(
 } else {
   Seq.empty
 })
-
