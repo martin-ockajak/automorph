@@ -8,10 +8,10 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.tapir.server.armeria.ArmeriaFutureServerInterpreter
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 import test.transport.http.TapirArmeriaHttpFutureTest.TapirServer
 
-class TapirArmeriaHttpFutureTest extends StandardHttpServerTest {
+class TapirArmeriaHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = TapirHttpEndpoint.Context

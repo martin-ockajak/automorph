@@ -7,10 +7,10 @@ import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.WebSocketServerTest
 import test.transport.http.HttpContextGenerator
 
-class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
+class UndertowServerWebSocketFutureTest extends WebSocketServerTest {
 
   type Effect[T] = Future[T]
   type Context = UndertowServer.Context
@@ -28,10 +28,4 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     UndertowWebSocketEndpoint(system)
-
-  override def integration: Boolean =
-    true
-
-  override def webSocket: Boolean =
-    true
 }

@@ -1,6 +1,6 @@
-package test
+package test.api
 
-import test.Enum.Enum
+import test.api.Enum.Enum
 
 final case class Record(
   string: String,

@@ -7,9 +7,9 @@ import automorph.transport.http.server.VertxServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 
-class VertxServerHttpFutureTest extends StandardHttpServerTest {
+class VertxServerHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = VertxServer.Context
@@ -30,7 +30,4 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
 
   override def integration: Boolean =
     true
-
-  override def testServerClose: Boolean =
-    false
 }

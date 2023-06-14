@@ -7,10 +7,10 @@ import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.WebSocketServerTest
 import test.transport.http.HttpContextGenerator
 
-class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
+class VertxServerWebSocketFutureTest extends WebSocketServerTest {
 
   type Effect[T] = Future[T]
   type Context = VertxServer.Context
@@ -29,12 +29,6 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     VertxWebSocketEndpoint(system)
 
-  override def integration: Boolean =
-    true
-
   override def testServerClose: Boolean =
     false
-
-  override def webSocket: Boolean =
-    true
 }

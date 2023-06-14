@@ -27,6 +27,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   /** JSON-RPC message metadata. */
   type Metadata = Option[Message.Id]
+
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),

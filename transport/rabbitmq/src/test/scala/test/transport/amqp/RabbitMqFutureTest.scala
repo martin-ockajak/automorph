@@ -44,26 +44,23 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
     embeddedBroker.map { case (_, config) =>
-      val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
-      RabbitMqClient[Effect](url, fixtureId.toString, system)
+      RabbitMqClient[Effect](url(config), fixtureId.toString, system)
     }.getOrElse(
       LocalClient(system, LocalContext(arbitraryContext.arbitrary.sample.get), server.handler)
         .asInstanceOf[ClientTransport[Effect, Context]]
     )
 
-  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] = {
+  override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
     embeddedBroker.map { case (_, config) =>
-      val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
-      RabbitMqServer[Effect](system, url, Seq(fixtureId.toString))
+      RabbitMqServer[Effect](system, url(config), Seq(fixtureId.toString))
     }.getOrElse(
       server.asInstanceOf[ServerTransport[Effect, Context]]
     )
-  }
 
   override def integration: Boolean =
     true
 
-  override def afterAll(): Unit = {
+  override def afterAll(): Unit =
     try {
       super.afterAll()
       embeddedBroker.foreach { case (broker, config) =>
@@ -75,7 +72,6 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     } finally {
       unlock()
     }
-  }
 
   private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] =
     Option.when(erlangAvailable) {
@@ -87,4 +83,7 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
       broker.start()
       broker -> config
     }
+
+  private def url(config: EmbeddedRabbitMqConfig): URI =
+    new URI(s"amqp://localhost:${config.getRabbitMqPort}")
 }

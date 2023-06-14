@@ -8,10 +8,10 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.client3.httpclient.HttpClientFutureBackend
-import test.standard.StandardHttpClientTest
+import test.transport.WebSocketClientTest
 import test.transport.http.HttpContextGenerator
 
-class SttpClientHttpClientWebSocketFutureTest extends StandardHttpClientTest {
+class SttpClientHttpClientWebSocketFutureTest extends WebSocketClientTest {
 
   type Effect[T] = Future[T]
   type Context = SttpClient.Context
@@ -26,10 +26,4 @@ class SttpClientHttpClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient(system, HttpClientFutureBackend(), url(fixtureId), HttpMethod.Get)
-
-  override def integration: Boolean =
-    true
-
-  override def webSocket: Boolean =
-    true
 }

@@ -6,11 +6,11 @@ import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
 import org.scalacheck.Arbitrary
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import test.standard.StandardHttpClientTest
+import test.transport.HttpClientTest
 import test.transport.http.HttpContextGenerator
 import zio.{Task, Unsafe}
 
-class SttpClientAsyncHttpClientHttpZioTest extends StandardHttpClientTest {
+class SttpClientAsyncHttpClientHttpZioTest extends HttpClientTest {
 
   type Effect[T] = Task[T]
   type Context = SttpClient.Context
@@ -27,7 +27,4 @@ class SttpClientAsyncHttpClientHttpZioTest extends StandardHttpClientTest {
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, run(AsyncHttpClientZioBackend()), url(id), HttpMethod.Post)
-
-  override def integration: Boolean =
-    true
 }

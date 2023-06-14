@@ -2,8 +2,8 @@ package test.codec.json
 
 import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
 import org.scalacheck.{Arbitrary, Gen}
-import test.Generators.arbitraryRecord
-import test.{Enum, Record, Structure}
+import test.api.Generators.arbitraryRecord
+import test.api.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Null, Num, Obj, Str, Value}
 
 class UpickleJsonTest extends JsonMessageCodecTest {

@@ -5,8 +5,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
 import automorph.codec.json.CirceJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
-import test.Generators.arbitraryRecord
-import test.{Enum, Record, Structure}
+import test.api.Generators.arbitraryRecord
+import test.api.{Enum, Record, Structure}
 
 class CirceJsonTest extends JsonMessageCodecTest {
 

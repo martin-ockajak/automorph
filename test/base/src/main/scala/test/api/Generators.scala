@@ -1,10 +1,8 @@
-package test
+package test.api
 
-import org.scalacheck.Arbitrary.{
-  arbBool, arbByte, arbDouble, arbFloat, arbInt, arbLong, arbOption, arbShort, arbString, arbitrary
-}
+import org.scalacheck.Arbitrary.{arbBool, arbByte, arbDouble, arbFloat, arbInt, arbLong, arbOption, arbShort, arbString, arbitrary}
 import org.scalacheck.{Arbitrary, Gen}
-import test.Enum.Enum
+import test.api.Enum.Enum
 
 case object Generators {
 

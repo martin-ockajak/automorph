@@ -2,11 +2,17 @@ package test.base
 
 import java.net.ServerSocket
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.mutable
 import scala.util.{Random, Try}
 
 trait Network {
   private lazy val minPort = 16384
   private lazy val maxPort = 65536
+
+  def port(id: String): Int =
+    Network.ports.synchronized {
+      Network.ports.getOrElseUpdate(id, claimPort())
+    }
 
   def claimPort(): Int =
     LazyList.continually(Network.random.between(minPort, maxPort)).take(maxPort - minPort).find { port =>
@@ -25,7 +31,8 @@ trait Network {
 case object Network {
   private val targetDirectoryProperty = "project.target"
   private val targetDirectoryDefault = "target"
-  private lazy val random = new Random()
+  private val ports = mutable.HashMap[String, Int]()
+  private val random = new Random()
 
   private lazy val lockDirectory: Path = {
     val targetDir = Paths.get(Option(System.getProperty(targetDirectoryProperty)).getOrElse(targetDirectoryDefault))

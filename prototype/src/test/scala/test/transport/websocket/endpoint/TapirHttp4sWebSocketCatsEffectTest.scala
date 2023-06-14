@@ -10,11 +10,11 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.scalacheck.Arbitrary
 import sttp.capabilities.fs2.Fs2Streams
 import sttp.tapir.server.http4s.Http4sServerInterpreter
-import test.standard.StandardHttpServerTest
+import test.standard.WebSocketServerTest
 import test.transport.http.HttpContextGenerator
 import test.transport.websocket.TapirHttp4sWebSocketCatsEffectTest.TapirServer
 
-class TapirHttp4sWebSocketCatsEffectTest extends StandardHttpServerTest {
+class TapirHttp4sWebSocketCatsEffectTest extends WebSocketServerTest {
 
   type Effect[T] = IO[T]
   type Context = TapirWebSocketEndpoint.Context
@@ -31,9 +31,6 @@ class TapirHttp4sWebSocketCatsEffectTest extends StandardHttpServerTest {
     TapirServer(system, port(id))
 
   override def integration: Boolean =
-    true
-
-  override def webSocket: Boolean =
     true
 }
 

@@ -7,9 +7,9 @@ import automorph.transport.http.server.JettyServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.WebSocketServerTest
 
-class JettyServerWebSocketFutureTest extends StandardHttpServerTest {
+class JettyServerWebSocketFutureTest extends WebSocketServerTest {
 
   type Effect[T] = Future[T]
   type Context = JettyWebSocketEndpoint.Context
@@ -29,10 +29,4 @@ class JettyServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     JettyWebSocketEndpoint(system)
-
-  override def integration: Boolean =
-    true
-
-  override def webSocket: Boolean =
-    true
 }

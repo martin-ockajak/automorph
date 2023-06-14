@@ -1,7 +1,8 @@
-package test
+package test.api
 
 import automorph.RpcResult
 import automorph.spi.EffectSystem
+import test.api
 
 trait SimpleApi[Effect[_]] {
 
@@ -29,11 +30,11 @@ trait ComplexApi[Effect[_], Context] {
 
   def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]]
 
-  def method6(p0: Record, p1: Double): Effect[Option[Int]]
+  def method6(p0: api.Record, p1: Double): Effect[Option[Int]]
 
-  def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Record]
+  def method7(p0: api.Record, p1: Boolean)(implicit context: Context): Effect[api.Record]
 
-  def method8(p0: Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]]
+  def method8(p0: api.Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]]
 
   def method9(p0: String): Effect[String]
 
@@ -61,17 +62,17 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
   override def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]] =
     backend.successful(Map("boolean" -> p0.toString, "float" -> p1.toString, "list" -> p2.mkString(", ")))
 
-  override def method6(p0: Record, p1: Double): Effect[Option[Int]] =
+  override def method6(p0: api.Record, p1: Double): Effect[Option[Int]] =
     backend.successful(Some((p0.double + p1).toInt))
 
-  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Record] =
+  override def method7(p0: api.Record, p1: Boolean)(implicit context: Context): Effect[api.Record] =
     backend.successful(p0.copy(
       string = s"${p0.string} - ${p0.long} - ${p0.double} - $p1 - ${context.getClass.getName}",
       double = if (p1) 1 else 0,
       enumeration = Enum.fromOrdinal(1),
     ))
 
-  override def method8(p0: Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]] =
+  override def method8(p0: api.Record, p1: String, p2: Option[Double]): Effect[RpcResult[String, Context]] =
     backend.successful(p0.int match {
       case Some(int) => RpcResult(s"${int.toString} - $p1", defaultContext)
       case _ => RpcResult(s"${p2.getOrElse(0)}", defaultContext)

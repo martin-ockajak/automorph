@@ -26,8 +26,11 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
-    HttpClient(system, new URI(s"ws://localhost:${port(fixtureId)}"), HttpMethod.Get)
+    HttpClient(system, url(fixtureId), HttpMethod.Get)
 
   override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
     NanoServer[Effect](system, port(fixtureId))
+
+  private def url(fixtureId: Int): URI =
+    new URI(s"ws://localhost:${port(fixtureId)}")
 }

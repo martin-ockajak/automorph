@@ -6,9 +6,9 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.JettyClient
 import org.scalacheck.Arbitrary
-import test.standard.StandardHttpClientTest
+import test.transport.HttpClientTest
 
-class JettyClientHttpIdentityTest extends StandardHttpClientTest {
+class JettyClientHttpIdentityTest extends HttpClientTest {
 
   type Effect[T] = Identity[T]
   type Context = JettyClient.Context
@@ -25,7 +25,4 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyClient(system, url(fixtureId), HttpMethod.Post)
   }
-
-  override def integration: Boolean =
-    true
 }

@@ -9,10 +9,10 @@ import com.comcast.ip4s.Port
 import org.http4s.ember.server.EmberServerBuilder
 import org.scalacheck.Arbitrary
 import sttp.tapir.server.http4s.Http4sServerInterpreter
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 import test.transport.http.TapirHttp4sHttpCatsEffectTest.TapirServer
 
-class TapirHttp4sHttpCatsEffectTest extends StandardHttpServerTest {
+class TapirHttp4sHttpCatsEffectTest extends HttpServerTest {
 
   type Effect[T] = IO[T]
   type Context = TapirHttpEndpoint.Context

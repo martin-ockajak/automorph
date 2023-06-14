@@ -5,8 +5,8 @@ import argonaut.Json.jNumberOrNull
 import argonaut.{Argonaut, CodecJson, Json}
 import automorph.codec.json.ArgonautJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
-import test.Generators.arbitraryRecord
-import test.{Enum, Record, Structure}
+import test.api.Generators.arbitraryRecord
+import test.api.{Enum, Record, Structure}
 
 class ArgonautJsonTest extends JsonMessageCodecTest {
 

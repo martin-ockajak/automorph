@@ -8,10 +8,10 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.tapir.server.netty.{NettyFutureServer, NettyFutureServerBinding}
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 import test.transport.http.TapirNettyHttpFutureTest.TapirServer
 
-class TapirNettyHttpFutureTest extends StandardHttpServerTest {
+class TapirNettyHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = TapirHttpEndpoint.Context

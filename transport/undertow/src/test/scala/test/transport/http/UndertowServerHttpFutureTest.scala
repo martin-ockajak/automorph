@@ -7,9 +7,9 @@ import automorph.transport.http.server.UndertowServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 
-class UndertowServerHttpFutureTest extends StandardHttpServerTest {
+class UndertowServerHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = UndertowServer.Context
@@ -27,7 +27,4 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     UndertowHttpEndpoint(system)
-
-  override def integration: Boolean =
-    true
 }

@@ -8,10 +8,10 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.client3.armeria.future.ArmeriaFutureBackend
-import test.standard.StandardHttpClientTest
+import test.transport.HttpClientTest
 import test.transport.http.HttpContextGenerator
 
-class SttpClientArmeriaHttpFutureTest extends StandardHttpClientTest {
+class SttpClientArmeriaHttpFutureTest extends HttpClientTest {
 
   type Effect[T] = Future[T]
   type Context = SttpClient.Context
@@ -26,7 +26,4 @@ class SttpClientArmeriaHttpFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, ArmeriaFutureBackend(), url(fixtureId), HttpMethod.Post)
-
-  override def integration: Boolean =
-    true
 }

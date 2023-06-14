@@ -6,9 +6,9 @@ import automorph.{RpcClient, RpcServer}
 import org.scalacheck.Arbitrary
 import org.slf4j.{Logger, LoggerFactory}
 import scala.util.{Failure, Success, Try}
-import test.Generators.arbitraryRecord
+import test.api.Generators.arbitraryRecord
+import test.api.{ComplexApi, ComplexApiImpl, InvalidApi, Record, SimpleApi, SimpleApiImpl}
 import test.base.BaseTest
-import test.{ComplexApi, ComplexApiImpl, InvalidApi, Record, SimpleApi, SimpleApiImpl}
 
 /**
  * Main client -> server remote API function invocation test.
@@ -40,6 +40,12 @@ trait CoreTest extends BaseTest {
 
     val genericClient: GenericClient[Effect, Context] = client.asInstanceOf[GenericClient[Effect, Context]]
     val genericServer: GenericServer[Effect, Context] = server.asInstanceOf[GenericServer[Effect, Context]]
+
+    def name: String = {
+      val rpcProtocol = genericClient.rpcProtocol
+      val codecName = rpcProtocol.messageCodec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
+      s"${rpcProtocol.name} / $codecName"
+    }
   }
 
   val logger: Logger = LoggerFactory.getLogger(getClass)
@@ -60,9 +66,8 @@ trait CoreTest extends BaseTest {
   "" - {
     if (BaseTest.testSimple) {
       // Simple tests
-      fixtures.take(1).foreach { fixture =>
-        val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName
-        codecName.replaceAll("MessageCodec$", "") - {
+      fixtures.foreach { fixture =>
+        fixture.name - {
           "Basic" - {
             "Simple API" - {
               val apis = (fixture.simpleApi, simpleApi)
@@ -77,8 +82,7 @@ trait CoreTest extends BaseTest {
       if (BaseTest.testAll || !integration) {
         // All tests
         fixtures.foreach { fixture =>
-          val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName
-          codecName.replaceAll("MessageCodec$", "") - {
+          fixture.name - {
             "Static" - {
               "Simple API" - {
                 val apis = (fixture.simpleApi, simpleApi)

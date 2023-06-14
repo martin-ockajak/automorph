@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, SerializerProvider}
 import org.scalacheck.{Arbitrary, Gen}
 import scala.jdk.CollectionConverters.{MapHasAsJava, SeqHasAsJava}
-import test.Generators.arbitraryRecord
+import test.api.Generators.arbitraryRecord
 import test.codec.json.JsonMessageCodecTest
-import test.{Enum, Record}
+import test.api.{Enum, Record}
 
 class JacksonJsonTest extends JsonMessageCodecTest {
 

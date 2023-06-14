@@ -7,10 +7,10 @@ import automorph.transport.http.client.JettyClient
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpClientTest
+import test.transport.WebSocketClientTest
 import test.transport.http.HttpContextGenerator
 
-class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
+class JettyClientWebSocketFutureTest extends WebSocketClientTest {
 
   type Effect[T] = Future[T]
   type Context = JettyClient.Context
@@ -27,10 +27,4 @@ class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyClient(system, url(fixtureId), HttpMethod.Get)
   }
-
-  override def integration: Boolean =
-    true
-
-  override def webSocket: Boolean =
-    true
 }

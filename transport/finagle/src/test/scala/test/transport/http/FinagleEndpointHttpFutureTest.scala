@@ -8,10 +8,10 @@ import com.twitter.util.{Return, Throw}
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 import test.transport.http.FinagleEndpointHttpFutureTest.FinagleServer
 
-class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
+class FinagleEndpointHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = FinagleHttpEndpoint.Context
@@ -29,9 +29,6 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     FinagleHttpEndpoint(system)
-
-  override def integration: Boolean =
-    true
 }
 
 case object FinagleEndpointHttpFutureTest {

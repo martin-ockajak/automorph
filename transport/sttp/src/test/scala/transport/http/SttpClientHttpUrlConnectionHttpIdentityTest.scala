@@ -7,10 +7,10 @@ import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
 import org.scalacheck.Arbitrary
 import sttp.client3.HttpURLConnectionBackend
-import test.standard.StandardHttpClientTest
+import test.transport.HttpClientTest
 import test.transport.http.HttpContextGenerator
 
-class SttpClientHttpUrlConnectionHttpIdentityTest extends StandardHttpClientTest {
+class SttpClientHttpUrlConnectionHttpIdentityTest extends HttpClientTest {
 
   type Effect[T] = Identity[T]
   type Context = SttpClient.Context
@@ -25,7 +25,4 @@ class SttpClientHttpUrlConnectionHttpIdentityTest extends StandardHttpClientTest
 
   override def clientTransport(fixtureId: Int): ClientTransport[Effect, ?] =
     SttpClient.http(system, HttpURLConnectionBackend(), url(fixtureId), HttpMethod.Post)
-
-  override def integration: Boolean =
-    true
 }

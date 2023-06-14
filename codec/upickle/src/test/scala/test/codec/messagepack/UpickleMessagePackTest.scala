@@ -2,9 +2,9 @@ package test.codec.messagepack
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import org.scalacheck.{Arbitrary, Gen}
-import test.Generators.arbitraryRecord
+import test.api.Generators.arbitraryRecord
+import test.api.{Enum, Record, Structure}
 import test.codec.MessageCodecTest
-import test.{Enum, Record, Structure}
 import upack.{Arr, Bool, Float64, Msg, Null, Obj, Str}
 import upickle.core.LinkedHashMap
 

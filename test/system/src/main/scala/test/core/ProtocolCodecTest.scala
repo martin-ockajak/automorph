@@ -16,13 +16,17 @@ import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvide
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
 import scala.util.Try
+import test.api.{Enum, Record, Structure}
 import test.base.BaseTest
-import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
+    createFixtures
+  }
+
+  def createFixtures(implicit context: Context): Seq[TestFixture] = {
     if (BaseTest.testSimple) {
       Seq(circeJsonRpcJsonFixture(0))
     } else {
@@ -46,6 +50,15 @@ trait ProtocolCodecTest extends CoreTest {
 
   def endpointTransport: EndpointTransport[Effect, Context, ?] =
     LocalEndpoint(system).asInstanceOf[EndpointTransport[Effect, Context, ?]]
+
+  def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
+    clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
+
+  def mapName(name: String): Seq[String] =
+    name match {
+      case "method" => Seq("method", "function")
+      case value => Seq(value)
+    }
 
   def testServerClose: Boolean =
     true
@@ -94,9 +107,6 @@ trait ProtocolCodecTest extends CoreTest {
     }
     super.afterAll()
   }
-
-  private def typedClientTransport(fixtureId: Int): ClientTransport[Effect, Context] =
-    clientTransport(fixtureId).asInstanceOf[ClientTransport[Effect, Context]]
 
   private def circeJsonRpcJsonFixture(id: Int)(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
@@ -259,10 +269,4 @@ trait ProtocolCodecTest extends CoreTest {
       (function, a0) => client.tell(function)(a0),
     )
   }
-
-  private def mapName(name: String): Seq[String] =
-    name match {
-      case "method" => Seq("method", "function")
-      case value => Seq(value)
-    }
 }

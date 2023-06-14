@@ -1,4 +1,4 @@
-package test
+package test.api
 
 case object Enum extends Enumeration {
   type Enum = Value

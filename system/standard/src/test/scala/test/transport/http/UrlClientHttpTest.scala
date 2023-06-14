@@ -4,10 +4,11 @@ import automorph.spi.{ClientTransport, ServerTransport}
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.UrlClient
 import automorph.transport.http.server.NanoServer
+import java.net.URI
 import org.scalacheck.Arbitrary
-import test.core.ClientServerTest
+import test.core.HttpClientServerTest
 
-trait UrlClientHttpTest extends ClientServerTest {
+trait UrlClientHttpTest extends HttpClientServerTest {
 
   type Context = NanoServer.Context
 
@@ -19,4 +20,7 @@ trait UrlClientHttpTest extends ClientServerTest {
 
   override def serverTransport(fixtureId: Int): ServerTransport[Effect, Context] =
     NanoServer[Effect](system, port(fixtureId))
+
+  private def url(fixtureId: Int): URI =
+    new URI(s"http://localhost:${port(fixtureId)}")
 }

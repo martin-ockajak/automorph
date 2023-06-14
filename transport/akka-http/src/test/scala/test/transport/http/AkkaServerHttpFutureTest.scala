@@ -7,9 +7,9 @@ import automorph.transport.http.server.AkkaServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.standard.StandardHttpServerTest
+import test.transport.HttpServerTest
 
-class AkkaServerHttpFutureTest extends StandardHttpServerTest {
+class AkkaServerHttpFutureTest extends HttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = AkkaServer.Context
@@ -28,7 +28,4 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
 
   override def endpointTransport: EndpointTransport[Future, Context, ?] =
     AkkaHttpEndpoint(system)
-
-  override def integration: Boolean =
-    true
 }
