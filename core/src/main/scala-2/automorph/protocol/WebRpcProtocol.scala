@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.webrpc.{ErrorMapping, Message, WebRpcCore}
+import automorph.protocol.webrpc.{ErrorMapping, ErrorType, Message, WebRpcCore}
 import automorph.schema.OpenApi
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.transport.http.HttpContext
@@ -50,7 +50,7 @@ final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: Ht
   messageCodec: Codec,
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
-  mapException: Throwable => Option[Int] = WebRpcProtocol.defaultMapException,
+  mapException: Throwable => ErrorType = WebRpcProtocol.defaultMapException,
   mapOpenApi: OpenApi => OpenApi = identity,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
@@ -69,7 +69,7 @@ case object WebRpcProtocol extends ErrorMapping {
     codec: c.Expr[Codec],
     pathPrefix: c.Expr[String],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
-    mapException: c.Expr[Throwable => Option[Int]],
+    mapException: c.Expr[Throwable => ErrorType],
     mapOpenApi: c.Expr[OpenApi => OpenApi],
   ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -139,7 +139,7 @@ case object WebRpcProtocol extends ErrorMapping {
     codec: Codec,
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable,
-    mapException: Throwable => Option[Int],
+    mapException: Throwable => ErrorType,
     mapOpenApi: OpenApi => OpenApi,
   ): WebRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]

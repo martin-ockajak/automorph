@@ -30,7 +30,7 @@ equivalent to designing and implementing an unique custom RPC protocol.
 Web-RPC is an attempt to demonstrate that the REST-compatible remote API functionality required by web applications
 and online services can be achieved without effectivelly ending up designing a RPC protocol for each API.
 
-Web-RPC can be understood to be all of the following:
+Web-RPC can be understood to be any of the following:
 * Minimalistic sibling of [JSON-RPC](https://www.jsonrpc.org/specification) using HTTP as transport protocol
 * RPC protocol supporting various practical mechanisms often provided by typical REST APIs
 * REST-style protocol prescribing a standard way to represent data and meta-data in REST API requests and responses
@@ -51,7 +51,7 @@ Web-RPC can be understood to be all of the following:
 
 In case any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
-* Using URL to pass arguments
+* Using URLs to pass arguments
 * External constraints requiring a simple REST-style API with RPC semantics
  
 In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call
@@ -65,7 +65,7 @@ protocol such as:
 Yes. Any REST client or server library will suffice. However, using a specific Web-RPC library minimizes the
 implementation effort.
 
-### Why call it a REST-style RPC when it is conceptually unrelated to REST ?
+### Why call it a REST-style protocol when it is conceptually unrelated to REST ?
 
 To illustrate that it provides remote API authors with a solution with capabilities equivalent to and compatible with
 typical REST API protocols but does so by openly embracing RPC principles.
@@ -141,7 +141,7 @@ identically named query parameters must not be used.
 **Remote call**
 
 ```scala
-hello(some = "world", n = 1)
+remoteApi.hello(some = "world", n = 1)
 ```
 
 **Request headers**
@@ -188,6 +188,13 @@ fields:
 * `message` - A JSON string representing an error message. This field is mandatory.
 * `code` - A JSON number representing an error code. This field is optional.
 * `details` - An arbitrary JSON value representing additional error information. This field is optional.
+
+Error codes in inclusive range between -32768 and -32000 are reserved for protocol errors with specific meaning as follows:
+
+* `-32600` - Invalid request. Request is malformed or missing.
+* `-32601` - Function not found. Remote function does not exist.
+* `-32602` - Invalid arguments. Supplied arguments have incorrect data type.
+* `-32603` - Server error. Internal request processing error.
 
 - Message format: JSON
 - Content-Type: application/json

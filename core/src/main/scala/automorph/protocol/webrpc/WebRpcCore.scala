@@ -138,8 +138,8 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
             // Assemble error details
             val trace = error.trace
             val message = trace.mkString("\n")
-            val code = mapException(error)
-            ResponseError(message, code)
+            val errorType = mapException(error)
+            ResponseError(message, Some(errorType.code))
         }
         Response[Node](None, Some(responseError)).message
       },
@@ -213,7 +213,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * @return
    *   Web-RPC protocol
    */
-  def mapException(exceptionToError: Throwable => Option[Int]): WebRpcProtocol[Node, Codec, Context] =
+  def mapException(exceptionToError: Throwable => ErrorType): WebRpcProtocol[Node, Codec, Context] =
     copy(mapException = exceptionToError)
 
   /**

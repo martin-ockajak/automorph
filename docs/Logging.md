@@ -15,16 +15,16 @@ sidebar_position: 4
 
 ## Log level semantics
 
-* **ERROR** - Non-recoverable errors
-* **WARN** - Recoverable errors
-* **INFO** - Main events (e.g. remote API call performed successfully, component initialized)
-* **DEBUG** - Diagnostic events (e.g. request received, response sent)
-* **TRACE** - Detailed diagnostic events (e.g. message body, message metadata)
+* `ERROR` - Non-recoverable errors
+* `WARN` - Recoverable errors
+* `INFO` - Main events (e.g. remote API call performed successfully, component initialized)
+* `DEBUG` - Diagnostic events (e.g. request received, response sent)
+* `TRACE` - Detailed diagnostic events (e.g. message body, message metadata)
 
 
 ## Example configuration
 
-An example logging configuration for [Logback](https://logback.qos.ch/) which supports setting the log level using the **LOG_LEVEL** environment variable:
+An example logging configuration for [Logback](https://logback.qos.ch/) which supports setting the log level using the `LOG_LEVEL` environment variable:
 
 ```xml
 <configuration>

@@ -42,6 +42,7 @@ private[automorph] trait ErrorMapping {
     exception match {
       case _: InvalidRequest => ErrorType.InvalidRequest
       case _: FunctionNotFound => ErrorType.MethodNotFound
+      case _: InvalidArguments => ErrorType.InvalidParams
       case _: IllegalArgumentException => ErrorType.InvalidParams
       case _: ServerError => ErrorType.ServerError
       case _ => ErrorType.ApplicationError

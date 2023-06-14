@@ -1,6 +1,6 @@
 package test.core
 
-import automorph.RpcException.{FunctionNotFound, InvalidArguments, InvalidRequest, InvalidResponse}
+import automorph.RpcException.{FunctionNotFound, InvalidArguments, InvalidResponse}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.{RpcClient, RpcServer}
 import org.scalacheck.Arbitrary
@@ -167,14 +167,14 @@ trait CoreTest extends BaseTest {
                   run(api.method3(0, Some(0)))
                 }
                 "Malformed argument" in {
-                  val error = intercept[InvalidRequest] {
+                  val error = intercept[InvalidArguments] {
                     run(api.method4(BigDecimal(0), Some(true), None))
                   }.getMessage.toLowerCase
                   error.should(include("malformed argument"))
                   error.should(include("p1"))
                 }
                 "Missing arguments" in {
-                  val error = intercept[InvalidRequest] {
+                  val error = intercept[InvalidArguments] {
                     run(api.method5(p0 = true, 0))
                   }.getMessage.toLowerCase
                   error.should(include("missing argument"))
