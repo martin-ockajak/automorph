@@ -143,9 +143,9 @@ lazy val sttp = source(project, "transport/sttp", core, zio % Test, testTranspor
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "armeria-backend" % sttpVersion % Test,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend-zio" % sttpHttpClientVersion % Test
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
 )
 val embeddedRabbitMqVersion = "1.5.0"
