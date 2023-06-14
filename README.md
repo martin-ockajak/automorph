@@ -32,6 +32,8 @@ https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 * [NodeJS](https://nodejs.org/) 19+
 * [Yarn](https://yarnpkg.com/) 1.22+
 
+**Note**: uPickle plugin compilation may take a long time but it will build.
+
 
 ## Testing
 
