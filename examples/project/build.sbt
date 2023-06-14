@@ -10,7 +10,7 @@ val sttpVersion = "3.8.15"
 libraryDependencies ++= Seq(
   // Default
   "org.automorph" %% "automorph-default" % automorphVersion,
-  "ch.qos.logback" % "logback-classic" % "1.4.7",
+  "ch.qos.logback" % "logback-classic" % "1.4.8",
 
   // Plugins
   "org.automorph" %% "automorph-upickle" % automorphVersion,

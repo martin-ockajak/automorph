@@ -29,6 +29,6 @@
 //    SttpClient.http(system, run(HttpClientZioBackend()), url(id), HttpMethod.Post)
 //  }
 //
-//  override def integration: boolean =
+//  override def integration: Boolean =
 //    true
 //}

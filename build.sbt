@@ -104,7 +104,7 @@ lazy val core = source(project, "core", meta, testBase % Test)
 // Effect system
 lazy val standard = source(project, "system/standard", core, testSystem % Test)
 lazy val zio = source(project, "system/zio", core, testSystem % Test).settings(
-  libraryDependencies += "dev.zio" %% "zio" % "2.0.14"
+  libraryDependencies += "dev.zio" %% "zio" % "2.0.15"
 )
 lazy val monix = source(project, "system/monix", core, testSystem % Test).settings(
   libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1"
@@ -160,7 +160,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", core, testTransport % 
 )
 
 // Server transport
-val tapirVersion = "1.5.0"
+val tapirVersion = "1.5.4"
 lazy val tapir = source(project, "transport/tapir", core, catsEffect % Test, testTransport % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-server" % tapirVersion,
@@ -172,10 +172,10 @@ lazy val tapir = source(project, "transport/tapir", core, catsEffect % Test, tes
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, testTransport % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.6.Final"
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.7.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, testTransport % Test).settings(
-  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.2"
+  libraryDependencies += "io.vertx" % "vertx-core" % "4.4.3"
 )
 val jettyVersion = "11.0.15"
 lazy val jetty = source(project, "transport/jetty", core, testTransport % Test).settings(
@@ -238,7 +238,7 @@ lazy val testBase = source(project, "test/base").settings(
     "org.scalatest" %% "scalatest" % "3.2.16",
     "org.scalatestplus" %% "scalacheck-1-17" % "3.2.16.0",
     "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
-    "ch.qos.logback" % "logback-classic" % "1.4.7",
+    "ch.qos.logback" % "logback-classic" % "1.4.8",
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
