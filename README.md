@@ -1,22 +1,22 @@
 <br>
 
-![automorph](https://github.com/martin-ockajak/automorph/raw/main/site/static/banner.jpg)
+![automorph](https://github.com/automorph-org/automorph/raw/main/site/static/banner.jpg)
 
 [![Documentation](https://img.shields.io/badge/Website-Documentation-purple)](https://automorph.org)
 [![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/index.html)
 [![Artifacts](https://img.shields.io/badge/Releases-Artifacts-yellow)](
 https://mvnrepository.com/artifact/org.automorph/automorph)
-[![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](
-https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
+[![Build](https://github.com/automorph-org/automorph/workflows/Build/badge.svg)](
+https://github.com/automorph-org/automorph/actions/workflows/build.yml)
 
 
 ## This is a preview of an upcoming release without the artifacts being published. Please do not use it in any way but feel free to review the documentation.
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](
 https://www.scala-lang.org/) providing an easy way to invoke and expose remote APIs using [JSON-RPC](
-https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
+https://www.jsonrpc.org/specification) and [Web-RPC](https://automorph.org/docs/Web-RPC) protocols.
 
-* [Quick Start](docs/Quickstart.md)
+* [Quick Start](https://automorph.org/docs/Quickstart)
 * [Documentation](https://automorph.org)
 * [API](https://automorph.org/api/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
@@ -87,4 +87,3 @@ sbt site
 ```bash
 sbt serveSite
 ```
-

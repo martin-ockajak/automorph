@@ -70,7 +70,7 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://github.com/martin-ockajak/automorph',
+            href: 'https://github.com/automorph-org/automorph',
             label: 'Source',
             position: 'left',
           },

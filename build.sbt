@@ -14,13 +14,13 @@ ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
   email = "automorph.org@proton.me",
-  url = url(s"https://github.com/martin-ockajak")
+  url = url(s"https://automorph.org")
 ))
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 
 // Repository
-val repositoryPath = s"martin-ockajak/$projectName"
+val repositoryPath = s"automorph-org/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"
 ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
@@ -433,3 +433,4 @@ credentials ++= Seq(
 } else {
   Seq.empty
 })
+
