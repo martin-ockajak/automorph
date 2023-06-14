@@ -2,8 +2,7 @@ scalaVersion := "3.3.0"
 name := "automorph"
 organization := "example"
 
-//val automorphVersion = IO.readLines(file("../../version.sbt")).mkString.split("\"").tail.head.split("-").head
-val automorphVersion = IO.readLines(file("../../version.sbt")).mkString.split("\"").tail.head
+val automorphVersion = "0.0.0"
 val sttpVersion = "3.8.15"
 
 libraryDependencies ++= Seq(
