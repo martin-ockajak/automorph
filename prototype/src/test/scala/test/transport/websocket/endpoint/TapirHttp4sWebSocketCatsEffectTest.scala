@@ -8,6 +8,7 @@
 //import com.comcast.ip4s.Port
 //import org.http4s.ember.server.EmberServerBuilder
 //import org.scalacheck.Arbitrary
+//import sttp.capabilities.fs2.Fs2Streams
 //import sttp.tapir.server.http4s.Http4sServerInterpreter
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
@@ -42,7 +43,7 @@
 //  type Context = TapirWebSocketEndpoint.Context
 //
 //  final case class TapirServer(effectSystem: EffectSystem[Effect], port: Int) extends ServerTransport[Effect, Context] {
-//    private var endpoint = TapirWebSocketEndpoint(effectSystem)
+//    private var endpoint = TapirWebSocketEndpoint(effectSystem, Fs2Streams[IO])
 //    private var server = Option.empty[IO[Unit]]
 //
 //    override def withHandler(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
@@ -52,7 +53,8 @@
 //
 //    override def init(): Effect[Unit] =
 //      effectSystem.evaluate {
-//        val serviceBuilder = Http4sServerInterpreter[IO]().toWebSocketRoutes(endpoint.adapter)
+//        val adapter = endpoint.adapter
+//        val serviceBuilder = Http4sServerInterpreter[IO]().toWebSocketRoutes(adapter)
 //        val serverBuilder = EmberServerBuilder.default[IO].withPort(Port.fromInt(port).get).withHttpWebSocketApp(
 //          builder => serviceBuilder(builder).orNotFound
 //        )

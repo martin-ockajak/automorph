@@ -43,6 +43,8 @@ import sttp.tapir.{
  *   maps an exception to a corresponding HTTP status code
  * @param handler
  *   RPC request handler
+ * @tparam Effect
+ *   effect type
  */
 final case class TapirHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
@@ -69,7 +71,7 @@ final case class TapirHttpEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.Http.name)
   private implicit val system: EffectSystem[Effect] = effectSystem
 
-  def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  override def adapter: ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     // Define server endpoint inputs & outputs
     val endpointMethod = allowedMethod.map(endpoint.method).getOrElse(endpoint)
     val endpointPath = pathEndpointInput(prefixPaths).map(path => endpointMethod.in(path)).getOrElse(endpointMethod)
