@@ -24,7 +24,7 @@ sidebar_position: 4
 
 ## Example configuration
 
-This is an example logging configuration for [Logback](https://logback.qos.ch/):
+An example logging configuration for [Logback](https://logback.qos.ch/) which supports setting the log level using the **LOG_LEVEL** environment variable:
 
 ```xml
 <configuration>
@@ -37,7 +37,7 @@ This is an example logging configuration for [Logback](https://logback.qos.ch/):
   <!-- Simple console logging -->
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%date{HH:mm:ss.SSS} \(%-5level\) %message - %mdc %n</pattern>
+      <pattern>%cyan(%date{HH:mm:ss.SSS}) [%highlight(%-5level)] %message - %gray(%mdc) %</pattern>
     </encoder>
   </appender>
     
@@ -46,7 +46,7 @@ This is an example logging configuration for [Logback](https://logback.qos.ch/):
       <appender-ref ref="Console" />
   </root>
 
-  <!-- Library-specific log level -->
+  <!-- Package-specific log level -->
   <logger name="automorph" level="${LOG_LEVEL:-INFO}"/>
 </configuration>
 ```

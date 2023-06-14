@@ -17,6 +17,7 @@ cd automorph-example
 sbt run
 ```
 
+Application logs are saved to **target/main.log** and the log level can be adjusted by setting the **LOG_LEVEL** environment variable to a desired value (*ERROR*, *WARN*, *INFO*, *DEBUG*, *TRACE*).
 
 ## [Existing project](@REPOSITORY_URL@/blob/main/examples/project/src/main/scala/examples/Quickstart.scala)
 

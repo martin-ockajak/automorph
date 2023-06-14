@@ -15,6 +15,7 @@
     </encoder>
   </appender>
 
+  <!-- Synchronous file logging -->
   <appender name="FileSync" class="ch.qos.logback.core.FileAppender">
     <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
       <level>DEBUG</level>
@@ -26,6 +27,7 @@
     </encoder>
   </appender>
 
+  <!-- Asynchronous file logging -->
   <appender name="File" class="ch.qos.logback.classic.AsyncAppender">
     <appender-ref ref="FileSync" />
     <queueSize>1</queueSize>
@@ -38,6 +40,7 @@
     <appender-ref ref="File" />
   </root>
 
-  <!-- TeSt-specific log level -->
+  <!-- Package-specific log level -->
   <logger name="test" level="TRACE"/>
 </configuration>
+
