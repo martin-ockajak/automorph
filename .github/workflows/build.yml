@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build, Test & Deploy
+    name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
