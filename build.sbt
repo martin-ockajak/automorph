@@ -16,6 +16,7 @@ ThisBuild / developers := List(Developer(
   email = "automorph.org@proton.me",
   url = url(s"https://automorph.org")
 ))
+ThisBuild / version ~= (_.split("\\+").head)
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 
@@ -419,24 +420,19 @@ cleanFiles ++= Seq(
 
 
 // Release
-val repositoryCredentialsPath = Path.userHome / ".sbt/sonatype_credentials"
-ThisBuild / publishTo := {
-  Some(if (isSnapshot.value) {
-    "snapshots".at("https://s01.oss.sonatype.org/content/repositories/snapshots")
-  } else {
-    "releases".at("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
-  })
-}
-ThisBuild / pomIncludeRepository := { _ => false }
-ThisBuild / publishMavenStyle := true
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+sonatypeCredentialHost := "s01.oss.sonatype.org"
+credentials ++= Seq(Credentials(
+  "GnuPG Key ID",
+  "gpg",
+  "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63",
+  ""
+)) ++ Seq(Credentials(
+  "Sonatype Nexus Repository Manage",
+  "s01.oss.sonatype.org",
+  "automorph.org@proton.me",
+  Option(System.getenv("SONATYPE_PASSWORD")).getOrElse("")
+))
+ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / versionScheme := Some("early-semver")
-ThisBuild / releaseCrossBuild := true
-ThisBuild / releaseVcsSign := true
-ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
-credentials ++= Seq(
-  Credentials("GnuPG Key ID", "gpg", "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63", "")
-) ++ (if (repositoryCredentialsPath.isFile) {
-  Seq(Credentials(repositoryCredentialsPath))
-} else {
-  Seq.empty
-})
+
