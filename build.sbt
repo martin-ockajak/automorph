@@ -13,15 +13,15 @@ ThisBuild / organizationHomepage := Some(url(siteUrl))
 ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
-  email = "automorph.org@proton.me",
-  url = url(s"https://automorph.org")
+  email = s"${organization.value}@proton.me",
+  url = url(s"https://${organization.value}")
 ))
 ThisBuild / version ~= (_.split("\\+").head)
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 
 // Repository
-val repositoryPath = s"automorph-org/$projectName"
+val repositoryPath = s"$projectName-$projectRoot/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"
 ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
@@ -295,11 +295,11 @@ val compileScalac2Options = commonScalacOptions ++ Seq(
 )
 val docScalac3Options = compileScalac3Options ++ Seq(
   s"-source-links:src=github://$repositoryPath/master",
-  "-skip-by-id:automorph.client,automorph.handler,automorph.spi.codec"
+  s"-skip-by-id:$projectName.client,$projectName.handler"
 )
 val docScalac2Options = compileScalac2Options ++ Seq(
   "-skip-packages",
-  "automorph.client:automorph.handler:automorph.spi.codec"
+  s"$projectName.client:$projectName.handler"
 )
 ThisBuild / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((3, _)) => compileScalac3Options ++ Seq(
@@ -358,7 +358,7 @@ def relativizeScaladocLinks(content: String, path: String): String = {
   import java.io.File
   val searchData = path.endsWith(s"${File.separator}searchData.js")
   if (searchData || path.endsWith(".html")) {
-    val apiLinkPrefix = """"https:\/\/javadoc\.io\/page\/org\.automorph\/[^\/]+\/[^\/]+\/"""
+    val apiLinkPrefix = s""""https:\/\/javadoc\.io\/page\/$projectRoot\.$projectName\/[^\/]+\/[^\/]+\/"""
     val patterns = path.split(File.separator).toSeq.init.foldLeft(Seq("")) { case (paths, packageName) =>
       paths :+ s"${paths.last}$packageName/"
     }.reverse
@@ -419,7 +419,8 @@ cleanFiles ++= Seq(
 )
 
 
-// Release
+// Publish
+val lastVersion = "0.0.0"
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 sonatypeCredentialHost := "s01.oss.sonatype.org"
 credentials ++= Seq(Credentials(
@@ -428,11 +429,17 @@ credentials ++= Seq(Credentials(
   "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63",
   ""
 )) ++ Seq(Credentials(
-  "Sonatype Nexus Repository Manage",
+  "Sonatype Nexus Repository Manager",
   "s01.oss.sonatype.org",
-  "automorph.org@proton.me",
+  s"${organization.value}@proton.me",
   Option(System.getenv("SONATYPE_PASSWORD")).getOrElse("")
 ))
+mimaPreviousArtifacts := Set(
+  organization.value %% s"$projectName-meta" % lastVersion,
+  organization.value %% s"$projectName-core" % lastVersion,
+  organization.value %% s"$projectName-default" % lastVersion
+)
+tastyMiMaPreviousArtifacts := mimaPreviousArtifacts.value
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / versionScheme := Some("early-semver")
 

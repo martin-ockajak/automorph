@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sbt '+ mimaReportBinaryIssues ; + publishSigned ; sonatypeBundleRelease'
+sbt '+ mimaReportBinaryIssues ; + tastyMiMaReportIssues ; + publishSigned ; sonatypeBundleRelease'
 
