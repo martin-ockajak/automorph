@@ -1,6 +1,7 @@
 // Project
 val projectRoot = "org"
 val projectName = "automorph"
+val projectDomain = s"$projectName.$projectRoot"
 val projectDescription = "RPC client and server for Scala"
 val siteUrl = s"https://$projectName.$projectRoot"
 val apiUrl = s"$siteUrl/api"
@@ -13,8 +14,8 @@ ThisBuild / organizationHomepage := Some(url(siteUrl))
 ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
-  email = s"${organization.value}@proton.me",
-  url = url(s"https://${organization.value}")
+  email = s"$projectDomain@proton.me",
+  url = url(s"https://$projectDomain")
 ))
 ThisBuild / version ~= (_.split("\\+").head)
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -433,7 +434,7 @@ credentials ++= Seq(
   Credentials(
     "Sonatype Nexus Repository Manager",
     "s01.oss.sonatype.org",
-    s"${organization.value}@proton.me",
+    projectDomain,
     Option(System.getenv("SONATYPE_PASSWORD")).getOrElse("")
   )
 )
