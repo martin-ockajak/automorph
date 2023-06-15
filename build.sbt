@@ -358,7 +358,7 @@ def relativizeScaladocLinks(content: String, path: String): String = {
   import java.io.File
   val searchData = path.endsWith(s"${File.separator}searchData.js")
   if (searchData || path.endsWith(".html")) {
-    val apiLinkPrefix = s""""https:\/\/javadoc\.io\/page\/$projectRoot\.$projectName\/[^\/]+\/[^\/]+\/"""
+    val apiLinkPrefix = s""""https:\/\/javadoc\.io\/page\/${projectRoot}\.${projectName}\/[^\/]+\/[^\/]+\/"""
     val patterns = path.split(File.separator).toSeq.init.foldLeft(Seq("")) { case (paths, packageName) =>
       paths :+ s"${paths.last}$packageName/"
     }.reverse
