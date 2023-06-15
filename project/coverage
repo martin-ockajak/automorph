@@ -1,4 +1,0 @@
-#!/bin/bash
-
-sbt ++2.13.10 clean coverage test coverageReport
-
