@@ -423,17 +423,20 @@ cleanFiles ++= Seq(
 val lastVersion = "0.0.0"
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 sonatypeCredentialHost := "s01.oss.sonatype.org"
-credentials ++= Seq(Credentials(
-  "GnuPG Key ID",
-  "gpg",
-  "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63",
-  ""
-)) ++ Seq(Credentials(
-  "Sonatype Nexus Repository Manager",
-  "s01.oss.sonatype.org",
-  s"${organization.value}@proton.me",
-  Option(System.getenv("SONATYPE_PASSWORD")).getOrElse("")
-))
+credentials ++= Seq(
+  Credentials(
+    "GnuPG Key ID",
+    "gpg",
+    "9E5F3CBE696BE49391A5131EFEAB85EB98F65E63",
+    ""
+  ),
+  Credentials(
+    "Sonatype Nexus Repository Manager",
+    "s01.oss.sonatype.org",
+    s"${organization.value}@proton.me",
+    Option(System.getenv("SONATYPE_PASSWORD")).getOrElse("")
+  )
+)
 mimaPreviousArtifacts := Set(
   organization.value %% s"$projectName-meta" % lastVersion,
   organization.value %% s"$projectName-core" % lastVersion,
