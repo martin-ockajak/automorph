@@ -73,7 +73,7 @@ const features = [
   },
   {
     title: 'Compatible',
-    link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
+    link: 'https://central.sonatype.com/namespace/org.automorph',
     description: (
         <>
           Supports <a href="https://www.scala-lang.org/">Scala</a> 3.3+ and 2.13+ on <a
