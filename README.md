@@ -1,6 +1,6 @@
 <br>
 
-![automorph](https://github.com/automorph-org/automorph/raw/main/site/static/banner.jpg)
+![Automorph](https://github.com/automorph-org/automorph/raw/main/site/static/banner.jpg)
 
 [![Documentation](https://img.shields.io/badge/Website-documentation-purple)](https://automorph.org)
 [![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/index.html)
