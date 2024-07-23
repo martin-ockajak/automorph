@@ -11,7 +11,7 @@ https://central.sonatype.com/namespace/org.automorph)
 **Automorph** is a Scala [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library
 for type-safely calling and serving remote APIs in a few lines of code.
 
-The project repository has been moved [here](https://github.com/automorph-org/automorph).
+**The project repository has been moved [here](https://github.com/automorph-org/automorph)**.
 
 
 ## Features
